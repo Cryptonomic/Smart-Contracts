@@ -1,0 +1,36 @@
+# Title: Tezos Baker Registry
+# Author: Teckhua Chiang
+# Company: Cryptonomic
+
+parameter (pair string (pair int (pair mutez address)));
+storage
+  (pair :storage
+     (big_map
+        address
+        (pair :entry (string %name) (pair (int %fee) (pair (mutez %minimum) (address %payer)))))
+     string);
+code { DUP ;
+       DIP { CDR @storage_slash_1 } ;
+       CAR @_name_fee_minimum_payer_slash_2 ;
+       DUUP @storage ;
+       CDR %stamp ;
+       DUUUP @storage ;
+       CAR %record ;
+       DUUUP ;
+       CDDDR @payer ;
+       DUUUUP ;
+       CDDAR @minimum ;
+       PAIR %minimum %payer ;
+       DUUUUP ;
+       CDAR @fee ;
+       PAIR %fee ;
+       DUUUUP ;
+       CAR @name ;
+       PAIR @entry %name ;
+       SENDER ;
+       DIP { SOME } ;
+       DIIIIP { DROP ; DROP } ;
+       UPDATE ;
+       PAIR @storage %record %stamp ;
+       NIL operation ;
+       PAIR };
