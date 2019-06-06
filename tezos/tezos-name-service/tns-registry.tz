@@ -14,10 +14,223 @@ storage
 code { DUP ;
        DIP { CDR @storage_slash_1 } ;
        CAR @parameter_slash_2 ;
-       DUP @parameter ;
+       LAMBDA @subtractNat
+         (pair nat nat)
+         nat
+         { RENAME @nat1_nat2_slash_3 ;
+           DUP @nat1_nat2 ;
+           CDR @nat2 ;
+           DUUP @nat1_nat2 ;
+           CAR @nat1 ;
+           SUB ;
+           DUP ;
+           ABS ;
+           SWAP ;
+           GE ;
+           IF {} { UNIT ; FAILWITH } ;
+           DIP { DROP } } ;
+       DUP @subtractNat ;
+       LAMBDA
+         (pair (pair nat (pair nat string)) (lambda (pair nat nat) nat))
+         string
+         { RENAME @startIndex_endIndex_original__subtractNat_slash_9 ;
+           DUP ;
+           CAR @startIndex_endIndex_original_slash_10 ;
+           CAR @startIndex ;
+           DUUP ;
+           CAR @startIndex_endIndex_original_slash_10 ;
+           CDDR @original ;
+           DUUUP ;
+           CDR @subtractNat_slash_8 ;
+           DUUUP @startIndex ;
+           DUUUUUP ;
+           CAR @startIndex_endIndex_original_slash_10 ;
+           CDAR @endIndex ;
+           PAIR ;
+           EXEC @length ;
+           DUUUP @startIndex ;
+           SLICE ;
+           IF_NONE { UNIT ; FAILWITH } {} ;
+           DIP { DROP ; DROP } ;
+           RENAME @substring } ;
+       PAIR @sliceStringByIndex ;
+       DUUP @subtractNat ;
+       DUUP @sliceStringByIndex ;
+       PAIR ;
+       LAMBDA
+         (pair string
+               (pair (pair (lambda (pair (pair nat (pair nat string)) (lambda (pair nat nat) nat)) string)
+                           (lambda (pair nat nat) nat))
+                     (lambda (pair nat nat) nat)))
+         (list string)
+         { RENAME @domain__sliceStringByIndex_subtractNat_slash_18 ;
+           DUP ;
+           CAR @domain_slash_19 ;
+           SIZE @endIndex ;
+           NIL string ;
+           NIL string ;
+           DUUUUP ;
+           CDDR @subtractNat_slash_8 ;
+           PUSH nat 1 ;
+           DUUUUUUP ;
+           CAR @domain_slash_19 ;
+           SIZE ;
+           PAIR ;
+           EXEC ;
+           PAIR ;
+           PUSH bool True ;
+           LOOP { RENAME @x_slash_21 ;
+                  DUUUUP ;
+                  CAR @domain_slash_19 ;
+                  PUSH nat 1 ;
+                  DUUUP @x ;
+                  CAR ;
+                  SLICE ;
+                  IF_NONE
+                    { UNIT ; FAILWITH }
+                    { PUSH nat 0 ;
+                      DUUUP @x ;
+                      CAR ;
+                      COMPARE ;
+                      EQ ;
+                      IF { DUUP @x ;
+                           DUP ;
+                           CAR ;
+                           SWAP ;
+                           DROP ;
+                           DUUUP @x ;
+                           CDR ;
+                           DUUUUUUUP ;
+                           CDAR @sliceStringByIndex_slash_17 ;
+                           DUUUUUUUUP ;
+                           CAR @domain_slash_19 ;
+                           DUUUUUUUUP @endIndex ;
+                           PAIR ;
+                           PUSH nat 0 ;
+                           PAIR ;
+                           DIP { DUP ; CAR ; SWAP ; CDR } ;
+                           PAIR ;
+                           EXEC @substring ;
+                           CONS ;
+                           SWAP ;
+                           PAIR ;
+                           PUSH bool False ;
+                           PAIR }
+                         { PUSH string "." ;
+                           DUUP @nextCharacter ;
+                           COMPARE ;
+                           EQ ;
+                           IF { DUUP @x ;
+                                CDR ;
+                                DUUUUUUP ;
+                                CDAR @sliceStringByIndex_slash_17 ;
+                                DUUUUUUUP ;
+                                CAR @domain_slash_19 ;
+                                DUUUUUUUP @endIndex ;
+                                PAIR ;
+                                PUSH nat 1 ;
+                                DUUUUUUP @x ;
+                                CAR ;
+                                ADD ;
+                                PAIR ;
+                                DIP { DUP ; CAR ; SWAP ; CDR } ;
+                                PAIR ;
+                                EXEC @substring ;
+                                CONS ;
+                                DUUUUUUP ;
+                                CDDR @subtractNat_slash_8 ;
+                                PUSH nat 1 ;
+                                DUUUUUP @x ;
+                                CAR ;
+                                PAIR ;
+                                EXEC ;
+                                PAIR ;
+                                PUSH bool True ;
+                                PAIR }
+                              { DUUP @x ;
+                                CDR ;
+                                DUUUUUUP ;
+                                CDDR @subtractNat_slash_8 ;
+                                PUSH nat 1 ;
+                                DUUUUUP @x ;
+                                CAR ;
+                                PAIR ;
+                                EXEC ;
+                                PAIR ;
+                                PUSH bool True ;
+                                PAIR } } ;
+                      DIP { DROP } } ;
+                  DIP { DROP } ;
+                  DUP ;
+                  CAR ;
+                  DIP { CDR } } ;
+           RENAME @splitList ;
+           CDR ;
+           ITER { RENAME @arg_slash_26 ;
+                  DIP { DUP } ;
+                  DIIP { DROP } ;
+                  PAIR ;
+                  DUP ;
+                  CDR ;
+                  SWAP ;
+                  CAR ;
+                  CONS } ;
+           DIP { DROP ; DROP } } ;
+       PAIR @getDomainHierarchy ;
+       LAMBDA
+         (pair (pair string
+                     (pair :storage
+                        (big_map string (pair :entry (address %owner) (pair (address %resolver) (int %ttl))))
+                        string))
+               (pair (lambda
+                        (pair string
+                              (pair (pair (lambda (pair (pair nat (pair nat string)) (lambda (pair nat nat) nat)) string)
+                                          (lambda (pair nat nat) nat))
+                                    (lambda (pair nat nat) nat)))
+                        (list string))
+                     (pair (pair (lambda (pair (pair nat (pair nat string)) (lambda (pair nat nat) nat)) string)
+                                 (lambda (pair nat nat) nat))
+                           (lambda (pair nat nat) nat))))
+         bool
+         { RENAME @domain_storage__getDomainHierarchy_slash_28 ;
+           PUSH bool False ;
+           DUUP ;
+           CDR @getDomainHierarchy_slash_27 ;
+           DUUUP ;
+           CAR @domain_storage_slash_29 ;
+           CAR @domain ;
+           DIP { DUP ; CAR ; SWAP ; CDR } ;
+           PAIR ;
+           EXEC @domainHierarchy ;
+           ITER { RENAME @_elt_acc_slash_33 ;
+                  DIP { DUP } ;
+                  PAIR ;
+                  DUP ;
+                  CDR @acc ;
+                  DUUUUP ;
+                  CAR @domain_storage_slash_29 ;
+                  CDR @storage ;
+                  CAR %record ;
+                  DUUUP ;
+                  CAR @elt ;
+                  GET ;
+                  IF_NONE
+                    { DUP @acc }
+                    { DUP @higherEntry ;
+                      CAR %owner ;
+                      SENDER ;
+                      COMPARE ;
+                      EQ ;
+                      IF { PUSH bool True } { DUUP @acc } ;
+                      DIP { DROP } } ;
+                  DIP { DROP ; DROP ; DROP } } ;
+           DIP { DROP } ;
+           RENAME @permitted } ;
+       PAIR @isPermitted ;
+       DUUUUP @parameter ;
        IF_LEFT
-         { RENAME @_domain_resolver_ttl_slash_3 ;
-           DUUUP @storage ;
+         { RENAME @_domain_resolver_ttl_slash_39 ;
+           DUUUUUUP @storage ;
            DUUP ;
            CAR @domain ;
            DUUP @storage ;
@@ -25,28 +238,36 @@ code { DUP ;
            DUUP @domain ;
            GET ;
            IF_NONE
-             { DUUP @storage ;
-               CDR %stamp ;
+             { DUUUUP @isPermitted ;
                DUUUP @storage ;
-               CAR %record ;
-               DUUUUUP ;
-               CDDR @ttl ;
-               DUUUUUUP ;
-               CDAR @resolver ;
-               PAIR %resolver %ttl ;
-               SENDER @owner ;
-               PAIR @entry %owner ;
-               DUUUUP @domain ;
-               DIP { SOME } ;
-               UPDATE ;
-               PAIR @storage %record %stamp ;
-               NIL operation ;
-               PAIR }
+               DUUUP @domain ;
+               PAIR ;
+               DIP { DUP ; CAR ; SWAP ; CDR } ;
+               PAIR ;
+               EXEC ;
+               IF { DUUP @storage ;
+                    CDR %stamp ;
+                    DUUUP @storage ;
+                    CAR %record ;
+                    DUUUUUP ;
+                    CDDR @ttl ;
+                    DUUUUUUP ;
+                    CDAR @resolver ;
+                    PAIR %resolver %ttl ;
+                    SENDER @owner ;
+                    PAIR @entry %owner ;
+                    DUUUUP @domain ;
+                    DIP { SOME } ;
+                    UPDATE ;
+                    PAIR @storage %record %stamp ;
+                    NIL operation ;
+                    PAIR }
+                  { PUSH string "You do not own the higher-level domain" ; FAILWITH } }
              { DUUP @domain ; PUSH string "Not an available domain: " ; PAIR ; FAILWITH } ;
            DIP { DROP ; DROP ; DROP } }
          { IF_LEFT
-             { RENAME @_domain_resolver_ttl_slash_12 ;
-               DUUUP @storage ;
+             { RENAME @_domain_resolver_ttl_slash_48 ;
+               DUUUUUUP @storage ;
                DUUP ;
                CAR @domain ;
                DUUP @storage ;
@@ -84,8 +305,8 @@ code { DUP ;
                         FAILWITH } ;
                    DIP { DROP } } ;
                DIP { DROP ; DROP ; DROP } }
-             { RENAME @_domain_newOwner_slash_20 ;
-               DUUUP @storage ;
+             { RENAME @_domain_newOwner_slash_56 ;
+               DUUUUUUP @storage ;
                DUUP ;
                CAR @domain ;
                DUUP @storage ;
@@ -94,11 +315,13 @@ code { DUP ;
                GET ;
                IF_NONE
                  { DUP @domain ; PUSH string "Not a registered domain: " ; PAIR ; FAILWITH }
-                 { DUP @entry ;
-                   CAR %owner ;
-                   SENDER ;
-                   COMPARE ;
-                   EQ ;
+                 { DUUUUUP @isPermitted ;
+                   DUUUUP @storage ;
+                   DUUUUP @domain ;
+                   PAIR ;
+                   DIP { DUP ; CAR ; SWAP ; CDR } ;
+                   PAIR ;
+                   EXEC ;
                    IF { DUUUP @storage ;
                         CDR %stamp ;
                         DUUUUP @storage ;
@@ -115,9 +338,9 @@ code { DUP ;
                         NIL operation ;
                         PAIR }
                       { DUUP @domain ;
-                        PUSH string "You do not own the domain: " ;
+                        PUSH string "You do not manage the domain: " ;
                         PAIR ;
                         FAILWITH } ;
                    DIP { DROP } } ;
                DIP { DROP ; DROP ; DROP } } } ;
-       DIP { DROP ; DROP } };
+       DIP { DROP ; DROP ; DROP ; DROP ; DROP } };
