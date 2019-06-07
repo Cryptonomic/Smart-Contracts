@@ -2,35 +2,132 @@
 # Author: Teckhua Chiang
 # Company: Cryptonomic
 
-parameter (pair string (pair int (pair mutez address)));
+parameter
+  (or :_entries
+     (string %_Liq_entry_updateName)
+     (or (address %_Liq_entry_updatePaymentAddress)
+         (or (pair %_Liq_entry_updateTerms int (pair int mutez))
+             (unit %_Liq_entry_deleteRegistration))));
 storage
   (pair :storage
-     (big_map
-        address
-        (pair :entry (string %name) (pair (int %fee) (pair (mutez %minimum) (address %payer)))))
-     string);
+     (map %recordsNP address (pair :recordNP (string %name) (address %payer)))
+     (pair (map %recordsFM address (map int (pair :recordFM (int %fee) (mutez %minimum))))
+           (string %stamp)));
 code { DUP ;
        DIP { CDR @storage_slash_1 } ;
-       CAR @_name_fee_minimum_payer_slash_2 ;
-       DUUP @storage ;
-       CDR %stamp ;
-       DUUUP @storage ;
-       CAR %record ;
-       DUUUP ;
-       CDDDR @payer ;
-       DUUUUP ;
-       CDDAR @minimum ;
-       PAIR %minimum %payer ;
-       DUUUUP ;
-       CDAR @fee ;
-       PAIR %fee ;
-       DUUUUP ;
-       CAR @name ;
-       PAIR @entry %name ;
-       SENDER ;
-       DIP { SOME } ;
-       DIIIIP { DROP ; DROP } ;
-       UPDATE ;
-       PAIR @storage %record %stamp ;
-       NIL operation ;
-       PAIR };
+       CAR @parameter_slash_2 ;
+       DUP @parameter ;
+       IF_LEFT
+         { RENAME @name_slash_3 ;
+           DUUUP @storage ;
+           SENDER @sender ;
+           DUUP @storage ;
+           CDR ;
+           DUUUP @storage ;
+           CAR %recordsNP ;
+           DUUUUP @storage ;
+           CAR %recordsNP ;
+           DUUUUP @sender ;
+           GET ;
+           IF_NONE { DUUUP @sender ; PUSH string "" ; PAIR %name %payer } {} ;
+           RENAME @recordNP ;
+           CDR %payer ;
+           DUUUUUUP @name ;
+           PAIR @newRecordNP %name %payer ;
+           DUUUUP @sender ;
+           DIP { SOME } ;
+           DIIIIP { DROP ; DROP ; DROP } ;
+           UPDATE ;
+           PAIR @storage %recordsNP ;
+           NIL operation ;
+           PAIR }
+         { IF_LEFT
+             { RENAME @payer_slash_10 ;
+               DUUUP @storage ;
+               SENDER @sender ;
+               DUUP @storage ;
+               CDR ;
+               DUUUP @storage ;
+               CAR %recordsNP ;
+               DUUUUP @storage ;
+               CAR %recordsNP ;
+               DUUUUP @sender ;
+               GET ;
+               IF_NONE { DUUUP @sender ; PUSH string "" ; PAIR %name %payer } {} ;
+               RENAME @recordNP ;
+               CAR %name ;
+               DUUUUUUP @payer ;
+               SWAP ;
+               PAIR @newRecordNP %name %payer ;
+               DUUUUP @sender ;
+               DIP { SOME } ;
+               DIIIIP { DROP ; DROP ; DROP } ;
+               UPDATE ;
+               PAIR @storage %recordsNP ;
+               NIL operation ;
+               PAIR }
+             { IF_LEFT
+                 { RENAME @_cycle_fee_minimum_slash_17 ;
+                   DUUUP @storage ;
+                   SENDER @sender ;
+                   DUUP @storage ;
+                   DUP ;
+                   CAR %recordsNP ;
+                   SWAP ;
+                   CDR ;
+                   CDR %stamp ;
+                   DUUUUP @storage ;
+                   CDAR %recordsFM ;
+                   DUUUUUP @storage ;
+                   CDAR %recordsFM ;
+                   DUUUUUP @sender ;
+                   GET ;
+                   IF_NONE { PUSH (map int (pair :recordFM (int %fee) (mutez %minimum))) {} } {} ;
+                   RENAME @cycleToRecordFM ;
+                   DUUUUUUUP ;
+                   CDDR @minimum ;
+                   DUUUUUUUUP ;
+                   CDAR @fee ;
+                   PAIR @recordFM %fee %minimum ;
+                   DUUUUUUUUP ;
+                   CAR @cycle ;
+                   DIP { SOME } ;
+                   UPDATE @newCycleToRecordFM ;
+                   DUUUUUP @sender ;
+                   DIP { SOME } ;
+                   DIIIIIP { DROP ; DROP ; DROP } ;
+                   UPDATE ;
+                   PAIR %recordsFM %stamp ;
+                   SWAP ;
+                   PAIR @storage %recordsNP ;
+                   NIL operation ;
+                   PAIR }
+                 { RENAME @__slash_28 ;
+                   DUUUP @storage ;
+                   SENDER @sender ;
+                   DUUP @storage ;
+                   CDR ;
+                   DUUUP @storage ;
+                   CAR %recordsNP ;
+                   DUUUP @sender ;
+                   DIP { NONE (pair :recordNP (string %name) (address %payer)) } ;
+                   UPDATE ;
+                   PAIR @storage %recordsNP ;
+                   DUP @storage ;
+                   DUP ;
+                   CAR %recordsNP ;
+                   SWAP ;
+                   CDR ;
+                   CDR %stamp ;
+                   DUUUP @storage ;
+                   CDAR %recordsFM ;
+                   DUUUUUP @sender ;
+                   DIP { NONE (map int (pair :recordFM (int %fee) (mutez %minimum))) } ;
+                   DIIIIIP { DROP ; DROP ; DROP ; DROP } ;
+                   UPDATE ;
+                   PAIR %recordsFM %stamp ;
+                   SWAP ;
+                   PAIR @storage %recordsNP ;
+                   NIL operation ;
+                   PAIR } } } ;
+       DIP { DROP ; DROP } };
