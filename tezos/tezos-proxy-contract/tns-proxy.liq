@@ -1,6 +1,6 @@
-(* Title: Tezos Name Service Proxy *)
+(* Title: Tezos Proxy Contract *)
 (* Author: Teckhua Chiang *)
-(* Company: Cryptonomic *)
+(* Company: Cryptonomic Inc. *)
 
 [%%version 1.04] 
 
@@ -13,16 +13,15 @@ type storage = {
 let%init storage = {
   owner = Current.sender ();
   redirect = Current.sender ();
-  stamp = "Author: Teckhua Chiang, Company: Cryptonomic";
+  stamp = "Author: Teckhua Chiang, Company: Cryptonomic Inc.";
 } 
   
-(* Allows owner to set subnode owner *)
+(* Allows the owner to set the redirect address *)
 let%entry setRedirect
     ((redirect : address))
-    storage = 
-  (* Check if sender is the owner *)
+    storage =
   if Current.sender () = storage.owner then
     let storage = storage.redirect <- redirect in
     ([], storage)
   else 
-    failwith ("You do not own the Tezos Name Service proxy")
+    failwith ("You do not own this proxy contract")
