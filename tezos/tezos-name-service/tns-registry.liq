@@ -1,74 +1,103 @@
 (* Title: Tezos Name Service Registry *)
 (* Author: Teckhua Chiang *)
-(* Company: Cryptonomic *)
+(* Company: Cryptonomic Inc. *)
 
 [%%version 1.04]
 
-type entry = {
+type record = {
   owner : address;
   resolver : address;
   ttl : int;
 }
 
 type storage = {
-  record : (string, entry) big_map;
+  records : (string, record) big_map;
   stamp : string;
 }
 
 let%init storage = {
-  record = BigMap [];
-  stamp = "Author: Teckhua Chiang, Company: Cryptonomic";
+  records = BigMap ["tez", { owner = KT1BEqzn5Wx8uJrZNvuS9DVHmLvG9td3fDLi; resolver = KT1BEqzn5Wx8uJrZNvuS9DVHmLvG9td3fDLi; ttl = 0}];
+  stamp = "Author: Teckhua Chiang, Company: Cryptonomic Inc.";
 }
 
-(* Allows user to register a new domain *)
+(* Allows a permitted user to register a new domain *)
 let%entry registerDomain
     ((domain : string), (resolver : address), (ttl : int))
     storage = 
   (* Check domain existence *)
-  match Map.find domain storage.record with
+  match Map.find domain storage.records with
   | None -> 
       if isPermitted domain storage then
+        (* Create a new domain record *)
         let owner = Current.sender() in
-        let entry = { owner; resolver; ttl } in
-        let storage = storage.record <- Map.add domain entry storage.record in
+        let record = { owner; resolver; ttl } in
+        let storage = storage.records <- Map.add domain record storage.records in
         ([], storage)
       else
-        failwith ("You do not own the higher-level domain")
+        failwith ("You do not have permission to register that domain: ", domain)
   | Some _ ->
-      failwith ("Not an available domain: ", domain)
+      failwith ("Domain is not available: ", domain)
   
-(* Allows owner to update domain information *)
-let%entry updateInformation 
-    ((domain : string), (resolver : address), (ttl : int))
+(* Allows a domain owner to update the resolver for a domain *)
+let%entry updateResolver
+    ((domain : string), (resolver : address))
     storage = 
   (* Check domain existence *)
-  match Map.find domain storage.record with
+  match Map.find domain storage.records with
   | None -> failwith ("Domain does not exist: ", domain)
-  | Some entry -> 
-      if Current.sender() = entry.owner then 
-        (* Update resolver and ttl *)
-        let newEntry = { owner = entry.owner; resolver; ttl } in
-        let storage = storage.record <- Map.add domain newEntry storage.record in
+  | Some record -> 
+      if Current.sender() = record.owner then 
+        (* Update the resolver *)
+        let newRecord = record.resolver <- resolver in
+        let storage = storage.records <- Map.add domain newRecord storage.records in
         ([], storage)
       else
-        failwith ("You do not own the domain: ", domain)
+        failwith ("You do not own that domain: ", domain)
+  
+(* Allows a domain owner to update the TTL for a domain *)
+let%entry updateTTL
+    ((domain : string), (ttl : int))
+    storage = 
+  (* Check domain existence *)
+  match Map.find domain storage.records with
+  | None -> failwith ("Domain does not exist: ", domain)
+  | Some record -> 
+      if Current.sender() = record.owner then 
+        (* Update the TTL *)
+        let newRecord = record.ttl <- ttl in
+        let storage = storage.records <- Map.add domain newRecord storage.records in
+        ([], storage)
+      else
+        failwith ("You do not own that domain: ", domain)
 
-(* Allows owner to transfer ownership to another user *)
+(* Allows a permitted user to transfer ownership of a domain to another user *)
 let%entry transferOwnership
     ((domain : string), (newOwner: address)) 
     storage = 
   (* Check domain existence *)
-  match Map.find domain storage.record with
-  | None -> failwith ("Not a registered domain: ", domain)
-  | Some entry ->
+  match Map.find domain storage.records with
+  | None -> failwith ("Domain does not exist: ", domain)
+  | Some record ->
       if isPermitted domain storage then
-        (* Update new owner *)
-        let newEntry = entry.owner <- newOwner in
-        let storage = storage.record <- Map.add domain newEntry storage.record in
+        (* Update the owner *)
+        let newRecord = record.owner <- newOwner in
+        let storage = storage.records <- Map.add domain newRecord storage.records in
         ([], storage)
       else
-        failwith ("You do not manage the domain: ", domain) 
-    
+        failwith ("You do not have permission to transfer that domain: ", domain)
+  
+(* Allows a permitted user to delete an existing domain *)
+let%entry deleteDomain
+    (domain : string)
+    storage =
+  if isPermitted domain storage then
+    let storage = storage.records <- Map.remove domain storage.records in
+    ([], storage)
+  else
+    failwith ("You do not have permission to delete that domain: ", domain)
+
+(* <!-- Auxillary Functions --> *)
+
 (* Returns the nat difference of two nats *)
 let subtractNat
     (nat1 : nat)
@@ -90,7 +119,7 @@ let sliceStringByIndex
     | Some p -> p in 
   substring 
     
-(* Returns a string list containing the higher-level domains of a domain *)
+(* Returns a string list containing the domain hierarchy of a domain *)
 let getDomainHierarchy
     (domain : string) =
   let endIndex = String.length domain in
@@ -114,15 +143,16 @@ let getDomainHierarchy
         | None -> failwith () 
       ) (subtractNat (String.length domain) 1p, []) (* searchIndex, splitList *)
   in
-  List.rev splitList.(1)
+  splitList.(1)
 
 (* Returns a bool representing a user's permission to manage a domain *)
 let isPermitted
     (domain : string)
     storage =
   let domainHierarchy = getDomainHierarchy domain in
-  let permitted = List.fold (fun (elt, acc) ->
-      match Map.find elt storage.record with
+  (* True only if the user owns the domain or any higher-level domain *)
+  List.fold (fun (elt, acc) ->
+      match Map.find elt storage.records with
       | None -> acc
       | Some higherEntry ->
           if Current.sender () = higherEntry.owner then
@@ -130,5 +160,3 @@ let isPermitted
           else
             acc
     ) domainHierarchy false
-  in
-  permitted
