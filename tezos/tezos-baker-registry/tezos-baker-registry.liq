@@ -1,31 +1,31 @@
 (* Title: Tezos Baker Registry *)
 (* Author: Teckhua Chiang *)
-(* Company: Cryptonomic *)
+(* Company: Cryptonomic Inc. *)
 
 [%%version 1.04]
 
-type recordNP = {
+type recordOfNameAndPayer = {
   name : string;
   payer : address;
 }
 
-type recordFM = {
+type recordOfFeeAndMinimum = {
   fee : int;
   minimum : tez;
 } 
     
-type cycleToRecordFM = (int, recordFM) map (* Cycle to fee and minimum *)
+type recordsOfFeeAndMinimumAsOfCycle = (int, recordOfFeeAndMinimum) map
 
 type storage = {
-  recordsNP : (address, recordNP) map; (* Address to name and payer *)
-  recordsFM : (address, cycleToRecordFM) map; (* Address to cycle to fee and minimum *)
+  recordsOfNameAndPayer : (address, recordOfNameAndPayer) map;
+  recordsOfFeeAndMinimum : (address, recordsOfFeeAndMinimumAsOfCycle) map;
   stamp : string;
 }
 
 let%init storage = {
-  recordsNP = Map [];
-  recordsFM = Map [];
-  stamp = "Author: Teckhua Chiang, Company: Cryptonomic";
+  recordsOfNameAndPayer = Map [];
+  recordsOfFeeAndMinimum = Map [];
+  stamp = "Author: Teckhua Chiang, Company: Cryptonomic Inc.";
 }
 
 (* Allows a baker to update their name *)
@@ -33,11 +33,11 @@ let%entry updateName
     (name : string)
     (storage : storage) =
   let sender = Current.sender () in 
-  let recordNP = match Map.find sender storage.recordsNP with
+  let recordOfNameAndPayer = match Map.find sender storage.recordsOfNameAndPayer with
     | None -> { name = ""; payer = sender }
     | Some r -> r in
-  let newRecordNP = recordNP.name <- name in
-  let storage = storage.recordsNP <- Map.add sender newRecordNP storage.recordsNP in
+  let newRecordOfNameAndPayer = recordOfNameAndPayer.name <- name in
+  let storage = storage.recordsOfNameAndPayer <- Map.add sender newRecordOfNameAndPayer storage.recordsOfNameAndPayer in
   ([], storage)
 
 (* Allows a baker to update their payment address *)
@@ -45,11 +45,11 @@ let%entry updatePaymentAddress
     (payer : address)
     (storage : storage) =
   let sender = Current.sender () in 
-  let recordNP = match Map.find sender storage.recordsNP with
+  let recordOfNameAndPayer = match Map.find sender storage.recordsOfNameAndPayer with
     | None -> { name = ""; payer = sender }
     | Some r -> r in
-  let newRecordNP = recordNP.payer <- payer in
-  let storage = storage.recordsNP <- Map.add sender newRecordNP storage.recordsNP in
+  let newRecordOfNameAndPayer = recordOfNameAndPayer.payer <- payer in
+  let storage = storage.recordsOfNameAndPayer <- Map.add sender newRecordOfNameAndPayer storage.recordsOfNameAndPayer in
   ([], storage)
   
 (* Allows a baker to update their fee and minimum as of a cycle *)                        
@@ -57,18 +57,19 @@ let%entry updateTerms
     ((cycle : int), (fee : int), (minimum : tez))
     (storage : storage) =
   let sender = Current.sender () in 
-  let recordFM = { fee; minimum } in
-  let cycleToRecordFM = match Map.find sender storage.recordsFM with
+  let newRecordOfFeeAndMinimum = { fee; minimum } in
+  let recordsOfFeeAndMinimumAsOfCycle = match Map.find sender storage.recordsOfFeeAndMinimum with
     | None -> Map []
-    | Some ctrfm -> ctrfm in
-  let newCycleToRecordFM = Map.add cycle recordFM cycleToRecordFM in
-  let storage = storage.recordsFM <- Map.add sender newCycleToRecordFM storage.recordsFM in
+    | Some r -> r in
+  let newRecordsOfFeeAndMinimumAsOfCycle = Map.add cycle newRecordOfFeeAndMinimum recordsOfFeeAndMinimumAsOfCycle in
+  let storage = storage.recordsOfFeeAndMinimum <- Map.add sender newRecordsOfFeeAndMinimumAsOfCycle storage.recordsOfFeeAndMinimum in
   ([], storage)
   
+(* Allows a baker to delete their registration information *)
 let%entry deleteRegistration
     ()
     storage =
   let sender = Current.sender () in
-  let storage = storage.recordsNP <- Map.remove sender storage.recordsNP in
-  let storage = storage.recordsFM <- Map.remove sender storage.recordsFM in
+  let storage = storage.recordsOfNameAndPayer <- Map.remove sender storage.recordsOfNameAndPayer in
+  let storage = storage.recordsOfFeeAndMinimum <- Map.remove sender storage.recordsOfFeeAndMinimum in
   ([], storage)
