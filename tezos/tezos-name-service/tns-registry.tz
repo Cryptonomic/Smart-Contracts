@@ -11,7 +11,9 @@ parameter
                  (string %_Liq_entry_deleteDomain)))));
 storage
   (pair :storage
-     (big_map string (pair :record (address %owner) (pair (address %resolver) (int %ttl))))
+     (big_map
+        string
+        (pair :record (address %owner) (pair (address %resolver) (int %ttlInSeconds))))
      string);
 code { DUP ;
        DIP { CDR @storage_slash_1 } ;
@@ -32,6 +34,7 @@ code { DUP ;
            IF {} { UNIT ; FAILWITH } ;
            DIP { DROP } } ;
        DUP @subtractNat ;
+       DUUP @subtractNat ;
        LAMBDA
          (pair (pair nat (pair nat string)) (lambda (pair nat nat) nat))
          string
@@ -56,8 +59,6 @@ code { DUP ;
            DIP { DROP ; DROP } ;
            RENAME @substring } ;
        PAIR @sliceStringByIndex ;
-       DUUP @subtractNat ;
-       DUUP @sliceStringByIndex ;
        PAIR ;
        LAMBDA
          (pair string
@@ -66,14 +67,11 @@ code { DUP ;
                      (lambda (pair nat nat) nat)))
          (list string)
          { RENAME @domain__sliceStringByIndex_subtractNat_slash_18 ;
-           DUP ;
-           CAR @domain_slash_19 ;
-           SIZE @endIndex ;
            NIL string ;
-           DUUUP ;
+           DUUP ;
            CDDR @subtractNat_slash_8 ;
            PUSH nat 1 ;
-           DUUUUUP ;
+           DUUUUP ;
            CAR @domain_slash_19 ;
            SIZE ;
            PAIR ;
@@ -81,7 +79,7 @@ code { DUP ;
            PAIR ;
            PUSH bool True ;
            LOOP { RENAME @x_slash_21 ;
-                  DUUUP ;
+                  DUUP ;
                   CAR @domain_slash_19 ;
                   PUSH nat 1 ;
                   DUUUP @x ;
@@ -101,17 +99,8 @@ code { DUP ;
                            DROP ;
                            DUUUP @x ;
                            CDR ;
-                           DUUUUUUP ;
-                           CDAR @sliceStringByIndex_slash_17 ;
-                           DUUUUUUUP ;
+                           DUUUUUP ;
                            CAR @domain_slash_19 ;
-                           DUUUUUUUP @endIndex ;
-                           PAIR ;
-                           PUSH nat 0 ;
-                           PAIR ;
-                           DIP { DUP ; CAR ; SWAP ; CDR } ;
-                           PAIR ;
-                           EXEC @substring ;
                            CONS ;
                            SWAP ;
                            PAIR ;
@@ -123,11 +112,13 @@ code { DUP ;
                            EQ ;
                            IF { DUUP @x ;
                                 CDR ;
-                                DUUUUUP ;
+                                DUUUUP ;
                                 CDAR @sliceStringByIndex_slash_17 ;
+                                DUUUUUP ;
+                                CAR @domain_slash_19 ;
                                 DUUUUUUP ;
                                 CAR @domain_slash_19 ;
-                                DUUUUUUP @endIndex ;
+                                SIZE @endIndex ;
                                 PAIR ;
                                 PUSH nat 1 ;
                                 DUUUUUUP @x ;
@@ -138,7 +129,7 @@ code { DUP ;
                                 PAIR ;
                                 EXEC @substring ;
                                 CONS ;
-                                DUUUUUP ;
+                                DUUUUP ;
                                 CDDR @subtractNat_slash_8 ;
                                 PUSH nat 1 ;
                                 DUUUUUP @x ;
@@ -150,7 +141,7 @@ code { DUP ;
                                 PAIR }
                               { DUUP @x ;
                                 CDR ;
-                                DUUUUUP ;
+                                DUUUUP ;
                                 CDDR @subtractNat_slash_8 ;
                                 PUSH nat 1 ;
                                 DUUUUUP @x ;
@@ -165,14 +156,16 @@ code { DUP ;
                   DUP ;
                   CAR ;
                   DIP { CDR } } ;
-           DIP { DROP ; DROP } ;
+           DIP { DROP } ;
            RENAME @splitList ;
            CDR } ;
        PAIR @getDomainHierarchy ;
        LAMBDA
          (pair (pair string
                      (pair :storage
-                        (big_map string (pair :record (address %owner) (pair (address %resolver) (int %ttl))))
+                        (big_map
+                           string
+                           (pair :record (address %owner) (pair (address %resolver) (int %ttlInSeconds))))
                         string))
                (pair (lambda
                         (pair string
@@ -184,48 +177,49 @@ code { DUP ;
                                  (lambda (pair nat nat) nat))
                            (lambda (pair nat nat) nat))))
          bool
-         { RENAME @domain_storage__getDomainHierarchy_slash_27 ;
+         { RENAME @domain_storage__getDomainHierarchy_slash_26 ;
            PUSH bool False ;
            DUUP ;
-           CDR @getDomainHierarchy_slash_26 ;
+           CDR @getDomainHierarchy_slash_25 ;
            DUUUP ;
-           CAR @domain_storage_slash_28 ;
+           CAR @domain_storage_slash_27 ;
            CAR @domain ;
            DIP { DUP ; CAR ; SWAP ; CDR } ;
            PAIR ;
            EXEC @domainHierarchy ;
-           ITER { RENAME @_elt_acc_slash_32 ;
+           ITER { RENAME @_higherDomain_permitted_slash_31 ;
                   DIP { DUP } ;
                   PAIR ;
                   DUP ;
-                  CDR @acc ;
+                  CDR @permitted ;
                   DUUUUP ;
-                  CAR @domain_storage_slash_28 ;
+                  CAR @domain_storage_slash_27 ;
                   CDR @storage ;
-                  CAR %records ;
+                  CAR %domainToRecord ;
                   DUUUP ;
-                  CAR @elt ;
+                  CAR @higherDomain ;
                   GET ;
                   IF_NONE
-                    { DUP @acc }
-                    { DUP @higherEntry ;
+                    { DUP @permitted }
+                    { DUP @higherRecord ;
                       CAR %owner ;
                       SENDER ;
                       COMPARE ;
                       EQ ;
-                      IF { PUSH bool True } { DUUP @acc } ;
+                      IF { PUSH bool True ; DUUUP @permitted ; COMPARE ; EQ }
+                         { DUUP @permitted } ;
                       DIP { DROP } } ;
                   DIP { DROP ; DROP ; DROP } } ;
            DIP { DROP } } ;
        PAIR @isPermitted ;
-       DUUUUP @parameter ;
+       DUUUP @parameter ;
        IF_LEFT
-         { RENAME @_domain_resolver_ttl_slash_37 ;
-           DUUUUUUP @storage ;
+         { RENAME @_domain_resolver_ttlInSeconds_slash_36 ;
+           DUUUUUP @storage ;
            DUUP ;
            CAR @domain ;
            DUUP @storage ;
-           CAR %records ;
+           CAR %domainToRecord ;
            DUUP @domain ;
            GET ;
            IF_NONE
@@ -239,18 +233,18 @@ code { DUP ;
                IF { DUUP @storage ;
                     CDR %stamp ;
                     DUUUP @storage ;
-                    CAR %records ;
+                    CAR %domainToRecord ;
                     DUUUUUP ;
-                    CDDR @ttl ;
+                    CDDR @ttlInSeconds ;
                     DUUUUUUP ;
                     CDAR @resolver ;
-                    PAIR %resolver %ttl ;
+                    PAIR %resolver %ttlInSeconds ;
                     SENDER @owner ;
                     PAIR @record %owner ;
                     DUUUUP @domain ;
                     DIP { SOME } ;
                     UPDATE ;
-                    PAIR @storage %records %stamp ;
+                    PAIR @storage %domainToRecord %stamp ;
                     NIL operation ;
                     PAIR }
                   { DUP @domain ;
@@ -260,12 +254,12 @@ code { DUP ;
              { DUUP @domain ; PUSH string "Domain is not available: " ; PAIR ; FAILWITH } ;
            DIP { DROP ; DROP ; DROP } }
          { IF_LEFT
-             { RENAME @_domain_resolver_slash_46 ;
-               DUUUUUUP @storage ;
+             { RENAME @_domain_resolver_slash_45 ;
+               DUUUUUP @storage ;
                DUUP ;
                CAR @domain ;
                DUUP @storage ;
-               CAR %records ;
+               CAR %domainToRecord ;
                DUUP @domain ;
                GET ;
                IF_NONE
@@ -278,22 +272,22 @@ code { DUP ;
                    IF { DUUUP @storage ;
                         CDR %stamp ;
                         DUUUUP @storage ;
-                        CAR %records ;
+                        CAR %domainToRecord ;
                         DUUUP @record ;
                         DUP ;
                         CAR %owner ;
                         SWAP ;
                         CDR ;
-                        CDR %ttl ;
+                        CDR %ttlInSeconds ;
                         DUUUUUUUUP ;
                         CDR @resolver ;
-                        PAIR %resolver %ttl ;
+                        PAIR %resolver %ttlInSeconds ;
                         SWAP ;
                         PAIR @newRecord %owner ;
                         DUUUUUP @domain ;
                         DIP { SOME } ;
                         UPDATE ;
-                        PAIR @storage %records %stamp ;
+                        PAIR @storage %domainToRecord %stamp ;
                         NIL operation ;
                         PAIR }
                       { DUUP @domain ;
@@ -303,12 +297,12 @@ code { DUP ;
                    DIP { DROP } } ;
                DIP { DROP ; DROP ; DROP } }
              { IF_LEFT
-                 { RENAME @_domain_ttl_slash_53 ;
-                   DUUUUUUP @storage ;
+                 { RENAME @_domain_ttlInSeconds_slash_52 ;
+                   DUUUUUP @storage ;
                    DUUP ;
                    CAR @domain ;
                    DUUP @storage ;
-                   CAR %records ;
+                   CAR %domainToRecord ;
                    DUUP @domain ;
                    GET ;
                    IF_NONE
@@ -321,7 +315,7 @@ code { DUP ;
                        IF { DUUUP @storage ;
                             CDR %stamp ;
                             DUUUUP @storage ;
-                            CAR %records ;
+                            CAR %domainToRecord ;
                             DUUUP @record ;
                             DUP ;
                             CAR %owner ;
@@ -329,15 +323,15 @@ code { DUP ;
                             CDR ;
                             CAR %resolver ;
                             DUUUUUUUUP ;
-                            CDR @ttl ;
+                            CDR @ttlInSeconds ;
                             SWAP ;
-                            PAIR %resolver %ttl ;
+                            PAIR %resolver %ttlInSeconds ;
                             SWAP ;
                             PAIR @newRecord %owner ;
                             DUUUUUP @domain ;
                             DIP { SOME } ;
                             UPDATE ;
-                            PAIR @storage %records %stamp ;
+                            PAIR @storage %domainToRecord %stamp ;
                             NIL operation ;
                             PAIR }
                           { DUUP @domain ;
@@ -347,12 +341,12 @@ code { DUP ;
                        DIP { DROP } } ;
                    DIP { DROP ; DROP ; DROP } }
                  { IF_LEFT
-                     { RENAME @_domain_newOwner_slash_60 ;
-                       DUUUUUUP @storage ;
+                     { RENAME @_domain_newOwner_slash_59 ;
+                       DUUUUUP @storage ;
                        DUUP ;
                        CAR @domain ;
                        DUUP @storage ;
-                       CAR %records ;
+                       CAR %domainToRecord ;
                        DUUP @domain ;
                        GET ;
                        IF_NONE
@@ -367,7 +361,7 @@ code { DUP ;
                            IF { DUUUP @storage ;
                                 CDR %stamp ;
                                 DUUUUP @storage ;
-                                CAR %records ;
+                                CAR %domainToRecord ;
                                 DUUUP @record ;
                                 CDR ;
                                 DUUUUUUUP ;
@@ -376,7 +370,7 @@ code { DUP ;
                                 DUUUUUP @domain ;
                                 DIP { SOME } ;
                                 UPDATE ;
-                                PAIR @storage %records %stamp ;
+                                PAIR @storage %domainToRecord %stamp ;
                                 NIL operation ;
                                 PAIR }
                               { DUUP @domain ;
@@ -385,8 +379,8 @@ code { DUP ;
                                 FAILWITH } ;
                            DIP { DROP } } ;
                        DIP { DROP ; DROP ; DROP } }
-                     { RENAME @domain_slash_67 ;
-                       DUUUUUUP @storage ;
+                     { RENAME @domain_slash_66 ;
+                       DUUUUUP @storage ;
                        DUUUP @isPermitted ;
                        DUUP @storage ;
                        DUUUUP @domain ;
@@ -397,11 +391,11 @@ code { DUP ;
                        IF { DUP @storage ;
                             CDR %stamp ;
                             DUUP @storage ;
-                            CAR %records ;
+                            CAR %domainToRecord ;
                             DUUUUP @domain ;
-                            DIP { NONE (pair :record (address %owner) (pair (address %resolver) (int %ttl))) } ;
+                            DIP { NONE (pair :record (address %owner) (pair (address %resolver) (int %ttlInSeconds))) } ;
                             UPDATE ;
-                            PAIR @storage %records %stamp ;
+                            PAIR @storage %domainToRecord %stamp ;
                             NIL operation ;
                             PAIR }
                           { DUUP @domain ;
@@ -409,4 +403,4 @@ code { DUP ;
                             PAIR ;
                             FAILWITH } ;
                        DIP { DROP ; DROP } } } } } ;
-       DIP { DROP ; DROP ; DROP ; DROP ; DROP } };
+       DIP { DROP ; DROP ; DROP ; DROP } };
