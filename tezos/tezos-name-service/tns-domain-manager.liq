@@ -4,11 +4,16 @@
 
 [%%version 1.04] 
 
+type record = {
+  subdomainOwner : address;
+  subdomainManager : address;
+}
+
 type storage = {
   owner : address;
   resolver: address;
   ttlInSeconds : int;
-  subdomainToRegistrar : (string, address) map;
+  subdomainToRecord : (string, record) map;
   stamp : string;
 }
 
@@ -16,7 +21,7 @@ let%init storage = {
   owner = KT1BEqzn5Wx8uJrZNvuS9DVHmLvG9td3fDLi;
   resolver = KT1BEqzn5Wx8uJrZNvuS9DVHmLvG9td3fDLi;
   ttlInSeconds = 0;
-  subdomainToRegistrar = Map [];
+  subdomainToRecord = Map [];
   stamp = "Author: Teckhua Chiang, Company: Cryptonomic Inc.";
 }
   
@@ -56,20 +61,37 @@ let%entry changeTTL
 
 (* Default subdomain registration logic - Modify for your own purposes *)
 let%entry registerSubdomain
-    ((subdomain : string), (registrar : address))
+    ((subdomain : string), (subdomainOwner : address), (subdomainManager : address))
     storage = 
   if Current.sender () = storage.owner then
-    let storage = storage.subdomainToRegistrar <- Map.add subdomain registrar storage.subdomainToRegistrar in
+    let record = { subdomainOwner; subdomainManager } in
+    let storage = storage.subdomainToRecord <- Map.add subdomain record storage.subdomainToRecord in
     ([], storage)
   else
     failwith ("You do not have permission to register subdomains")
+
+(* Allows the subdomain owner to change their manager address *)
+let%entry updateSubdomain
+    ((subdomain : string), (subdomainManager : address))
+    storage =
+  (* Check subdomain existence *)
+  match Map.find subdomain storage.subdomainToRecord with
+  | None -> failwith ("Subdomain does not exist: ", subdomain)
+  | Some record -> 
+      if Current.sender () = record.subdomainOwner then 
+        (* Update the resolver *)
+        let newRecord = record.subdomainManager <- subdomainManager in
+        let storage = storage.subdomainToRecord <- Map.add subdomain newRecord storage.subdomainToRecord in
+        ([], storage)
+      else
+        failwith ("You do not own that subdomain: ", subdomain)
   
 (* Allows the owner to delete a subdomain *)
 let%entry deleteSubdomain
     (subdomain : string)
     storage =
   if Current.sender () = storage.owner then
-    let storage = storage.subdomainToRegistrar <- Map.remove subdomain storage.subdomainToRegistrar in
+    let storage = storage.subdomainToRecord <- Map.remove subdomain storage.subdomainToRecord in
     ([], storage)
   else
     failwith ("You do not have permission to delete subdomains")
