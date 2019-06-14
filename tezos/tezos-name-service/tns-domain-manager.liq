@@ -24,7 +24,7 @@ let%init storage = {
 
 (* Allows the domain owner to change the owner *)
 let%entry changeOwner
-    ((newOwner: address)) 
+    (newOwner: address) 
     storage = 
   if Current.sender () = storage.owner then 
     let storage = storage.owner <- newOwner in
@@ -34,7 +34,7 @@ let%entry changeOwner
 
 (* Allows the domain owner to change the resolver *)
 let%entry changeResolver
-    ((newResolver : address))
+    (newResolver : address)
     storage = 
   if Current.sender () = storage.owner then 
     let storage = storage.resolver <- newResolver in
@@ -44,7 +44,7 @@ let%entry changeResolver
   
 (* Allows the domain owner to change the TTL *)
 let%entry changeTTL
-    ((newTTLInSeconds : int))
+    (newTTLInSeconds : int)
     storage = 
   if Current.sender () = storage.owner then 
     let storage = storage.ttlInSeconds <- newTTLInSeconds in
