@@ -131,7 +131,7 @@ code { DUP ;
                         NIL operation ;
                         PAIR }
                       { DUUP @subdomain ;
-                        PUSH string "You do not own that subdomain: " ;
+                        PUSH string "You do not have permission to transfer that subdomain: " ;
                         PAIR ;
                         FAILWITH } ;
                    DIP { DROP } } ;
@@ -340,7 +340,7 @@ code { DUP ;
                                     NIL operation ;
                                     PAIR }
                                   { DUUUP @subdomain ;
-                                    PUSH string "You do not own that subdomain: " ;
+                                    PUSH string "You do not have permission to delete that subdomain: " ;
                                     PAIR ;
                                     FAILWITH } ;
                                DIP { DROP } } ;

@@ -53,7 +53,7 @@ let%entry transferOwnership
         let storage = storage.subdomainToRecord <- Map.add subdomain newRecord storage.subdomainToRecord in
         ([], storage)
       else
-        failwith ("You do not own that subdomain: ", subdomain)
+        failwith ("You do not have permission to transfer that subdomain: ", subdomain)
 
 (* Allows a subdomain owner to update the resolver for a subdomain *)
 let%entry updateResolver
@@ -114,7 +114,7 @@ let%entry deleteSubdomain
         let storage = storage.subdomainToRecord <- Map.remove subdomain storage.subdomainToRecord in
         ([], storage)
       else
-        failwith ("You do not own that subdomain: ", subdomain) 
+        failwith ("You do not have permission to delete that subdomain: ", subdomain) 
 
 (* Returns a bool representing a user's permission to manage a domain *)
 let isPermitted
