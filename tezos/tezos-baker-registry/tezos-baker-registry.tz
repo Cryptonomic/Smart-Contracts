@@ -10,9 +10,9 @@ parameter
              (unit %_Liq_entry_deleteRegistration))));
 storage
   (pair :storage
-     (map %recordsOfNameAndPayer
+     (map %recordsOfNameAndPaymentAddress
         address
-        (pair :recordOfNameAndPayer (string %name) (address %payer)))
+        (pair :recordOfNameAndPaymentAddress (string %name) (address %paymentAddress)))
      (pair (map %recordsOfFeeAndMinimum
               address
               (map int (pair :recordOfFeeAndMinimum (int %fee) (mutez %minimum))))
@@ -28,46 +28,46 @@ code { DUP ;
            DUUP @storage ;
            CDR ;
            DUUUP @storage ;
-           CAR %recordsOfNameAndPayer ;
+           CAR %recordsOfNameAndPaymentAddress ;
            DUUUUP @storage ;
-           CAR %recordsOfNameAndPayer ;
+           CAR %recordsOfNameAndPaymentAddress ;
            DUUUUP @sender ;
            GET ;
-           IF_NONE { DUUUP @sender ; PUSH string "" ; PAIR %name %payer } {} ;
-           RENAME @recordOfNameAndPayer ;
-           CDR %payer ;
+           IF_NONE { DUUUP @sender ; PUSH string "" ; PAIR %name %paymentAddress } {} ;
+           RENAME @recordOfNameAndPaymentAddress ;
+           CDR %paymentAddress ;
            DUUUUUUP @name ;
-           PAIR @newRecordOfNameAndPayer %name %payer ;
+           PAIR @newRecordOfNameAndPaymentAddress %name %paymentAddress ;
            DUUUUP @sender ;
            DIP { SOME } ;
            DIIIIP { DROP ; DROP ; DROP } ;
            UPDATE ;
-           PAIR @storage %recordsOfNameAndPayer ;
+           PAIR @storage %recordsOfNameAndPaymentAddress ;
            NIL operation ;
            PAIR }
          { IF_LEFT
-             { RENAME @payer_slash_10 ;
+             { RENAME @paymentAddress_slash_10 ;
                DUUUP @storage ;
                SENDER @sender ;
                DUUP @storage ;
                CDR ;
                DUUUP @storage ;
-               CAR %recordsOfNameAndPayer ;
+               CAR %recordsOfNameAndPaymentAddress ;
                DUUUUP @storage ;
-               CAR %recordsOfNameAndPayer ;
+               CAR %recordsOfNameAndPaymentAddress ;
                DUUUUP @sender ;
                GET ;
-               IF_NONE { DUUUP @sender ; PUSH string "" ; PAIR %name %payer } {} ;
-               RENAME @recordOfNameAndPayer ;
+               IF_NONE { DUUUP @sender ; PUSH string "" ; PAIR %name %paymentAddress } {} ;
+               RENAME @recordOfNameAndPaymentAddress ;
                CAR %name ;
-               DUUUUUUP @payer ;
+               DUUUUUUP @paymentAddress ;
                SWAP ;
-               PAIR @newRecordOfNameAndPayer %name %payer ;
+               PAIR @newRecordOfNameAndPaymentAddress %name %paymentAddress ;
                DUUUUP @sender ;
                DIP { SOME } ;
                DIIIIP { DROP ; DROP ; DROP } ;
                UPDATE ;
-               PAIR @storage %recordsOfNameAndPayer ;
+               PAIR @storage %recordsOfNameAndPaymentAddress ;
                NIL operation ;
                PAIR }
              { IF_LEFT
@@ -76,7 +76,7 @@ code { DUP ;
                    SENDER @sender ;
                    DUUP @storage ;
                    DUP ;
-                   CAR %recordsOfNameAndPayer ;
+                   CAR %recordsOfNameAndPaymentAddress ;
                    SWAP ;
                    CDR ;
                    CDR %stamp ;
@@ -105,7 +105,7 @@ code { DUP ;
                    UPDATE ;
                    PAIR %recordsOfFeeAndMinimum %stamp ;
                    SWAP ;
-                   PAIR @storage %recordsOfNameAndPayer ;
+                   PAIR @storage %recordsOfNameAndPaymentAddress ;
                    NIL operation ;
                    PAIR }
                  { RENAME @__slash_28 ;
@@ -114,14 +114,14 @@ code { DUP ;
                    DUUP @storage ;
                    CDR ;
                    DUUUP @storage ;
-                   CAR %recordsOfNameAndPayer ;
+                   CAR %recordsOfNameAndPaymentAddress ;
                    DUUUP @sender ;
-                   DIP { NONE (pair :recordOfNameAndPayer (string %name) (address %payer)) } ;
+                   DIP { NONE (pair :recordOfNameAndPaymentAddress (string %name) (address %paymentAddress)) } ;
                    UPDATE ;
-                   PAIR @storage %recordsOfNameAndPayer ;
+                   PAIR @storage %recordsOfNameAndPaymentAddress ;
                    DUP @storage ;
                    DUP ;
-                   CAR %recordsOfNameAndPayer ;
+                   CAR %recordsOfNameAndPaymentAddress ;
                    SWAP ;
                    CDR ;
                    CDR %stamp ;
@@ -133,7 +133,7 @@ code { DUP ;
                    UPDATE ;
                    PAIR %recordsOfFeeAndMinimum %stamp ;
                    SWAP ;
-                   PAIR @storage %recordsOfNameAndPayer ;
+                   PAIR @storage %recordsOfNameAndPaymentAddress ;
                    NIL operation ;
                    PAIR } } } ;
        DIP { DROP ; DROP } };
