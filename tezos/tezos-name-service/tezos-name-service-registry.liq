@@ -32,7 +32,7 @@ let%entry registerDomain
   match Map.find domain storage.domainToRecord with
   | None -> 
       if isPermitted domain storage then
-        let owner = Current.sender() in
+        let owner = Current.sender () in
         let record = { owner; resolver; ttlInSeconds } in
         let storage = storage.domainToRecord <- Map.add domain record storage.domainToRecord in
         ([], storage)
@@ -50,7 +50,7 @@ let%entry updateResolver
   match Map.find domain storage.domainToRecord with
   | None -> failwith ("Domain does not exist: ", domain)
   | Some record -> 
-      if Current.sender() = record.owner then 
+      if Current.sender () = record.owner then 
         let newRecord = record.resolver <- resolver in
         let storage = storage.domainToRecord <- Map.add domain newRecord storage.domainToRecord in
         ([], storage)
@@ -66,7 +66,7 @@ let%entry updateTTL
   match Map.find domain storage.domainToRecord with
   | None -> failwith ("Domain does not exist: ", domain)
   | Some record -> 
-      if Current.sender() = record.owner then
+      if Current.sender () = record.owner then
         let newRecord = record.ttlInSeconds <- ttlInSeconds in
         let storage = storage.domainToRecord <- Map.add domain newRecord storage.domainToRecord in
         ([], storage)
