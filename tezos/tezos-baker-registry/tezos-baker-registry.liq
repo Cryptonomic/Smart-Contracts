@@ -4,38 +4,38 @@
 
 [%%version 1.04]
 
-(** Record containing a baker's name and payment address *)
+(** Record containing a baker's name and payment address. *)
 type recordOfNameAndPaymentAddress = {
   name : string;
   paymentAddress : address;
 }
 
-(** Record containing a baker's fee and minimum *)
+(** Record containing a baker's fee and minimum. *)
 type recordOfFeeAndMinimum = {
   fee : int;
   minimum : tez;
 } 
 
-(** Map associating a record of fee and minimum with its effective cycle *)
+(** Map associating a record of fee and minimum with its effective cycle. *)
 type recordsOfFeeAndMinimumAsOfCycle = (int, recordOfFeeAndMinimum) map
 
-(** Storage *)
+(** Storage of this smart contract. *)
 type storage = {
   recordsOfNameAndPaymentAddress : (address, recordOfNameAndPaymentAddress) map;
   recordsOfFeeAndMinimum : (address, recordsOfFeeAndMinimumAsOfCycle) map;
   stamp : string;
 }
 
-(** Initialize storage *)
+(** Initialize the storage of this smart contract. *)
 let%init storage = {
   recordsOfNameAndPaymentAddress = Map [];
   recordsOfFeeAndMinimum = Map [];
   stamp = "Author: Teckhua Chiang, Company: Cryptonomic Inc.";
 }
 
-(** Entry point for a baker to update their name
-    @param name A string representing the updated name
-    @param storage The storage of the smart contract *)
+(** Entry point for a baker to update their name.
+    @param name A string representing the updated name.
+    @param storage The storage of this smart contract. *)
 let%entry updateName
     (name : string)
     (storage : storage) =
@@ -47,9 +47,9 @@ let%entry updateName
   let storage = storage.recordsOfNameAndPaymentAddress <- Map.add sender newRecordOfNameAndPaymentAddress storage.recordsOfNameAndPaymentAddress in
   ([], storage)
 
-(** Entry point for a baker to update their payment address
-    @param paymentAddress A string representing the updated payment address
-    @param storage The storage of the smart contract *)
+(** Entry point for a baker to update their payment address.
+    @param paymentAddress A string representing the updated payment address.
+    @param storage The storage of this smart contract. *)
 let%entry updatePaymentAddress
     (paymentAddress : address)
     (storage : storage) =
@@ -61,9 +61,9 @@ let%entry updatePaymentAddress
   let storage = storage.recordsOfNameAndPaymentAddress <- Map.add sender newRecordOfNameAndPaymentAddress storage.recordsOfNameAndPaymentAddress in
   ([], storage)
   
-(** Entry point for a baker to update their fee and minimum as of a cycle
-    @param (cycle, fee, minimum) A tuple containing an int representing the effective cycle, an int representing the updated fee, and a tez amount representing the updated minimum, respectively
-    @param storage The storage of the smart contract *)                      
+(** Entry point for a baker to update their fee and minimum as of a cycle.
+    @param (cycle, fee, minimum) A tuple containing an int representing the effective cycle, an int representing the updated fee, and a tez amount representing the updated minimum, respectively.
+    @param storage The storage of this smart contract. *)                      
 let%entry updateTerms
     ((cycle : int), (fee : int), (minimum : tez))
     (storage : storage) =
@@ -76,8 +76,8 @@ let%entry updateTerms
   let storage = storage.recordsOfFeeAndMinimum <- Map.add sender newRecordsOfFeeAndMinimumAsOfCycle storage.recordsOfFeeAndMinimum in
   ([], storage)
   
-(** Entry point for a baker to delete their registration information
-    @param storage The storage of the smart contract *)
+(** Entry point for a baker to delete their registration information.
+    @param storage The storage of this smart contract. *)
 let%entry deleteRegistration
     ()
     (storage : storage) =
