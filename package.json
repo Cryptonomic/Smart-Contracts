@@ -1,0 +1,17 @@
+{
+  "name": "conseiljs-contracts",
+  "version": "1.0.0",
+  "main": "deploy-contract.js",
+  "dependencies": {
+    "conseiljs": "git://github.com/Cryptonomic/ConseilJS.git#feat/michelson-parser",
+    "typescript": "^3.5.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
+  "description": ""
+}
