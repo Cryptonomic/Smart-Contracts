@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "deploy-contract.js",
   "dependencies": {
-    "conseiljs": "git://github.com/Cryptonomic/ConseilJS.git#feat/michelson-parser",
+    "conseiljs": "git://github.com/Cryptonomic/ConseilJS.git#feat/tezos-types",
     "typescript": "^3.5.2"
   },
   "devDependencies": {},
