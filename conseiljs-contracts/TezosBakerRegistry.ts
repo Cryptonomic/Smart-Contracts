@@ -12,29 +12,26 @@ const keystore = {
 
 const contractAddress = 'KT1NpCh6tNQDmbmAVbGLxwRBx8jJD4rEFnmC'; // Tezos Baker Registry Alphanet
 
-async function updateName(name: string) {
+export async function updateName(name: string) {
     const parameter = 'Left ' + name;
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, TezosParameterFormat.Michelson);
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }
 
-async function updatePaymentAddress(paymentAddress: string) {
-    const parameter = 'Right (Left ' + paymentAddress;
+export async function updatePaymentAddress(paymentAddress: string) {
+    const parameter = 'Right (Left ' + paymentAddress + ' )';
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, TezosParameterFormat.Michelson);
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }
 
-async function updateTerms(cycle: number, fee: number, minimum: number) {
+export async function updateTerms(cycle: number, fee: number, minimum: number) {
     const parameter = 'Right (Right (Left (Pair ' + cycle + ' (Pair ' + fee + ' ' + minimum + ' ))))';
-    console.log(parameter);
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, TezosParameterFormat.Michelson);
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }
 
-async function deleteRegistration() {
+export async function deleteRegistration() {
     const parameter = 'Right (Right (Right Unit))';
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, TezosParameterFormat.Michelson);
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }
-
-updateTerms(50, 2, 8);

@@ -61,13 +61,14 @@ function updateName(name) {
         });
     });
 }
+exports.updateName = updateName;
 function updatePaymentAddress(paymentAddress) {
     return __awaiter(this, void 0, void 0, function () {
         var parameter, result;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    parameter = 'Right (Left ' + paymentAddress;
+                    parameter = 'Right (Left ' + paymentAddress + ' )';
                     return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
                 case 1:
                     result = _a.sent();
@@ -77,6 +78,7 @@ function updatePaymentAddress(paymentAddress) {
         });
     });
 }
+exports.updatePaymentAddress = updatePaymentAddress;
 function updateTerms(cycle, fee, minimum) {
     return __awaiter(this, void 0, void 0, function () {
         var parameter, result;
@@ -84,7 +86,6 @@ function updateTerms(cycle, fee, minimum) {
             switch (_a.label) {
                 case 0:
                     parameter = 'Right (Right (Left (Pair ' + cycle + ' (Pair ' + fee + ' ' + minimum + ' ))))';
-                    console.log(parameter);
                     return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
                 case 1:
                     result = _a.sent();
@@ -94,6 +95,7 @@ function updateTerms(cycle, fee, minimum) {
         });
     });
 }
+exports.updateTerms = updateTerms;
 function deleteRegistration() {
     return __awaiter(this, void 0, void 0, function () {
         var parameter, result;
@@ -110,4 +112,4 @@ function deleteRegistration() {
         });
     });
 }
-updateTerms(50, 2, 8);
+exports.deleteRegistration = deleteRegistration;
