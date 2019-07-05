@@ -68,7 +68,7 @@ function updatePaymentAddress(paymentAddress) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    parameter = 'Right (Left ' + paymentAddress + ' )';
+                    parameter = 'Right (Left ' + paymentAddress + ')';
                     return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
                 case 1:
                     result = _a.sent();
@@ -85,7 +85,7 @@ function updateTerms(cycle, fee, minimum) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    parameter = 'Right (Right (Left (Pair ' + cycle + ' (Pair ' + fee + ' ' + minimum + ' ))))';
+                    parameter = 'Right (Right (Left (Pair ' + cycle + ' (Pair ' + fee + ' ' + minimum + '))))';
                     return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
                 case 1:
                     result = _a.sent();

@@ -19,13 +19,13 @@ export async function updateName(name: string) {
 }
 
 export async function updatePaymentAddress(paymentAddress: string) {
-    const parameter = 'Right (Left ' + paymentAddress + ' )';
+    const parameter = 'Right (Left ' + paymentAddress + ')';
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, TezosParameterFormat.Michelson);
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }
 
 export async function updateTerms(cycle: number, fee: number, minimum: number) {
-    const parameter = 'Right (Right (Left (Pair ' + cycle + ' (Pair ' + fee + ' ' + minimum + ' ))))';
+    const parameter = 'Right (Right (Left (Pair ' + cycle + ' (Pair ' + fee + ' ' + minimum + '))))';
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, TezosParameterFormat.Michelson);
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }
