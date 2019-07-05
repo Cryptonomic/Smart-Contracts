@@ -44,7 +44,7 @@ var keystore = {
     seed: '',
     storeType: conseiljs_1.StoreType.Fundraiser
 };
-var contractAddress = 'KT1NpCh6tNQDmbmAVbGLxwRBx8jJD4rEFnmC'; // Tezos Baker Registry Alphanet
+var contractAddress = 'KT1NpCh6tNQDmbmAVbGLxwRBx8jJD4rEFnmC'; // Tezos Baker Registry - Alphanet
 function updateName(name) {
     return __awaiter(this, void 0, void 0, function () {
         var parameter, result;

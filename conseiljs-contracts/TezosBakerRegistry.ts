@@ -10,7 +10,7 @@ const keystore = {
     storeType: StoreType.Fundraiser
 };
 
-const contractAddress = 'KT1NpCh6tNQDmbmAVbGLxwRBx8jJD4rEFnmC'; // Tezos Baker Registry Alphanet
+const contractAddress = 'KT1NpCh6tNQDmbmAVbGLxwRBx8jJD4rEFnmC'; // Tezos Baker Registry - Alphanet
 
 export async function updateName(name: string) {
     const parameter = 'Left ' + name;
