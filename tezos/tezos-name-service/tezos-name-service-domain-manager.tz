@@ -1,0 +1,348 @@
+# Title: Tezos Name Service Domain Manager
+# Author: Teckhua Chiang
+# Company: Cryptonomic Inc.
+
+parameter
+  (or :_entries
+     (pair %_Liq_entry_registerSubdomain string (pair address (pair address int)))
+     (or (pair %_Liq_entry_transferSubdomainOwnership string address)
+         (or (pair %_Liq_entry_updateResolver string address)
+             (or (pair %_Liq_entry_updateManager string address)
+                 (or (pair %_Liq_entry_updateTTL string int) (string %_Liq_entry_deleteSubdomain))))));
+storage
+  (pair :storage
+     (address %domainOwner)
+     (pair (map %subdomainToRecord
+              string
+              (pair :record
+                 (address %subdomainOwner)
+                 (pair (address %resolver) (pair (address %manager) (int %ttlInSeconds)))))
+           (string %stamp)));
+code { DUP ;
+       DIP { CDR @storage_slash_1 } ;
+       CAR @parameter_slash_2 ;
+       LAMBDA @isController
+         (pair (pair :record
+                  (address %subdomainOwner)
+                  (pair (address %resolver) (pair (address %manager) (int %ttlInSeconds))))
+               (pair :storage
+                  (address %domainOwner)
+                  (pair (map %subdomainToRecord
+                           string
+                           (pair :record
+                              (address %subdomainOwner)
+                              (pair (address %resolver) (pair (address %manager) (int %ttlInSeconds)))))
+                        (string %stamp))))
+         bool
+         { RENAME @record_storage_slash_3 ;
+           DUP @record_storage ;
+           CAR @record ;
+           CAR %subdomainOwner ;
+           SENDER ;
+           COMPARE ;
+           EQ ;
+           SWAP ;
+           CDR @storage ;
+           CAR %domainOwner ;
+           SENDER ;
+           COMPARE ;
+           EQ ;
+           OR } ;
+       DUUP @parameter ;
+       IF_LEFT
+         { RENAME @_subdomain_resolver_manager_ttlInSeconds_slash_7 ;
+           DUUUUP @storage ;
+           DUUP ;
+           CAR @subdomain ;
+           DUUP @storage ;
+           CDAR %subdomainToRecord ;
+           DUUP @subdomain ;
+           GET ;
+           IF_NONE
+             { DUUP @storage ;
+               DUP ;
+               CAR %domainOwner ;
+               SWAP ;
+               CDR ;
+               CDR %stamp ;
+               DUUUUP @storage ;
+               CDAR %subdomainToRecord ;
+               DUUUUUUP ;
+               CDDDR @ttlInSeconds ;
+               DUUUUUUUP ;
+               CDDAR @manager ;
+               PAIR %manager %ttlInSeconds ;
+               DUUUUUUUP ;
+               CDAR @resolver ;
+               PAIR %resolver ;
+               SENDER @subdomainOwner ;
+               PAIR @record %subdomainOwner ;
+               DUUUUUP @subdomain ;
+               DIP { SOME } ;
+               UPDATE ;
+               PAIR %subdomainToRecord %stamp ;
+               SWAP ;
+               PAIR @storage %domainOwner ;
+               NIL operation ;
+               PAIR }
+             { DUUP @subdomain ;
+               PUSH string "Subdomain is not available: " ;
+               PAIR ;
+               FAILWITH } ;
+           DIP { DROP ; DROP ; DROP } }
+         { IF_LEFT
+             { RENAME @_subdomain_newSubdomainOwner_slash_17 ;
+               DUUUUP @storage ;
+               DUUP ;
+               CAR @subdomain ;
+               DUUP @storage ;
+               CDAR %subdomainToRecord ;
+               DUUP @subdomain ;
+               GET ;
+               IF_NONE
+                 { DUP @subdomain ;
+                   PUSH string "Subdomain does not exist: " ;
+                   PAIR ;
+                   FAILWITH }
+                 { DUUUUUP @isController ;
+                   DUUUUP @storage ;
+                   DUUUP @record ;
+                   PAIR ;
+                   EXEC ;
+                   IF { DUUUP @storage ;
+                        DUP ;
+                        CAR %domainOwner ;
+                        SWAP ;
+                        CDR ;
+                        CDR %stamp ;
+                        DUUUUUP @storage ;
+                        CDAR %subdomainToRecord ;
+                        DUUUUP @record ;
+                        CDR ;
+                        DUUUUUUUUP ;
+                        CDR @newSubdomainOwner ;
+                        PAIR @newRecord %subdomainOwner ;
+                        DUUUUUUP @subdomain ;
+                        DIP { SOME } ;
+                        UPDATE ;
+                        PAIR %subdomainToRecord %stamp ;
+                        SWAP ;
+                        PAIR @storage %domainOwner ;
+                        NIL operation ;
+                        PAIR }
+                      { DUUP @subdomain ;
+                        PUSH string "You do not have permission to transfer that subdomain: " ;
+                        PAIR ;
+                        FAILWITH } ;
+                   DIP { DROP } } ;
+               DIP { DROP ; DROP ; DROP } }
+             { IF_LEFT
+                 { RENAME @_subdomain_resolver_slash_24 ;
+                   DUUUUP @storage ;
+                   DUUP ;
+                   CAR @subdomain ;
+                   DUUP @storage ;
+                   CDAR %subdomainToRecord ;
+                   DUUP @subdomain ;
+                   GET ;
+                   IF_NONE
+                     { DUP @subdomain ;
+                       PUSH string "Subdomain does not exist: " ;
+                       PAIR ;
+                       FAILWITH }
+                     { DUP @record ;
+                       CAR %subdomainOwner ;
+                       SENDER ;
+                       COMPARE ;
+                       EQ ;
+                       IF { DUUUP @storage ;
+                            DUP ;
+                            CAR %domainOwner ;
+                            SWAP ;
+                            CDR ;
+                            CDR %stamp ;
+                            DUUUUUP @storage ;
+                            CDAR %subdomainToRecord ;
+                            DUUUUP @record ;
+                            DUP ;
+                            CAR %subdomainOwner ;
+                            SWAP ;
+                            CDR ;
+                            CDR ;
+                            DUUUUUUUUUP ;
+                            CDR @resolver ;
+                            PAIR %resolver ;
+                            SWAP ;
+                            PAIR @newRecord %subdomainOwner ;
+                            DUUUUUUP @subdomain ;
+                            DIP { SOME } ;
+                            UPDATE ;
+                            PAIR %subdomainToRecord %stamp ;
+                            SWAP ;
+                            PAIR @storage %domainOwner ;
+                            NIL operation ;
+                            PAIR }
+                          { DUUP @subdomain ;
+                            PUSH string "You do not own that subdomain: " ;
+                            PAIR ;
+                            FAILWITH } ;
+                       DIP { DROP } } ;
+                   DIP { DROP ; DROP ; DROP } }
+                 { IF_LEFT
+                     { RENAME @_subdomain_manager_slash_31 ;
+                       DUUUUP @storage ;
+                       DUUP ;
+                       CAR @subdomain ;
+                       DUUP @storage ;
+                       CDAR %subdomainToRecord ;
+                       DUUP @subdomain ;
+                       GET ;
+                       IF_NONE
+                         { DUP @subdomain ;
+                           PUSH string "Subdomain does not exist: " ;
+                           PAIR ;
+                           FAILWITH }
+                         { DUP @record ;
+                           CAR %subdomainOwner ;
+                           SENDER ;
+                           COMPARE ;
+                           EQ ;
+                           IF { DUUUP @storage ;
+                                DUP ;
+                                CAR %domainOwner ;
+                                SWAP ;
+                                CDR ;
+                                CDR %stamp ;
+                                DUUUUUP @storage ;
+                                CDAR %subdomainToRecord ;
+                                DUUUUP @record ;
+                                DUP ;
+                                CAR %subdomainOwner ;
+                                SWAP ;
+                                CDR ;
+                                DUP ;
+                                CAR %resolver ;
+                                SWAP ;
+                                CDR ;
+                                CDR %ttlInSeconds ;
+                                DUUUUUUUUUUP ;
+                                CDR @manager ;
+                                PAIR %manager %ttlInSeconds ;
+                                SWAP ;
+                                PAIR %resolver ;
+                                SWAP ;
+                                PAIR @newRecord %subdomainOwner ;
+                                DUUUUUUP @subdomain ;
+                                DIP { SOME } ;
+                                UPDATE ;
+                                PAIR %subdomainToRecord %stamp ;
+                                SWAP ;
+                                PAIR @storage %domainOwner ;
+                                NIL operation ;
+                                PAIR }
+                              { DUUP @subdomain ;
+                                PUSH string "You do not own that subdomain: " ;
+                                PAIR ;
+                                FAILWITH } ;
+                           DIP { DROP } } ;
+                       DIP { DROP ; DROP ; DROP } }
+                     { IF_LEFT
+                         { RENAME @_subdomain_ttlInSeconds_slash_38 ;
+                           DUUUUP @storage ;
+                           DUUP ;
+                           CAR @subdomain ;
+                           DUUP @storage ;
+                           CDAR %subdomainToRecord ;
+                           DUUP @subdomain ;
+                           GET ;
+                           IF_NONE
+                             { DUP @subdomain ;
+                               PUSH string "Subdomain does not exist: " ;
+                               PAIR ;
+                               FAILWITH }
+                             { DUP @record ;
+                               CAR %subdomainOwner ;
+                               SENDER ;
+                               COMPARE ;
+                               EQ ;
+                               IF { DUUUP @storage ;
+                                    DUP ;
+                                    CAR %domainOwner ;
+                                    SWAP ;
+                                    CDR ;
+                                    CDR %stamp ;
+                                    DUUUUUP @storage ;
+                                    CDAR %subdomainToRecord ;
+                                    DUUUUP @record ;
+                                    DUP ;
+                                    CAR %subdomainOwner ;
+                                    SWAP ;
+                                    CDR ;
+                                    DUP ;
+                                    CAR %resolver ;
+                                    SWAP ;
+                                    CDR ;
+                                    CAR %manager ;
+                                    DUUUUUUUUUUP ;
+                                    CDR @ttlInSeconds ;
+                                    SWAP ;
+                                    PAIR %manager %ttlInSeconds ;
+                                    SWAP ;
+                                    PAIR %resolver ;
+                                    SWAP ;
+                                    PAIR @newRecord %subdomainOwner ;
+                                    DUUUUUUP @subdomain ;
+                                    DIP { SOME } ;
+                                    UPDATE ;
+                                    PAIR %subdomainToRecord %stamp ;
+                                    SWAP ;
+                                    PAIR @storage %domainOwner ;
+                                    NIL operation ;
+                                    PAIR }
+                                  { DUUP @subdomain ;
+                                    PUSH string "You do not own that subdomain: " ;
+                                    PAIR ;
+                                    FAILWITH } ;
+                               DIP { DROP } } ;
+                           DIP { DROP ; DROP ; DROP } }
+                         { RENAME @subdomain_slash_45 ;
+                           DUUUUP @storage ;
+                           DUP @storage ;
+                           CDAR %subdomainToRecord ;
+                           DUUUP @subdomain ;
+                           GET ;
+                           IF_NONE
+                             { DUUP @subdomain ;
+                               PUSH string "Subdomain does not exist: " ;
+                               PAIR ;
+                               FAILWITH }
+                             { DUUUUP @isController ;
+                               DUUUP @storage ;
+                               DUUUP @record ;
+                               PAIR ;
+                               EXEC ;
+                               IF { DUUP @storage ;
+                                    DUP ;
+                                    CAR %domainOwner ;
+                                    SWAP ;
+                                    CDR ;
+                                    CDR %stamp ;
+                                    DUUUUP @storage ;
+                                    CDAR %subdomainToRecord ;
+                                    DUUUUUUP @subdomain ;
+                                    DIP { NONE (pair :record
+                                                  (address %subdomainOwner)
+                                                  (pair (address %resolver) (pair (address %manager) (int %ttlInSeconds)))) } ;
+                                    UPDATE ;
+                                    PAIR %subdomainToRecord %stamp ;
+                                    SWAP ;
+                                    PAIR @storage %domainOwner ;
+                                    NIL operation ;
+                                    PAIR }
+                                  { DUUUP @subdomain ;
+                                    PUSH string "You do not have permission to delete that subdomain: " ;
+                                    PAIR ;
+                                    FAILWITH } ;
+                               DIP { DROP } } ;
+                           DIP { DROP ; DROP } } } } } } ;
+       DIP { DROP ; DROP ; DROP } };

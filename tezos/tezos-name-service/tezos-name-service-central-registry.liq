@@ -1,4 +1,4 @@
-(* Title: Tezos Name Service Registry *)
+(* Title: Tezos Name Service Central Registry *)
 (* Author: Teckhua Chiang *)
 (* Company: Cryptonomic Inc. *)
 
@@ -29,7 +29,7 @@ let%entry registerDomain
   | None -> 
       if isPermitted domain storage then
         (* Create a new domain record *)
-        let owner = Current.sender() in
+        let owner = Current.sender () in
         let record = { owner; resolver; ttlInSeconds } in
         let storage = storage.domainToRecord <- Map.add domain record storage.domainToRecord in
         ([], storage)
@@ -46,7 +46,7 @@ let%entry updateResolver
   match Map.find domain storage.domainToRecord with
   | None -> failwith ("Domain does not exist: ", domain)
   | Some record -> 
-      if Current.sender() = record.owner then 
+      if Current.sender () = record.owner then 
         (* Update the resolver *)
         let newRecord = record.resolver <- resolver in
         let storage = storage.domainToRecord <- Map.add domain newRecord storage.domainToRecord in
@@ -62,7 +62,7 @@ let%entry updateTTL
   match Map.find domain storage.domainToRecord with
   | None -> failwith ("Domain does not exist: ", domain)
   | Some record -> 
-      if Current.sender() = record.owner then 
+      if Current.sender () = record.owner then 
         (* Update the TTL *)
         let newRecord = record.ttlInSeconds <- ttlInSeconds in
         let storage = storage.domainToRecord <- Map.add domain newRecord storage.domainToRecord in
