@@ -14,30 +14,62 @@ const contractAddress = ''; // Tezos Managed Ledger - Alphanet
 
 // Implementation of FA1.2
 
+/**
+ * Sends the given amount of tokens from one address to another address.
+ * 
+ * @param from - The address of the account from which the tokens are sent
+ * @param to - The address of the account to which the tokens are sent
+ * @param value - The amount of tokens to send
+ */
 export async function transfer(from: string, to: string, value: number) {
     const parameter = 'Left (Pair '+ from + ' (Pair ' + to + ' ' + value + '))';
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, TezosParameterFormat.Michelson);
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }
 
+/**
+ * Allows another account to withdraw from your account, multiple times, up to the given amount.
+ * If this function is called again it overwrites the current allowance with the new given amount.
+ * 
+ * @param spender - The address of the account that can withdraw from your account
+ * @param value - The amount of allowance given to the spender
+ */
 export async function approve(spender: string, value: number) {
     const parameter = 'Right (Left (Pair ' + spender + ' ' + value + '))';
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, TezosParameterFormat.Michelson);
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }
 
-export async function getAllowance(owner: string, spender: string, remaining: number) {
+/**
+ * Returns the amount which an account is still allowed to withdraw from another account to a receiving smart contract.
+ * 
+ * @param owner - The address of the account providing the allowance
+ * @param spender - The address of the account receiving the allowance
+ * @param remaining - A contract of type nat
+ */
+export async function getAllowance(owner: string, spender: string, remaining: string) {
     const parameter = 'Right (Right (Left (Pair (Pair ' + owner + ' ' + spender + ') ' + remaining + '))))';
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, TezosParameterFormat.Michelson);
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }
 
-export async function getBalance(owner: string, balance: number) {
+/**
+ * Returns the account balance of an account with the given address to a receiving smart contract.
+ * 
+ * @param owner - The address of the account from which the account balance is retrieved
+ * @param balance - A contract of type nat
+ */
+export async function getBalance(owner: string, balance: string) {
     const parameter = 'Right (Right (Right (Left (Pair ' + owner + ' ' + balance + '))))';
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, TezosParameterFormat.Michelson);
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }
 
+/**
+ * Returns the total token supply to a receiving smart contract.
+ * 
+ * @param totalSupply - A contract of type nat
+ */
 export async function getTotalSupply(totalSupply: number) {
     const parameter = 'Right (Right (Right (Right (Left (Pair Unit ' + totalSupply + ')))))';
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, TezosParameterFormat.Michelson);
@@ -46,30 +78,59 @@ export async function getTotalSupply(totalSupply: number) {
 
 // Additional operations
 
+/**
+ * Pauses operations when the parameter is True, and resumes them when the parameter is False.
+ * During the pause, no contract can perform transfer or approval operations.
+ * The administrator is still allowed to perform his operations.
+ * 
+ * @param pause - Whether the blockchain is frozen or not
+ */
 export async function setPause(pause: boolean) {
     const parameter = 'Right (Right (Right (Right (Right (Left ' + pause + ')))))';
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, TezosParameterFormat.Michelson);
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }
 
+/**
+ * Changes the current administrator.
+ * 
+ * @param administrator - The address of the new administrator
+ */
 export async function setAdministrator(administrator: string) {
     const parameter = 'Right (Right (Right (Right (Right (Right (Left ' + administrator + '))))))';
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, TezosParameterFormat.Michelson);
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }
 
+/**
+ * Returns the address of the current administrator to a receiving smart contract.
+ * 
+ * @param administrator - A contract of type string
+ */
 export async function getAdministrator(administrator: string) {
     const parameter = 'Right (Right (Right (Right (Right (Right (Right (Left (Pair Unit ' + administrator + '))))))))';
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, TezosParameterFormat.Michelson);
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }
 
+/**
+ * Produces the given amount of tokens on the account associated with the given address.
+ * 
+ * @param to - The address to which the newly minted tokens are sent
+ * @param value - The amount of tokens to mint
+ */
 export async function mint(to: string, value: number) {
     const parameter = 'Right (Right (Right (Right (Right (Right (Right (Right (Left (Pair ' + to + ' ' + value + ')))))))))';
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, TezosParameterFormat.Michelson);
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }
 
+/**
+ * Destroys the given amount of tokens on the account associated with the given address.
+ * 
+ * @param from - The account from which the tokens are destroyed
+ * @param value - The amount of tokens to destroy
+ */
 export async function burn(from: string, value: number) {
     const parameter = 'Right (Right (Right (Right (Right (Right (Right (Right (Right (Left (Pair ' + from + ' ' + value + '))))))))))';
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, TezosParameterFormat.Michelson);
