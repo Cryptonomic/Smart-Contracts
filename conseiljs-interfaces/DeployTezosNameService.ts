@@ -416,7 +416,7 @@ async function deployContract() {
             DIP { DROP } } ;
         DIP { DROP ; DROP ; DROP ; DROP ; DROP ; DROP } };
     `;
-    const michelson_storage = 'Pair "tz1WpPzK6NwWVTJcXqFvYmoA6msQeVy1YP6z" (Pair "tz1WpPzK6NwWVTJcXqFvYmoA6msQeVy1YP6z" "Author: Teckhua Chiang, Company: Cryptonomic")';
+    const michelson_storage = 'Pair {} "Author: Teckhua Chiang, Company: Cryptonomic Inc."';
     const result = await TezosNodeWriter.sendContractOriginationOperation(tezosNode, keystore, 0, undefined, false, true, 100000, '', 1000, 100000, michelson, michelson_storage, TezosParameterFormat.Michelson);
 
     console.log(`Injected operation group id ${result.operationGroupID}`);
