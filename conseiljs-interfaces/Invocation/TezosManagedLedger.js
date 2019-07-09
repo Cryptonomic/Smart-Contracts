@@ -46,6 +46,13 @@ var keystore = {
 };
 var contractAddress = ''; // Tezos Managed Ledger - Alphanet
 // Implementation of FA1.2
+/**
+ * Sends the given amount of tokens from one address to another address.
+ *
+ * @param from - The address of the account from which the tokens are sent
+ * @param to - The address of the account to which the tokens are sent
+ * @param value - The amount of tokens to send
+ */
 function transfer(from, to, value) {
     return __awaiter(this, void 0, void 0, function () {
         var parameter, result;
@@ -63,6 +70,13 @@ function transfer(from, to, value) {
     });
 }
 exports.transfer = transfer;
+/**
+ * Allows another account to withdraw from your account, multiple times, up to the given amount.
+ * If this function is called again it overwrites the current allowance with the new given amount.
+ *
+ * @param spender - The address of the account that can withdraw from your account
+ * @param value - The amount of allowance given to the spender
+ */
 function approve(spender, value) {
     return __awaiter(this, void 0, void 0, function () {
         var parameter, result;
@@ -80,6 +94,13 @@ function approve(spender, value) {
     });
 }
 exports.approve = approve;
+/**
+ * Returns the amount which an account is still allowed to withdraw from another account to a receiving smart contract.
+ *
+ * @param owner - The address of the account providing the allowance
+ * @param spender - The address of the account receiving the allowance
+ * @param remaining - A contract of type nat
+ */
 function getAllowance(owner, spender, remaining) {
     return __awaiter(this, void 0, void 0, function () {
         var parameter, result;
@@ -97,6 +118,12 @@ function getAllowance(owner, spender, remaining) {
     });
 }
 exports.getAllowance = getAllowance;
+/**
+ * Returns the account balance of an account with the given address to a receiving smart contract.
+ *
+ * @param owner - The address of the account from which the account balance is retrieved
+ * @param balance - A contract of type nat
+ */
 function getBalance(owner, balance) {
     return __awaiter(this, void 0, void 0, function () {
         var parameter, result;
@@ -114,6 +141,11 @@ function getBalance(owner, balance) {
     });
 }
 exports.getBalance = getBalance;
+/**
+ * Returns the total token supply to a receiving smart contract.
+ *
+ * @param totalSupply - A contract of type nat
+ */
 function getTotalSupply(totalSupply) {
     return __awaiter(this, void 0, void 0, function () {
         var parameter, result;
@@ -132,6 +164,13 @@ function getTotalSupply(totalSupply) {
 }
 exports.getTotalSupply = getTotalSupply;
 // Additional operations
+/**
+ * Pauses operations when the parameter is True, and resumes them when the parameter is False.
+ * During the pause, no contract can perform transfer or approval operations.
+ * The administrator is still allowed to perform his operations.
+ *
+ * @param pause - Whether the blockchain is frozen or not
+ */
 function setPause(pause) {
     return __awaiter(this, void 0, void 0, function () {
         var parameter, result;
@@ -149,6 +188,11 @@ function setPause(pause) {
     });
 }
 exports.setPause = setPause;
+/**
+ * Changes the current administrator.
+ *
+ * @param administrator - The address of the new administrator
+ */
 function setAdministrator(administrator) {
     return __awaiter(this, void 0, void 0, function () {
         var parameter, result;
@@ -166,6 +210,11 @@ function setAdministrator(administrator) {
     });
 }
 exports.setAdministrator = setAdministrator;
+/**
+ * Returns the address of the current administrator to a receiving smart contract.
+ *
+ * @param administrator - A contract of type string
+ */
 function getAdministrator(administrator) {
     return __awaiter(this, void 0, void 0, function () {
         var parameter, result;
@@ -183,6 +232,12 @@ function getAdministrator(administrator) {
     });
 }
 exports.getAdministrator = getAdministrator;
+/**
+ * Produces the given amount of tokens on the account associated with the given address.
+ *
+ * @param to - The address to which the newly minted tokens are sent
+ * @param value - The amount of tokens to mint
+ */
 function mint(to, value) {
     return __awaiter(this, void 0, void 0, function () {
         var parameter, result;
@@ -200,6 +255,12 @@ function mint(to, value) {
     });
 }
 exports.mint = mint;
+/**
+ * Destroys the given amount of tokens on the account associated with the given address.
+ *
+ * @param from - The account from which the tokens are destroyed
+ * @param value - The amount of tokens to destroy
+ */
 function burn(from, value) {
     return __awaiter(this, void 0, void 0, function () {
         var parameter, result;
