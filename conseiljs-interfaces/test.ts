@@ -1,5 +1,5 @@
-import * as TezosBakerRegistry from './TezosBakerRegistry';
-import * as TezosProxyRedirect from './TezosProxyContract';
+import * as TezosBakerRegistry from './Invocation/TezosBakerRegistry';
+import * as TezosProxyRedirect from './Invocation/TezosProxyContract';
 
 // Run each line individually because the previous transaction needs to complete before the next one can activate.
 TezosBakerRegistry.updateName('"Juniper"');
