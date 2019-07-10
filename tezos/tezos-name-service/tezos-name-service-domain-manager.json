@@ -1,0 +1,2691 @@
+{
+	"code": [{
+		"prim": "parameter",
+		"args": [{
+			"prim": "or",
+			"args": [{
+				"prim": "pair",
+				"args": [{
+					"prim": "string"
+				}, {
+					"prim": "pair",
+					"args": [{
+						"prim": "address"
+					}, {
+						"prim": "pair",
+						"args": [{
+							"prim": "address"
+						}, {
+							"prim": "int"
+						}]
+					}]
+				}],
+				"annots": ["%_Liq_entry_registerSubdomain"]
+			}, {
+				"prim": "or",
+				"args": [{
+					"prim": "pair",
+					"args": [{
+						"prim": "string"
+					}, {
+						"prim": "address"
+					}],
+					"annots": ["%_Liq_entry_transferSubdomainOwnership"]
+				}, {
+					"prim": "or",
+					"args": [{
+						"prim": "pair",
+						"args": [{
+							"prim": "string"
+						}, {
+							"prim": "address"
+						}],
+						"annots": ["%_Liq_entry_updateResolver"]
+					}, {
+						"prim": "or",
+						"args": [{
+							"prim": "pair",
+							"args": [{
+								"prim": "string"
+							}, {
+								"prim": "address"
+							}],
+							"annots": ["%_Liq_entry_updateManager"]
+						}, {
+							"prim": "or",
+							"args": [{
+								"prim": "pair",
+								"args": [{
+									"prim": "string"
+								}, {
+									"prim": "int"
+								}],
+								"annots": ["%_Liq_entry_updateTTL"]
+							}, {
+								"prim": "string",
+								"annots": ["%_Liq_entry_deleteSubdomain"]
+							}]
+						}]
+					}]
+				}]
+			}],
+			"annots": [":_entries"]
+		}]
+	}, {
+		"prim": "storage",
+		"args": [{
+			"prim": "pair",
+			"args": [{
+				"prim": "address",
+				"annots": ["%domainOwner"]
+			}, {
+				"prim": "pair",
+				"args": [{
+					"prim": "map",
+					"args": [{
+						"prim": "string"
+					}, {
+						"prim": "pair",
+						"args": [{
+							"prim": "address",
+							"annots": ["%subdomainOwner"]
+						}, {
+							"prim": "pair",
+							"args": [{
+								"prim": "address",
+								"annots": ["%resolver"]
+							}, {
+								"prim": "pair",
+								"args": [{
+									"prim": "address",
+									"annots": ["%manager"]
+								}, {
+									"prim": "int",
+									"annots": ["%ttlInSeconds"]
+								}]
+							}]
+						}],
+						"annots": [":record"]
+					}],
+					"annots": ["%subdomainToRecord"]
+				}, {
+					"prim": "string",
+					"annots": ["%stamp"]
+				}]
+			}],
+			"annots": [":storage"]
+		}]
+	}, {
+		"prim": "code",
+		"args": [
+			[{
+					"prim": "DUP"
+				}, {
+					"prim": "DIP",
+					"args": [
+						[{
+							"prim": "CDR",
+							"annots": ["@storage_slash_1"]
+						}]
+					]
+				}, {
+					"prim": "CAR",
+					"annots": ["@parameter_slash_2"]
+				}, {
+					"prim": "LAMBDA",
+					"args": [{
+							"prim": "pair",
+							"args": [{
+								"prim": "pair",
+								"args": [{
+									"prim": "address",
+									"annots": ["%subdomainOwner"]
+								}, {
+									"prim": "pair",
+									"args": [{
+										"prim": "address",
+										"annots": ["%resolver"]
+									}, {
+										"prim": "pair",
+										"args": [{
+											"prim": "address",
+											"annots": ["%manager"]
+										}, {
+											"prim": "int",
+											"annots": ["%ttlInSeconds"]
+										}]
+									}]
+								}],
+								"annots": [":record"]
+							}, {
+								"prim": "pair",
+								"args": [{
+									"prim": "address",
+									"annots": ["%domainOwner"]
+								}, {
+									"prim": "pair",
+									"args": [{
+										"prim": "map",
+										"args": [{
+											"prim": "string"
+										}, {
+											"prim": "pair",
+											"args": [{
+												"prim": "address",
+												"annots": ["%subdomainOwner"]
+											}, {
+												"prim": "pair",
+												"args": [{
+													"prim": "address",
+													"annots": ["%resolver"]
+												}, {
+													"prim": "pair",
+													"args": [{
+														"prim": "address",
+														"annots": ["%manager"]
+													}, {
+														"prim": "int",
+														"annots": ["%ttlInSeconds"]
+													}]
+												}]
+											}],
+											"annots": [":record"]
+										}],
+										"annots": ["%subdomainToRecord"]
+									}, {
+										"prim": "string",
+										"annots": ["%stamp"]
+									}]
+								}],
+								"annots": [":storage"]
+							}]
+						}, {
+							"prim": "bool"
+						},
+						[{
+							"prim": "RENAME",
+							"annots": ["@record_storage_slash_3"]
+						}, {
+							"prim": "DUP",
+							"annots": ["@record_storage"]
+						}, {
+							"prim": "CAR",
+							"annots": ["@record"]
+						}, {
+							"prim": "CAR",
+							"annots": ["%subdomainOwner"]
+						}, {
+							"prim": "SENDER"
+						}, {
+							"prim": "COMPARE"
+						}, {
+							"prim": "EQ"
+						}, {
+							"prim": "SWAP"
+						}, {
+							"prim": "CDR",
+							"annots": ["@storage"]
+						}, {
+							"prim": "CAR",
+							"annots": ["%domainOwner"]
+						}, {
+							"prim": "SENDER"
+						}, {
+							"prim": "COMPARE"
+						}, {
+							"prim": "EQ"
+						}, {
+							"prim": "OR"
+						}]
+					],
+					"annots": ["@isController"]
+				},
+				[{
+					"prim": "DIP",
+					"args": [
+						[{
+							"prim": "DUP",
+							"annots": ["@parameter"]
+						}]
+					]
+				}, {
+					"prim": "SWAP"
+				}], {
+					"prim": "IF_LEFT",
+					"args": [
+						[{
+								"prim": "RENAME",
+								"annots": ["@_subdomain_resolver_manager_ttlInSeconds_slash_7"]
+							},
+							[{
+								"prim": "DIP",
+								"args": [
+									[{
+										"prim": "DIP",
+										"args": [
+											[{
+												"prim": "DIP",
+												"args": [
+													[{
+														"prim": "DUP",
+														"annots": ["@storage"]
+													}]
+												]
+											}, {
+												"prim": "SWAP"
+											}]
+										]
+									}, {
+										"prim": "SWAP"
+									}]
+								]
+							}, {
+								"prim": "SWAP"
+							}],
+							[{
+								"prim": "DIP",
+								"args": [
+									[{
+										"prim": "DUP"
+									}]
+								]
+							}, {
+								"prim": "SWAP"
+							}], {
+								"prim": "CAR",
+								"annots": ["@subdomain"]
+							},
+							[{
+								"prim": "DIP",
+								"args": [
+									[{
+										"prim": "DUP",
+										"annots": ["@storage"]
+									}]
+								]
+							}, {
+								"prim": "SWAP"
+							}],
+							[{
+								"prim": "CDR"
+							}, {
+								"prim": "CAR",
+								"annots": ["%subdomainToRecord"]
+							}],
+							[{
+								"prim": "DIP",
+								"args": [
+									[{
+										"prim": "DUP",
+										"annots": ["@subdomain"]
+									}]
+								]
+							}, {
+								"prim": "SWAP"
+							}], {
+								"prim": "GET"
+							}, {
+								"prim": "IF_NONE",
+								"args": [
+									[
+										[{
+											"prim": "DIP",
+											"args": [
+												[{
+													"prim": "DUP",
+													"annots": ["@storage"]
+												}]
+											]
+										}, {
+											"prim": "SWAP"
+										}], {
+											"prim": "DUP"
+										}, {
+											"prim": "CAR",
+											"annots": ["%domainOwner"]
+										}, {
+											"prim": "SWAP"
+										}, {
+											"prim": "CDR"
+										}, {
+											"prim": "CDR",
+											"annots": ["%stamp"]
+										},
+										[{
+											"prim": "DIP",
+											"args": [
+												[{
+													"prim": "DIP",
+													"args": [
+														[{
+															"prim": "DIP",
+															"args": [
+																[{
+																	"prim": "DUP",
+																	"annots": ["@storage"]
+																}]
+															]
+														}, {
+															"prim": "SWAP"
+														}]
+													]
+												}, {
+													"prim": "SWAP"
+												}]
+											]
+										}, {
+											"prim": "SWAP"
+										}],
+										[{
+											"prim": "CDR"
+										}, {
+											"prim": "CAR",
+											"annots": ["%subdomainToRecord"]
+										}],
+										[{
+											"prim": "DIP",
+											"args": [
+												[{
+													"prim": "DIP",
+													"args": [
+														[{
+															"prim": "DIP",
+															"args": [
+																[{
+																	"prim": "DIP",
+																	"args": [
+																		[{
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DUP"
+																				}]
+																			]
+																		}, {
+																			"prim": "SWAP"
+																		}]
+																	]
+																}, {
+																	"prim": "SWAP"
+																}]
+															]
+														}, {
+															"prim": "SWAP"
+														}]
+													]
+												}, {
+													"prim": "SWAP"
+												}]
+											]
+										}, {
+											"prim": "SWAP"
+										}],
+										[{
+											"prim": "CDR"
+										}, {
+											"prim": "CDR"
+										}, {
+											"prim": "CDR",
+											"annots": ["@ttlInSeconds"]
+										}],
+										[{
+											"prim": "DIP",
+											"args": [
+												[{
+													"prim": "DIP",
+													"args": [
+														[{
+															"prim": "DIP",
+															"args": [
+																[{
+																	"prim": "DIP",
+																	"args": [
+																		[{
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DUP"
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}]
+																			]
+																		}, {
+																			"prim": "SWAP"
+																		}]
+																	]
+																}, {
+																	"prim": "SWAP"
+																}]
+															]
+														}, {
+															"prim": "SWAP"
+														}]
+													]
+												}, {
+													"prim": "SWAP"
+												}]
+											]
+										}, {
+											"prim": "SWAP"
+										}],
+										[{
+											"prim": "CDR"
+										}, {
+											"prim": "CDR"
+										}, {
+											"prim": "CAR",
+											"annots": ["@manager"]
+										}], {
+											"prim": "PAIR",
+											"annots": ["%manager", "%ttlInSeconds"]
+										},
+										[{
+											"prim": "DIP",
+											"args": [
+												[{
+													"prim": "DIP",
+													"args": [
+														[{
+															"prim": "DIP",
+															"args": [
+																[{
+																	"prim": "DIP",
+																	"args": [
+																		[{
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DUP"
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}]
+																			]
+																		}, {
+																			"prim": "SWAP"
+																		}]
+																	]
+																}, {
+																	"prim": "SWAP"
+																}]
+															]
+														}, {
+															"prim": "SWAP"
+														}]
+													]
+												}, {
+													"prim": "SWAP"
+												}]
+											]
+										}, {
+											"prim": "SWAP"
+										}],
+										[{
+											"prim": "CDR"
+										}, {
+											"prim": "CAR",
+											"annots": ["@resolver"]
+										}], {
+											"prim": "PAIR",
+											"annots": ["%resolver"]
+										}, {
+											"prim": "SENDER",
+											"annots": ["@subdomainOwner"]
+										}, {
+											"prim": "PAIR",
+											"annots": ["@record", "%subdomainOwner"]
+										},
+										[{
+											"prim": "DIP",
+											"args": [
+												[{
+													"prim": "DIP",
+													"args": [
+														[{
+															"prim": "DIP",
+															"args": [
+																[{
+																	"prim": "DIP",
+																	"args": [
+																		[{
+																			"prim": "DUP",
+																			"annots": ["@subdomain"]
+																		}]
+																	]
+																}, {
+																	"prim": "SWAP"
+																}]
+															]
+														}, {
+															"prim": "SWAP"
+														}]
+													]
+												}, {
+													"prim": "SWAP"
+												}]
+											]
+										}, {
+											"prim": "SWAP"
+										}], {
+											"prim": "DIP",
+											"args": [
+												[{
+													"prim": "SOME"
+												}]
+											]
+										}, {
+											"prim": "UPDATE"
+										}, {
+											"prim": "PAIR",
+											"annots": ["%subdomainToRecord", "%stamp"]
+										}, {
+											"prim": "SWAP"
+										}, {
+											"prim": "PAIR",
+											"annots": ["@storage", "%domainOwner"]
+										}, {
+											"prim": "NIL",
+											"args": [{
+												"prim": "operation"
+											}]
+										}, {
+											"prim": "PAIR"
+										}
+									],
+									[
+										[{
+											"prim": "DIP",
+											"args": [
+												[{
+													"prim": "DUP",
+													"annots": ["@subdomain"]
+												}]
+											]
+										}, {
+											"prim": "SWAP"
+										}], {
+											"prim": "PUSH",
+											"args": [{
+												"prim": "string"
+											}, {
+												"string": "Subdomain is not available: "
+											}]
+										}, {
+											"prim": "PAIR"
+										}, {
+											"prim": "FAILWITH"
+										}
+									]
+								]
+							}, {
+								"prim": "DIP",
+								"args": [
+									[{
+										"prim": "DROP"
+									}, {
+										"prim": "DROP"
+									}, {
+										"prim": "DROP"
+									}]
+								]
+							}
+						],
+						[{
+							"prim": "IF_LEFT",
+							"args": [
+								[{
+										"prim": "RENAME",
+										"annots": ["@_subdomain_newSubdomainOwner_slash_17"]
+									},
+									[{
+										"prim": "DIP",
+										"args": [
+											[{
+												"prim": "DIP",
+												"args": [
+													[{
+														"prim": "DIP",
+														"args": [
+															[{
+																"prim": "DUP",
+																"annots": ["@storage"]
+															}]
+														]
+													}, {
+														"prim": "SWAP"
+													}]
+												]
+											}, {
+												"prim": "SWAP"
+											}]
+										]
+									}, {
+										"prim": "SWAP"
+									}],
+									[{
+										"prim": "DIP",
+										"args": [
+											[{
+												"prim": "DUP"
+											}]
+										]
+									}, {
+										"prim": "SWAP"
+									}], {
+										"prim": "CAR",
+										"annots": ["@subdomain"]
+									},
+									[{
+										"prim": "DIP",
+										"args": [
+											[{
+												"prim": "DUP",
+												"annots": ["@storage"]
+											}]
+										]
+									}, {
+										"prim": "SWAP"
+									}],
+									[{
+										"prim": "CDR"
+									}, {
+										"prim": "CAR",
+										"annots": ["%subdomainToRecord"]
+									}],
+									[{
+										"prim": "DIP",
+										"args": [
+											[{
+												"prim": "DUP",
+												"annots": ["@subdomain"]
+											}]
+										]
+									}, {
+										"prim": "SWAP"
+									}], {
+										"prim": "GET"
+									}, {
+										"prim": "IF_NONE",
+										"args": [
+											[{
+												"prim": "DUP",
+												"annots": ["@subdomain"]
+											}, {
+												"prim": "PUSH",
+												"args": [{
+													"prim": "string"
+												}, {
+													"string": "Subdomain does not exist: "
+												}]
+											}, {
+												"prim": "PAIR"
+											}, {
+												"prim": "FAILWITH"
+											}],
+											[
+												[{
+													"prim": "DIP",
+													"args": [
+														[{
+															"prim": "DIP",
+															"args": [
+																[{
+																	"prim": "DIP",
+																	"args": [
+																		[{
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DUP",
+																					"annots": ["@isController"]
+																				}]
+																			]
+																		}, {
+																			"prim": "SWAP"
+																		}]
+																	]
+																}, {
+																	"prim": "SWAP"
+																}]
+															]
+														}, {
+															"prim": "SWAP"
+														}]
+													]
+												}, {
+													"prim": "SWAP"
+												}],
+												[{
+													"prim": "DIP",
+													"args": [
+														[{
+															"prim": "DIP",
+															"args": [
+																[{
+																	"prim": "DIP",
+																	"args": [
+																		[{
+																			"prim": "DUP",
+																			"annots": ["@storage"]
+																		}]
+																	]
+																}, {
+																	"prim": "SWAP"
+																}]
+															]
+														}, {
+															"prim": "SWAP"
+														}]
+													]
+												}, {
+													"prim": "SWAP"
+												}],
+												[{
+													"prim": "DIP",
+													"args": [
+														[{
+															"prim": "DIP",
+															"args": [
+																[{
+																	"prim": "DUP",
+																	"annots": ["@record"]
+																}]
+															]
+														}, {
+															"prim": "SWAP"
+														}]
+													]
+												}, {
+													"prim": "SWAP"
+												}], {
+													"prim": "PAIR"
+												}, {
+													"prim": "EXEC"
+												}, {
+													"prim": "IF",
+													"args": [
+														[
+															[{
+																"prim": "DIP",
+																"args": [
+																	[{
+																		"prim": "DIP",
+																		"args": [
+																			[{
+																				"prim": "DUP",
+																				"annots": ["@storage"]
+																			}]
+																		]
+																	}, {
+																		"prim": "SWAP"
+																	}]
+																]
+															}, {
+																"prim": "SWAP"
+															}], {
+																"prim": "DUP"
+															}, {
+																"prim": "CAR",
+																"annots": ["%domainOwner"]
+															}, {
+																"prim": "SWAP"
+															}, {
+																"prim": "CDR"
+															}, {
+																"prim": "CDR",
+																"annots": ["%stamp"]
+															},
+															[{
+																"prim": "DIP",
+																"args": [
+																	[{
+																		"prim": "DIP",
+																		"args": [
+																			[{
+																				"prim": "DIP",
+																				"args": [
+																					[{
+																						"prim": "DIP",
+																						"args": [
+																							[{
+																								"prim": "DUP",
+																								"annots": ["@storage"]
+																							}]
+																						]
+																					}, {
+																						"prim": "SWAP"
+																					}]
+																				]
+																			}, {
+																				"prim": "SWAP"
+																			}]
+																		]
+																	}, {
+																		"prim": "SWAP"
+																	}]
+																]
+															}, {
+																"prim": "SWAP"
+															}],
+															[{
+																"prim": "CDR"
+															}, {
+																"prim": "CAR",
+																"annots": ["%subdomainToRecord"]
+															}],
+															[{
+																"prim": "DIP",
+																"args": [
+																	[{
+																		"prim": "DIP",
+																		"args": [
+																			[{
+																				"prim": "DIP",
+																				"args": [
+																					[{
+																						"prim": "DUP",
+																						"annots": ["@record"]
+																					}]
+																				]
+																			}, {
+																				"prim": "SWAP"
+																			}]
+																		]
+																	}, {
+																		"prim": "SWAP"
+																	}]
+																]
+															}, {
+																"prim": "SWAP"
+															}], {
+																"prim": "CDR"
+															},
+															[{
+																"prim": "DIP",
+																"args": [
+																	[{
+																		"prim": "DIP",
+																		"args": [
+																			[{
+																				"prim": "DIP",
+																				"args": [
+																					[{
+																						"prim": "DIP",
+																						"args": [
+																							[{
+																								"prim": "DIP",
+																								"args": [
+																									[{
+																										"prim": "DIP",
+																										"args": [
+																											[{
+																												"prim": "DIP",
+																												"args": [
+																													[{
+																														"prim": "DUP"
+																													}]
+																												]
+																											}, {
+																												"prim": "SWAP"
+																											}]
+																										]
+																									}, {
+																										"prim": "SWAP"
+																									}]
+																								]
+																							}, {
+																								"prim": "SWAP"
+																							}]
+																						]
+																					}, {
+																						"prim": "SWAP"
+																					}]
+																				]
+																			}, {
+																				"prim": "SWAP"
+																			}]
+																		]
+																	}, {
+																		"prim": "SWAP"
+																	}]
+																]
+															}, {
+																"prim": "SWAP"
+															}], {
+																"prim": "CDR",
+																"annots": ["@newSubdomainOwner"]
+															}, {
+																"prim": "PAIR",
+																"annots": ["@newRecord", "%subdomainOwner"]
+															},
+															[{
+																"prim": "DIP",
+																"args": [
+																	[{
+																		"prim": "DIP",
+																		"args": [
+																			[{
+																				"prim": "DIP",
+																				"args": [
+																					[{
+																						"prim": "DIP",
+																						"args": [
+																							[{
+																								"prim": "DIP",
+																								"args": [
+																									[{
+																										"prim": "DUP",
+																										"annots": ["@subdomain"]
+																									}]
+																								]
+																							}, {
+																								"prim": "SWAP"
+																							}]
+																						]
+																					}, {
+																						"prim": "SWAP"
+																					}]
+																				]
+																			}, {
+																				"prim": "SWAP"
+																			}]
+																		]
+																	}, {
+																		"prim": "SWAP"
+																	}]
+																]
+															}, {
+																"prim": "SWAP"
+															}], {
+																"prim": "DIP",
+																"args": [
+																	[{
+																		"prim": "SOME"
+																	}]
+																]
+															}, {
+																"prim": "UPDATE"
+															}, {
+																"prim": "PAIR",
+																"annots": ["%subdomainToRecord", "%stamp"]
+															}, {
+																"prim": "SWAP"
+															}, {
+																"prim": "PAIR",
+																"annots": ["@storage", "%domainOwner"]
+															}, {
+																"prim": "NIL",
+																"args": [{
+																	"prim": "operation"
+																}]
+															}, {
+																"prim": "PAIR"
+															}
+														],
+														[
+															[{
+																"prim": "DIP",
+																"args": [
+																	[{
+																		"prim": "DUP",
+																		"annots": ["@subdomain"]
+																	}]
+																]
+															}, {
+																"prim": "SWAP"
+															}], {
+																"prim": "PUSH",
+																"args": [{
+																	"prim": "string"
+																}, {
+																	"string": "You do not have permission to transfer that subdomain: "
+																}]
+															}, {
+																"prim": "PAIR"
+															}, {
+																"prim": "FAILWITH"
+															}
+														]
+													]
+												}, {
+													"prim": "DIP",
+													"args": [
+														[{
+															"prim": "DROP"
+														}]
+													]
+												}
+											]
+										]
+									}, {
+										"prim": "DIP",
+										"args": [
+											[{
+												"prim": "DROP"
+											}, {
+												"prim": "DROP"
+											}, {
+												"prim": "DROP"
+											}]
+										]
+									}
+								],
+								[{
+									"prim": "IF_LEFT",
+									"args": [
+										[{
+												"prim": "RENAME",
+												"annots": ["@_subdomain_resolver_slash_24"]
+											},
+											[{
+												"prim": "DIP",
+												"args": [
+													[{
+														"prim": "DIP",
+														"args": [
+															[{
+																"prim": "DIP",
+																"args": [
+																	[{
+																		"prim": "DUP",
+																		"annots": ["@storage"]
+																	}]
+																]
+															}, {
+																"prim": "SWAP"
+															}]
+														]
+													}, {
+														"prim": "SWAP"
+													}]
+												]
+											}, {
+												"prim": "SWAP"
+											}],
+											[{
+												"prim": "DIP",
+												"args": [
+													[{
+														"prim": "DUP"
+													}]
+												]
+											}, {
+												"prim": "SWAP"
+											}], {
+												"prim": "CAR",
+												"annots": ["@subdomain"]
+											},
+											[{
+												"prim": "DIP",
+												"args": [
+													[{
+														"prim": "DUP",
+														"annots": ["@storage"]
+													}]
+												]
+											}, {
+												"prim": "SWAP"
+											}],
+											[{
+												"prim": "CDR"
+											}, {
+												"prim": "CAR",
+												"annots": ["%subdomainToRecord"]
+											}],
+											[{
+												"prim": "DIP",
+												"args": [
+													[{
+														"prim": "DUP",
+														"annots": ["@subdomain"]
+													}]
+												]
+											}, {
+												"prim": "SWAP"
+											}], {
+												"prim": "GET"
+											}, {
+												"prim": "IF_NONE",
+												"args": [
+													[{
+														"prim": "DUP",
+														"annots": ["@subdomain"]
+													}, {
+														"prim": "PUSH",
+														"args": [{
+															"prim": "string"
+														}, {
+															"string": "Subdomain does not exist: "
+														}]
+													}, {
+														"prim": "PAIR"
+													}, {
+														"prim": "FAILWITH"
+													}],
+													[{
+														"prim": "DUP",
+														"annots": ["@record"]
+													}, {
+														"prim": "CAR",
+														"annots": ["%subdomainOwner"]
+													}, {
+														"prim": "SENDER"
+													}, {
+														"prim": "COMPARE"
+													}, {
+														"prim": "EQ"
+													}, {
+														"prim": "IF",
+														"args": [
+															[
+																[{
+																	"prim": "DIP",
+																	"args": [
+																		[{
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DUP",
+																					"annots": ["@storage"]
+																				}]
+																			]
+																		}, {
+																			"prim": "SWAP"
+																		}]
+																	]
+																}, {
+																	"prim": "SWAP"
+																}], {
+																	"prim": "DUP"
+																}, {
+																	"prim": "CAR",
+																	"annots": ["%domainOwner"]
+																}, {
+																	"prim": "SWAP"
+																}, {
+																	"prim": "CDR"
+																}, {
+																	"prim": "CDR",
+																	"annots": ["%stamp"]
+																},
+																[{
+																	"prim": "DIP",
+																	"args": [
+																		[{
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DIP",
+																							"args": [
+																								[{
+																									"prim": "DUP",
+																									"annots": ["@storage"]
+																								}]
+																							]
+																						}, {
+																							"prim": "SWAP"
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}]
+																			]
+																		}, {
+																			"prim": "SWAP"
+																		}]
+																	]
+																}, {
+																	"prim": "SWAP"
+																}],
+																[{
+																	"prim": "CDR"
+																}, {
+																	"prim": "CAR",
+																	"annots": ["%subdomainToRecord"]
+																}],
+																[{
+																	"prim": "DIP",
+																	"args": [
+																		[{
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DUP",
+																							"annots": ["@record"]
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}]
+																			]
+																		}, {
+																			"prim": "SWAP"
+																		}]
+																	]
+																}, {
+																	"prim": "SWAP"
+																}], {
+																	"prim": "DUP"
+																}, {
+																	"prim": "CAR",
+																	"annots": ["%subdomainOwner"]
+																}, {
+																	"prim": "SWAP"
+																}, {
+																	"prim": "CDR"
+																}, {
+																	"prim": "CDR"
+																},
+																[{
+																	"prim": "DIP",
+																	"args": [
+																		[{
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DIP",
+																							"args": [
+																								[{
+																									"prim": "DIP",
+																									"args": [
+																										[{
+																											"prim": "DIP",
+																											"args": [
+																												[{
+																													"prim": "DIP",
+																													"args": [
+																														[{
+																															"prim": "DIP",
+																															"args": [
+																																[{
+																																	"prim": "DUP"
+																																}]
+																															]
+																														}, {
+																															"prim": "SWAP"
+																														}]
+																													]
+																												}, {
+																													"prim": "SWAP"
+																												}]
+																											]
+																										}, {
+																											"prim": "SWAP"
+																										}]
+																									]
+																								}, {
+																									"prim": "SWAP"
+																								}]
+																							]
+																						}, {
+																							"prim": "SWAP"
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}]
+																			]
+																		}, {
+																			"prim": "SWAP"
+																		}]
+																	]
+																}, {
+																	"prim": "SWAP"
+																}], {
+																	"prim": "CDR",
+																	"annots": ["@resolver"]
+																}, {
+																	"prim": "PAIR",
+																	"annots": ["%resolver"]
+																}, {
+																	"prim": "SWAP"
+																}, {
+																	"prim": "PAIR",
+																	"annots": ["@newRecord", "%subdomainOwner"]
+																},
+																[{
+																	"prim": "DIP",
+																	"args": [
+																		[{
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DIP",
+																							"args": [
+																								[{
+																									"prim": "DIP",
+																									"args": [
+																										[{
+																											"prim": "DUP",
+																											"annots": ["@subdomain"]
+																										}]
+																									]
+																								}, {
+																									"prim": "SWAP"
+																								}]
+																							]
+																						}, {
+																							"prim": "SWAP"
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}]
+																			]
+																		}, {
+																			"prim": "SWAP"
+																		}]
+																	]
+																}, {
+																	"prim": "SWAP"
+																}], {
+																	"prim": "DIP",
+																	"args": [
+																		[{
+																			"prim": "SOME"
+																		}]
+																	]
+																}, {
+																	"prim": "UPDATE"
+																}, {
+																	"prim": "PAIR",
+																	"annots": ["%subdomainToRecord", "%stamp"]
+																}, {
+																	"prim": "SWAP"
+																}, {
+																	"prim": "PAIR",
+																	"annots": ["@storage", "%domainOwner"]
+																}, {
+																	"prim": "NIL",
+																	"args": [{
+																		"prim": "operation"
+																	}]
+																}, {
+																	"prim": "PAIR"
+																}
+															],
+															[
+																[{
+																	"prim": "DIP",
+																	"args": [
+																		[{
+																			"prim": "DUP",
+																			"annots": ["@subdomain"]
+																		}]
+																	]
+																}, {
+																	"prim": "SWAP"
+																}], {
+																	"prim": "PUSH",
+																	"args": [{
+																		"prim": "string"
+																	}, {
+																		"string": "You do not own that subdomain: "
+																	}]
+																}, {
+																	"prim": "PAIR"
+																}, {
+																	"prim": "FAILWITH"
+																}
+															]
+														]
+													}, {
+														"prim": "DIP",
+														"args": [
+															[{
+																"prim": "DROP"
+															}]
+														]
+													}]
+												]
+											}, {
+												"prim": "DIP",
+												"args": [
+													[{
+														"prim": "DROP"
+													}, {
+														"prim": "DROP"
+													}, {
+														"prim": "DROP"
+													}]
+												]
+											}
+										],
+										[{
+											"prim": "IF_LEFT",
+											"args": [
+												[{
+														"prim": "RENAME",
+														"annots": ["@_subdomain_manager_slash_31"]
+													},
+													[{
+														"prim": "DIP",
+														"args": [
+															[{
+																"prim": "DIP",
+																"args": [
+																	[{
+																		"prim": "DIP",
+																		"args": [
+																			[{
+																				"prim": "DUP",
+																				"annots": ["@storage"]
+																			}]
+																		]
+																	}, {
+																		"prim": "SWAP"
+																	}]
+																]
+															}, {
+																"prim": "SWAP"
+															}]
+														]
+													}, {
+														"prim": "SWAP"
+													}],
+													[{
+														"prim": "DIP",
+														"args": [
+															[{
+																"prim": "DUP"
+															}]
+														]
+													}, {
+														"prim": "SWAP"
+													}], {
+														"prim": "CAR",
+														"annots": ["@subdomain"]
+													},
+													[{
+														"prim": "DIP",
+														"args": [
+															[{
+																"prim": "DUP",
+																"annots": ["@storage"]
+															}]
+														]
+													}, {
+														"prim": "SWAP"
+													}],
+													[{
+														"prim": "CDR"
+													}, {
+														"prim": "CAR",
+														"annots": ["%subdomainToRecord"]
+													}],
+													[{
+														"prim": "DIP",
+														"args": [
+															[{
+																"prim": "DUP",
+																"annots": ["@subdomain"]
+															}]
+														]
+													}, {
+														"prim": "SWAP"
+													}], {
+														"prim": "GET"
+													}, {
+														"prim": "IF_NONE",
+														"args": [
+															[{
+																"prim": "DUP",
+																"annots": ["@subdomain"]
+															}, {
+																"prim": "PUSH",
+																"args": [{
+																	"prim": "string"
+																}, {
+																	"string": "Subdomain does not exist: "
+																}]
+															}, {
+																"prim": "PAIR"
+															}, {
+																"prim": "FAILWITH"
+															}],
+															[{
+																"prim": "DUP",
+																"annots": ["@record"]
+															}, {
+																"prim": "CAR",
+																"annots": ["%subdomainOwner"]
+															}, {
+																"prim": "SENDER"
+															}, {
+																"prim": "COMPARE"
+															}, {
+																"prim": "EQ"
+															}, {
+																"prim": "IF",
+																"args": [
+																	[
+																		[{
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DUP",
+																							"annots": ["@storage"]
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}]
+																			]
+																		}, {
+																			"prim": "SWAP"
+																		}], {
+																			"prim": "DUP"
+																		}, {
+																			"prim": "CAR",
+																			"annots": ["%domainOwner"]
+																		}, {
+																			"prim": "SWAP"
+																		}, {
+																			"prim": "CDR"
+																		}, {
+																			"prim": "CDR",
+																			"annots": ["%stamp"]
+																		},
+																		[{
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DIP",
+																							"args": [
+																								[{
+																									"prim": "DIP",
+																									"args": [
+																										[{
+																											"prim": "DUP",
+																											"annots": ["@storage"]
+																										}]
+																									]
+																								}, {
+																									"prim": "SWAP"
+																								}]
+																							]
+																						}, {
+																							"prim": "SWAP"
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}]
+																			]
+																		}, {
+																			"prim": "SWAP"
+																		}],
+																		[{
+																			"prim": "CDR"
+																		}, {
+																			"prim": "CAR",
+																			"annots": ["%subdomainToRecord"]
+																		}],
+																		[{
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DIP",
+																							"args": [
+																								[{
+																									"prim": "DUP",
+																									"annots": ["@record"]
+																								}]
+																							]
+																						}, {
+																							"prim": "SWAP"
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}]
+																			]
+																		}, {
+																			"prim": "SWAP"
+																		}], {
+																			"prim": "DUP"
+																		}, {
+																			"prim": "CAR",
+																			"annots": ["%subdomainOwner"]
+																		}, {
+																			"prim": "SWAP"
+																		}, {
+																			"prim": "CDR"
+																		}, {
+																			"prim": "DUP"
+																		}, {
+																			"prim": "CAR",
+																			"annots": ["%resolver"]
+																		}, {
+																			"prim": "SWAP"
+																		}, {
+																			"prim": "CDR"
+																		}, {
+																			"prim": "CDR",
+																			"annots": ["%ttlInSeconds"]
+																		},
+																		[{
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DIP",
+																							"args": [
+																								[{
+																									"prim": "DIP",
+																									"args": [
+																										[{
+																											"prim": "DIP",
+																											"args": [
+																												[{
+																													"prim": "DIP",
+																													"args": [
+																														[{
+																															"prim": "DIP",
+																															"args": [
+																																[{
+																																	"prim": "DIP",
+																																	"args": [
+																																		[{
+																																			"prim": "DIP",
+																																			"args": [
+																																				[{
+																																					"prim": "DUP"
+																																				}]
+																																			]
+																																		}, {
+																																			"prim": "SWAP"
+																																		}]
+																																	]
+																																}, {
+																																	"prim": "SWAP"
+																																}]
+																															]
+																														}, {
+																															"prim": "SWAP"
+																														}]
+																													]
+																												}, {
+																													"prim": "SWAP"
+																												}]
+																											]
+																										}, {
+																											"prim": "SWAP"
+																										}]
+																									]
+																								}, {
+																									"prim": "SWAP"
+																								}]
+																							]
+																						}, {
+																							"prim": "SWAP"
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}]
+																			]
+																		}, {
+																			"prim": "SWAP"
+																		}], {
+																			"prim": "CDR",
+																			"annots": ["@manager"]
+																		}, {
+																			"prim": "PAIR",
+																			"annots": ["%manager", "%ttlInSeconds"]
+																		}, {
+																			"prim": "SWAP"
+																		}, {
+																			"prim": "PAIR",
+																			"annots": ["%resolver"]
+																		}, {
+																			"prim": "SWAP"
+																		}, {
+																			"prim": "PAIR",
+																			"annots": ["@newRecord", "%subdomainOwner"]
+																		},
+																		[{
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DIP",
+																							"args": [
+																								[{
+																									"prim": "DIP",
+																									"args": [
+																										[{
+																											"prim": "DIP",
+																											"args": [
+																												[{
+																													"prim": "DUP",
+																													"annots": ["@subdomain"]
+																												}]
+																											]
+																										}, {
+																											"prim": "SWAP"
+																										}]
+																									]
+																								}, {
+																									"prim": "SWAP"
+																								}]
+																							]
+																						}, {
+																							"prim": "SWAP"
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}]
+																			]
+																		}, {
+																			"prim": "SWAP"
+																		}], {
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "SOME"
+																				}]
+																			]
+																		}, {
+																			"prim": "UPDATE"
+																		}, {
+																			"prim": "PAIR",
+																			"annots": ["%subdomainToRecord", "%stamp"]
+																		}, {
+																			"prim": "SWAP"
+																		}, {
+																			"prim": "PAIR",
+																			"annots": ["@storage", "%domainOwner"]
+																		}, {
+																			"prim": "NIL",
+																			"args": [{
+																				"prim": "operation"
+																			}]
+																		}, {
+																			"prim": "PAIR"
+																		}
+																	],
+																	[
+																		[{
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DUP",
+																					"annots": ["@subdomain"]
+																				}]
+																			]
+																		}, {
+																			"prim": "SWAP"
+																		}], {
+																			"prim": "PUSH",
+																			"args": [{
+																				"prim": "string"
+																			}, {
+																				"string": "You do not own that subdomain: "
+																			}]
+																		}, {
+																			"prim": "PAIR"
+																		}, {
+																			"prim": "FAILWITH"
+																		}
+																	]
+																]
+															}, {
+																"prim": "DIP",
+																"args": [
+																	[{
+																		"prim": "DROP"
+																	}]
+																]
+															}]
+														]
+													}, {
+														"prim": "DIP",
+														"args": [
+															[{
+																"prim": "DROP"
+															}, {
+																"prim": "DROP"
+															}, {
+																"prim": "DROP"
+															}]
+														]
+													}
+												],
+												[{
+													"prim": "IF_LEFT",
+													"args": [
+														[{
+																"prim": "RENAME",
+																"annots": ["@_subdomain_ttlInSeconds_slash_38"]
+															},
+															[{
+																"prim": "DIP",
+																"args": [
+																	[{
+																		"prim": "DIP",
+																		"args": [
+																			[{
+																				"prim": "DIP",
+																				"args": [
+																					[{
+																						"prim": "DUP",
+																						"annots": ["@storage"]
+																					}]
+																				]
+																			}, {
+																				"prim": "SWAP"
+																			}]
+																		]
+																	}, {
+																		"prim": "SWAP"
+																	}]
+																]
+															}, {
+																"prim": "SWAP"
+															}],
+															[{
+																"prim": "DIP",
+																"args": [
+																	[{
+																		"prim": "DUP"
+																	}]
+																]
+															}, {
+																"prim": "SWAP"
+															}], {
+																"prim": "CAR",
+																"annots": ["@subdomain"]
+															},
+															[{
+																"prim": "DIP",
+																"args": [
+																	[{
+																		"prim": "DUP",
+																		"annots": ["@storage"]
+																	}]
+																]
+															}, {
+																"prim": "SWAP"
+															}],
+															[{
+																"prim": "CDR"
+															}, {
+																"prim": "CAR",
+																"annots": ["%subdomainToRecord"]
+															}],
+															[{
+																"prim": "DIP",
+																"args": [
+																	[{
+																		"prim": "DUP",
+																		"annots": ["@subdomain"]
+																	}]
+																]
+															}, {
+																"prim": "SWAP"
+															}], {
+																"prim": "GET"
+															}, {
+																"prim": "IF_NONE",
+																"args": [
+																	[{
+																		"prim": "DUP",
+																		"annots": ["@subdomain"]
+																	}, {
+																		"prim": "PUSH",
+																		"args": [{
+																			"prim": "string"
+																		}, {
+																			"string": "Subdomain does not exist: "
+																		}]
+																	}, {
+																		"prim": "PAIR"
+																	}, {
+																		"prim": "FAILWITH"
+																	}],
+																	[{
+																		"prim": "DUP",
+																		"annots": ["@record"]
+																	}, {
+																		"prim": "CAR",
+																		"annots": ["%subdomainOwner"]
+																	}, {
+																		"prim": "SENDER"
+																	}, {
+																		"prim": "COMPARE"
+																	}, {
+																		"prim": "EQ"
+																	}, {
+																		"prim": "IF",
+																		"args": [
+																			[
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DIP",
+																							"args": [
+																								[{
+																									"prim": "DUP",
+																									"annots": ["@storage"]
+																								}]
+																							]
+																						}, {
+																							"prim": "SWAP"
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}], {
+																					"prim": "DUP"
+																				}, {
+																					"prim": "CAR",
+																					"annots": ["%domainOwner"]
+																				}, {
+																					"prim": "SWAP"
+																				}, {
+																					"prim": "CDR"
+																				}, {
+																					"prim": "CDR",
+																					"annots": ["%stamp"]
+																				},
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DIP",
+																							"args": [
+																								[{
+																									"prim": "DIP",
+																									"args": [
+																										[{
+																											"prim": "DIP",
+																											"args": [
+																												[{
+																													"prim": "DUP",
+																													"annots": ["@storage"]
+																												}]
+																											]
+																										}, {
+																											"prim": "SWAP"
+																										}]
+																									]
+																								}, {
+																									"prim": "SWAP"
+																								}]
+																							]
+																						}, {
+																							"prim": "SWAP"
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}],
+																				[{
+																					"prim": "CDR"
+																				}, {
+																					"prim": "CAR",
+																					"annots": ["%subdomainToRecord"]
+																				}],
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DIP",
+																							"args": [
+																								[{
+																									"prim": "DIP",
+																									"args": [
+																										[{
+																											"prim": "DUP",
+																											"annots": ["@record"]
+																										}]
+																									]
+																								}, {
+																									"prim": "SWAP"
+																								}]
+																							]
+																						}, {
+																							"prim": "SWAP"
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}], {
+																					"prim": "DUP"
+																				}, {
+																					"prim": "CAR",
+																					"annots": ["%subdomainOwner"]
+																				}, {
+																					"prim": "SWAP"
+																				}, {
+																					"prim": "CDR"
+																				}, {
+																					"prim": "DUP"
+																				}, {
+																					"prim": "CAR",
+																					"annots": ["%resolver"]
+																				}, {
+																					"prim": "SWAP"
+																				}, {
+																					"prim": "CDR"
+																				}, {
+																					"prim": "CAR",
+																					"annots": ["%manager"]
+																				},
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DIP",
+																							"args": [
+																								[{
+																									"prim": "DIP",
+																									"args": [
+																										[{
+																											"prim": "DIP",
+																											"args": [
+																												[{
+																													"prim": "DIP",
+																													"args": [
+																														[{
+																															"prim": "DIP",
+																															"args": [
+																																[{
+																																	"prim": "DIP",
+																																	"args": [
+																																		[{
+																																			"prim": "DIP",
+																																			"args": [
+																																				[{
+																																					"prim": "DIP",
+																																					"args": [
+																																						[{
+																																							"prim": "DUP"
+																																						}]
+																																					]
+																																				}, {
+																																					"prim": "SWAP"
+																																				}]
+																																			]
+																																		}, {
+																																			"prim": "SWAP"
+																																		}]
+																																	]
+																																}, {
+																																	"prim": "SWAP"
+																																}]
+																															]
+																														}, {
+																															"prim": "SWAP"
+																														}]
+																													]
+																												}, {
+																													"prim": "SWAP"
+																												}]
+																											]
+																										}, {
+																											"prim": "SWAP"
+																										}]
+																									]
+																								}, {
+																									"prim": "SWAP"
+																								}]
+																							]
+																						}, {
+																							"prim": "SWAP"
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}], {
+																					"prim": "CDR",
+																					"annots": ["@ttlInSeconds"]
+																				}, {
+																					"prim": "SWAP"
+																				}, {
+																					"prim": "PAIR",
+																					"annots": ["%manager", "%ttlInSeconds"]
+																				}, {
+																					"prim": "SWAP"
+																				}, {
+																					"prim": "PAIR",
+																					"annots": ["%resolver"]
+																				}, {
+																					"prim": "SWAP"
+																				}, {
+																					"prim": "PAIR",
+																					"annots": ["@newRecord", "%subdomainOwner"]
+																				},
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DIP",
+																							"args": [
+																								[{
+																									"prim": "DIP",
+																									"args": [
+																										[{
+																											"prim": "DIP",
+																											"args": [
+																												[{
+																													"prim": "DIP",
+																													"args": [
+																														[{
+																															"prim": "DUP",
+																															"annots": ["@subdomain"]
+																														}]
+																													]
+																												}, {
+																													"prim": "SWAP"
+																												}]
+																											]
+																										}, {
+																											"prim": "SWAP"
+																										}]
+																									]
+																								}, {
+																									"prim": "SWAP"
+																								}]
+																							]
+																						}, {
+																							"prim": "SWAP"
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}], {
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "SOME"
+																						}]
+																					]
+																				}, {
+																					"prim": "UPDATE"
+																				}, {
+																					"prim": "PAIR",
+																					"annots": ["%subdomainToRecord", "%stamp"]
+																				}, {
+																					"prim": "SWAP"
+																				}, {
+																					"prim": "PAIR",
+																					"annots": ["@storage", "%domainOwner"]
+																				}, {
+																					"prim": "NIL",
+																					"args": [{
+																						"prim": "operation"
+																					}]
+																				}, {
+																					"prim": "PAIR"
+																				}
+																			],
+																			[
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DUP",
+																							"annots": ["@subdomain"]
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}], {
+																					"prim": "PUSH",
+																					"args": [{
+																						"prim": "string"
+																					}, {
+																						"string": "You do not own that subdomain: "
+																					}]
+																				}, {
+																					"prim": "PAIR"
+																				}, {
+																					"prim": "FAILWITH"
+																				}
+																			]
+																		]
+																	}, {
+																		"prim": "DIP",
+																		"args": [
+																			[{
+																				"prim": "DROP"
+																			}]
+																		]
+																	}]
+																]
+															}, {
+																"prim": "DIP",
+																"args": [
+																	[{
+																		"prim": "DROP"
+																	}, {
+																		"prim": "DROP"
+																	}, {
+																		"prim": "DROP"
+																	}]
+																]
+															}
+														],
+														[{
+																"prim": "RENAME",
+																"annots": ["@subdomain_slash_45"]
+															},
+															[{
+																"prim": "DIP",
+																"args": [
+																	[{
+																		"prim": "DIP",
+																		"args": [
+																			[{
+																				"prim": "DIP",
+																				"args": [
+																					[{
+																						"prim": "DUP",
+																						"annots": ["@storage"]
+																					}]
+																				]
+																			}, {
+																				"prim": "SWAP"
+																			}]
+																		]
+																	}, {
+																		"prim": "SWAP"
+																	}]
+																]
+															}, {
+																"prim": "SWAP"
+															}], {
+																"prim": "DUP",
+																"annots": ["@storage"]
+															},
+															[{
+																"prim": "CDR"
+															}, {
+																"prim": "CAR",
+																"annots": ["%subdomainToRecord"]
+															}],
+															[{
+																"prim": "DIP",
+																"args": [
+																	[{
+																		"prim": "DIP",
+																		"args": [
+																			[{
+																				"prim": "DUP",
+																				"annots": ["@subdomain"]
+																			}]
+																		]
+																	}, {
+																		"prim": "SWAP"
+																	}]
+																]
+															}, {
+																"prim": "SWAP"
+															}], {
+																"prim": "GET"
+															}, {
+																"prim": "IF_NONE",
+																"args": [
+																	[
+																		[{
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DUP",
+																					"annots": ["@subdomain"]
+																				}]
+																			]
+																		}, {
+																			"prim": "SWAP"
+																		}], {
+																			"prim": "PUSH",
+																			"args": [{
+																				"prim": "string"
+																			}, {
+																				"string": "Subdomain does not exist: "
+																			}]
+																		}, {
+																			"prim": "PAIR"
+																		}, {
+																			"prim": "FAILWITH"
+																		}
+																	],
+																	[
+																		[{
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DIP",
+																							"args": [
+																								[{
+																									"prim": "DUP",
+																									"annots": ["@isController"]
+																								}]
+																							]
+																						}, {
+																							"prim": "SWAP"
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}]
+																			]
+																		}, {
+																			"prim": "SWAP"
+																		}],
+																		[{
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DUP",
+																							"annots": ["@storage"]
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}]
+																			]
+																		}, {
+																			"prim": "SWAP"
+																		}],
+																		[{
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DIP",
+																					"args": [
+																						[{
+																							"prim": "DUP",
+																							"annots": ["@record"]
+																						}]
+																					]
+																				}, {
+																					"prim": "SWAP"
+																				}]
+																			]
+																		}, {
+																			"prim": "SWAP"
+																		}], {
+																			"prim": "PAIR"
+																		}, {
+																			"prim": "EXEC"
+																		}, {
+																			"prim": "IF",
+																			"args": [
+																				[
+																					[{
+																						"prim": "DIP",
+																						"args": [
+																							[{
+																								"prim": "DUP",
+																								"annots": ["@storage"]
+																							}]
+																						]
+																					}, {
+																						"prim": "SWAP"
+																					}], {
+																						"prim": "DUP"
+																					}, {
+																						"prim": "CAR",
+																						"annots": ["%domainOwner"]
+																					}, {
+																						"prim": "SWAP"
+																					}, {
+																						"prim": "CDR"
+																					}, {
+																						"prim": "CDR",
+																						"annots": ["%stamp"]
+																					},
+																					[{
+																						"prim": "DIP",
+																						"args": [
+																							[{
+																								"prim": "DIP",
+																								"args": [
+																									[{
+																										"prim": "DIP",
+																										"args": [
+																											[{
+																												"prim": "DUP",
+																												"annots": ["@storage"]
+																											}]
+																										]
+																									}, {
+																										"prim": "SWAP"
+																									}]
+																								]
+																							}, {
+																								"prim": "SWAP"
+																							}]
+																						]
+																					}, {
+																						"prim": "SWAP"
+																					}],
+																					[{
+																						"prim": "CDR"
+																					}, {
+																						"prim": "CAR",
+																						"annots": ["%subdomainToRecord"]
+																					}],
+																					[{
+																						"prim": "DIP",
+																						"args": [
+																							[{
+																								"prim": "DIP",
+																								"args": [
+																									[{
+																										"prim": "DIP",
+																										"args": [
+																											[{
+																												"prim": "DIP",
+																												"args": [
+																													[{
+																														"prim": "DIP",
+																														"args": [
+																															[{
+																																"prim": "DUP",
+																																"annots": ["@subdomain"]
+																															}]
+																														]
+																													}, {
+																														"prim": "SWAP"
+																													}]
+																												]
+																											}, {
+																												"prim": "SWAP"
+																											}]
+																										]
+																									}, {
+																										"prim": "SWAP"
+																									}]
+																								]
+																							}, {
+																								"prim": "SWAP"
+																							}]
+																						]
+																					}, {
+																						"prim": "SWAP"
+																					}], {
+																						"prim": "DIP",
+																						"args": [
+																							[{
+																								"prim": "NONE",
+																								"args": [{
+																									"prim": "pair",
+																									"args": [{
+																										"prim": "address",
+																										"annots": ["%subdomainOwner"]
+																									}, {
+																										"prim": "pair",
+																										"args": [{
+																											"prim": "address",
+																											"annots": ["%resolver"]
+																										}, {
+																											"prim": "pair",
+																											"args": [{
+																												"prim": "address",
+																												"annots": ["%manager"]
+																											}, {
+																												"prim": "int",
+																												"annots": ["%ttlInSeconds"]
+																											}]
+																										}]
+																									}],
+																									"annots": [":record"]
+																								}]
+																							}]
+																						]
+																					}, {
+																						"prim": "UPDATE"
+																					}, {
+																						"prim": "PAIR",
+																						"annots": ["%subdomainToRecord", "%stamp"]
+																					}, {
+																						"prim": "SWAP"
+																					}, {
+																						"prim": "PAIR",
+																						"annots": ["@storage", "%domainOwner"]
+																					}, {
+																						"prim": "NIL",
+																						"args": [{
+																							"prim": "operation"
+																						}]
+																					}, {
+																						"prim": "PAIR"
+																					}
+																				],
+																				[
+																					[{
+																						"prim": "DIP",
+																						"args": [
+																							[{
+																								"prim": "DIP",
+																								"args": [
+																									[{
+																										"prim": "DUP",
+																										"annots": ["@subdomain"]
+																									}]
+																								]
+																							}, {
+																								"prim": "SWAP"
+																							}]
+																						]
+																					}, {
+																						"prim": "SWAP"
+																					}], {
+																						"prim": "PUSH",
+																						"args": [{
+																							"prim": "string"
+																						}, {
+																							"string": "You do not have permission to delete that subdomain: "
+																						}]
+																					}, {
+																						"prim": "PAIR"
+																					}, {
+																						"prim": "FAILWITH"
+																					}
+																				]
+																			]
+																		}, {
+																			"prim": "DIP",
+																			"args": [
+																				[{
+																					"prim": "DROP"
+																				}]
+																			]
+																		}
+																	]
+																]
+															}, {
+																"prim": "DIP",
+																"args": [
+																	[{
+																		"prim": "DROP"
+																	}, {
+																		"prim": "DROP"
+																	}]
+																]
+															}
+														]
+													]
+												}]
+											]
+										}]
+									]
+								}]
+							]
+						}]
+					]
+				}, {
+					"prim": "DIP",
+					"args": [
+						[{
+							"prim": "DROP"
+						}, {
+							"prim": "DROP"
+						}, {
+							"prim": "DROP"
+						}]
+					]
+				}
+			]
+		]
+	}],
+	"storage": {
+		"prim": "Pair",
+		"args": [{
+			"string": "tz1WpPzK6NwWVTJcXqFvYmoA6msQeVy1YP6z"
+		}, {
+			"prim": "Pair",
+			"args": [
+				[], {
+					"string": "Author: Teckhua Chiang, Company: Cryptonomic"
+				}
+			]
+		}]
+	}
+}
