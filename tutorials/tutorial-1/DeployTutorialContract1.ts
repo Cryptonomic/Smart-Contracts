@@ -11,25 +11,26 @@ async function deployContract() {
         storeType: StoreType.Fundraiser
     };
 
-    const michelson = `# Title: Tezos Tutorial Contract 1
+    const michelson = `
+    # Title: Tezos Tutorial Contract 1
     # Author: Teckhua Chiang
     # Company: Cryptonomic Inc.
     
     parameter string;
-    storage (pair :storage (map %record address string) (string %stamp));
+    storage (pair (map address string) string);
     code { DUP ;
-           DIP { CDR @storage_slash_1 } ;
-           CAR @mark_slash_2 ;
-           DUUP @storage ;
-           CDR %stamp ;
-           DUUUP @storage ;
-           CAR %record ;
-           DUUUP @mark ;
-           SENDER @sender ;
+           DIP { CDR } ;
+           CAR ;
+           DUUP ;
+           CDR ;
+           DUUUP ;
+           CAR ;
+           DUUUP ;
+           SENDER ;
            DIP { SOME } ;
            DIIIIP { DROP ; DROP } ;
            UPDATE ;
-           PAIR @storage %record %stamp ;
+           PAIR ;
            NIL operation ;
            PAIR };
     `;

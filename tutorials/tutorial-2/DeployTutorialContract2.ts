@@ -15,23 +15,23 @@ async function deployContract() {
     # Title: Tezos Tutorial Contract 2
     # Author: Teckhua Chiang
     # Company: Cryptonomic Inc.
-
+    
     parameter (pair int int);
-    storage (pair :storage (int %sum) (string %stamp));
+    storage (pair int string);
     code { DUP ;
-        DIP { CDR @storage_slash_1 } ;
-        CAR @_addend1_addend2_slash_2 ;
-        SWAP ;
-        CDR %stamp ;
-        DUUP ;
-        CDR @addend2 ;
-        DUUUP ;
-        DIIIP { DROP } ;
-        CAR @addend1 ;
-        ADD @sum ;
-        PAIR @storage %sum %stamp ;
-        NIL operation ;
-        PAIR };
+           DIP { CDR } ;
+           CAR ;
+           SWAP ;
+           CDR ;
+           DUUP ;
+           CDR ;
+           DUUUP ;
+           DIIIP { DROP } ;
+           CAR ;
+           ADD ;
+           PAIR ;
+           NIL operation ;
+           PAIR };
     `;
     const michelson_storage = 'Pair 0 "Author: Teckhua Chiang, Company: Cryptonomic"';
     const result = await TezosNodeWriter.sendContractOriginationOperation(tezosNode, keystore, 0, undefined, false, true, 100000, '', 1000, 100000, michelson, michelson_storage, TezosParameterFormat.Michelson);

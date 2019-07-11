@@ -50,7 +50,7 @@ function deployContract() {
                         seed: '',
                         storeType: conseiljs_1.StoreType.Fundraiser
                     };
-                    michelson = "# Title: Tezos Tutorial Contract 1\n    # Author: Teckhua Chiang\n    # Company: Cryptonomic Inc.\n    \n    parameter string;\n    storage (pair :storage (map %record address string) (string %stamp));\n    code { DUP ;\n           DIP { CDR @storage_slash_1 } ;\n           CAR @mark_slash_2 ;\n           DUUP @storage ;\n           CDR %stamp ;\n           DUUUP @storage ;\n           CAR %record ;\n           DUUUP @mark ;\n           SENDER @sender ;\n           DIP { SOME } ;\n           DIIIIP { DROP ; DROP } ;\n           UPDATE ;\n           PAIR @storage %record %stamp ;\n           NIL operation ;\n           PAIR };\n    ";
+                    michelson = "\n    # Title: Tezos Tutorial Contract 1\n    # Author: Teckhua Chiang\n    # Company: Cryptonomic Inc.\n    \n    parameter string;\n    storage (pair (map address string) string);\n    code { DUP ;\n           DIP { CDR } ;\n           CAR ;\n           DUUP ;\n           CDR ;\n           DUUUP ;\n           CAR ;\n           DUUUP ;\n           SENDER ;\n           DIP { SOME } ;\n           DIIIIP { DROP ; DROP } ;\n           UPDATE ;\n           PAIR ;\n           NIL operation ;\n           PAIR };\n    ";
                     michelson_storage = 'Pair {} "Author: Teckhua Chiang, Company: Cryptonomic"';
                     return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractOriginationOperation(tezosNode, keystore, 0, undefined, false, true, 100000, '', 1000, 100000, michelson, michelson_storage, conseiljs_1.TezosParameterFormat.Michelson)];
                 case 1:
