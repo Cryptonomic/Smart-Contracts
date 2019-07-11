@@ -44,7 +44,8 @@ var keystore = {
     seed: '',
     storeType: conseiljs_1.StoreType.Fundraiser
 };
-var contractAddress = ''; // Tezos Managed Ledger - Alphanet
+var contractAddress = 'KT1Myqcyxp8MNgdB1aAhMpBApZHgVJ634nhm'; // Tezos Managed Ledger - Alphanet Modified
+// 'KT1DhPDy765YJwPRY8fRupSZQ3SjuxVvoUYd'; // Tezos Managed Ledger - Alphanet Original
 // Implementation of FA1.2
 /**
  * Sends the given amount of tokens from one address to another address.
@@ -60,7 +61,7 @@ function transfer(from, to, value) {
             switch (_a.label) {
                 case 0:
                     parameter = 'Left (Pair ' + from + ' (Pair ' + to + ' ' + value + '))';
-                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
+                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
                 case 1:
                     result = _a.sent();
                     console.log("Injected operation group id " + result.operationGroupID);
@@ -84,7 +85,7 @@ function approve(spender, value) {
             switch (_a.label) {
                 case 0:
                     parameter = 'Right (Left (Pair ' + spender + ' ' + value + '))';
-                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
+                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
                 case 1:
                     result = _a.sent();
                     console.log("Injected operation group id " + result.operationGroupID);
@@ -108,7 +109,7 @@ function getAllowance(owner, spender, remaining) {
             switch (_a.label) {
                 case 0:
                     parameter = 'Right (Right (Left (Pair (Pair ' + owner + ' ' + spender + ') ' + remaining + '))))';
-                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
+                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
                 case 1:
                     result = _a.sent();
                     console.log("Injected operation group id " + result.operationGroupID);
@@ -131,7 +132,7 @@ function getBalance(owner, balance) {
             switch (_a.label) {
                 case 0:
                     parameter = 'Right (Right (Right (Left (Pair ' + owner + ' ' + balance + '))))';
-                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
+                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
                 case 1:
                     result = _a.sent();
                     console.log("Injected operation group id " + result.operationGroupID);
@@ -153,7 +154,7 @@ function getTotalSupply(totalSupply) {
             switch (_a.label) {
                 case 0:
                     parameter = 'Right (Right (Right (Right (Left (Pair Unit ' + totalSupply + ')))))';
-                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
+                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
                 case 1:
                     result = _a.sent();
                     console.log("Injected operation group id " + result.operationGroupID);
@@ -173,12 +174,13 @@ exports.getTotalSupply = getTotalSupply;
  */
 function setPause(pause) {
     return __awaiter(this, void 0, void 0, function () {
-        var parameter, result;
+        var input, parameter, result;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    parameter = 'Right (Right (Right (Right (Right (Left ' + pause + ')))))';
-                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
+                    input = String(pause).charAt(0).toUpperCase() + String(pause).slice(1);
+                    parameter = 'Right (Right (Right (Right (Right (Left ' + input + ')))))';
+                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
                 case 1:
                     result = _a.sent();
                     console.log("Injected operation group id " + result.operationGroupID);
@@ -200,7 +202,7 @@ function setAdministrator(administrator) {
             switch (_a.label) {
                 case 0:
                     parameter = 'Right (Right (Right (Right (Right (Right (Left ' + administrator + '))))))';
-                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
+                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
                 case 1:
                     result = _a.sent();
                     console.log("Injected operation group id " + result.operationGroupID);
@@ -222,7 +224,7 @@ function getAdministrator(administrator) {
             switch (_a.label) {
                 case 0:
                     parameter = 'Right (Right (Right (Right (Right (Right (Right (Left (Pair Unit ' + administrator + '))))))))';
-                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
+                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
                 case 1:
                     result = _a.sent();
                     console.log("Injected operation group id " + result.operationGroupID);
@@ -245,7 +247,7 @@ function mint(to, value) {
             switch (_a.label) {
                 case 0:
                     parameter = 'Right (Right (Right (Right (Right (Right (Right (Right (Left (Pair ' + to + ' ' + value + ')))))))))';
-                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
+                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
                 case 1:
                     result = _a.sent();
                     console.log("Injected operation group id " + result.operationGroupID);
@@ -268,7 +270,7 @@ function burn(from, value) {
             switch (_a.label) {
                 case 0:
                     parameter = 'Right (Right (Right (Right (Right (Right (Right (Right (Right (Left (Pair ' + from + ' ' + value + '))))))))))';
-                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
+                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 300000, '', 55392, 504382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
                 case 1:
                     result = _a.sent();
                     console.log("Injected operation group id " + result.operationGroupID);
