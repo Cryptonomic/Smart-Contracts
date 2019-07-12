@@ -1,18 +1,10 @@
-import { TezosNodeWriter, StoreType, TezosParameterFormat } from 'conseiljs';
+import { TezosNodeWriter, TezosParameterFormat, KeyStore } from 'conseiljs';
 
 const tezosNode = 'https://tezos-dev.cryptonomic-infra.tech/';
 
-const keystore = {
-    publicKey: 'edpkuuGJ4ssH3N5k7ovwkBe16p8rVX1XLENiZ4FAayrcwUf9sCKXnG',
-    privateKey: 'edskRpVqFG2FHo11aB9pzbnHBiPBWhNWdwtNyQSfEEhDf5jhFbAtNS41vg9as7LSYZv6rEbtJTwyyEg9cNDdcAkSr9Z7hfvquB',
-    publicKeyHash: 'tz1WpPzK6NwWVTJcXqFvYmoA6msQeVy1YP6z',
-    seed: '',
-    storeType: StoreType.Fundraiser
-};
-
 const contractAddress = 'KT1GkF5ty6vfjLhqYdaPQCcYBBDQKbUiC8vF'; // Tezos Proxy Contract - Alphanet
 
-export async function setDestination(destination: string) {
+export async function setDestination(destination: string, keystore: KeyStore) {
     const parameter = destination;
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, TezosParameterFormat.Michelson);
     console.log(`Injected operation group id ${result.operationGroupID}`);

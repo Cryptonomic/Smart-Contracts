@@ -37,15 +37,8 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var conseiljs_1 = require("conseiljs");
 var tezosNode = 'https://tezos-dev.cryptonomic-infra.tech/';
-var keystore = {
-    publicKey: 'edpkuuGJ4ssH3N5k7ovwkBe16p8rVX1XLENiZ4FAayrcwUf9sCKXnG',
-    privateKey: 'edskRpVqFG2FHo11aB9pzbnHBiPBWhNWdwtNyQSfEEhDf5jhFbAtNS41vg9as7LSYZv6rEbtJTwyyEg9cNDdcAkSr9Z7hfvquB',
-    publicKeyHash: 'tz1WpPzK6NwWVTJcXqFvYmoA6msQeVy1YP6z',
-    seed: '',
-    storeType: conseiljs_1.StoreType.Fundraiser
-};
 var contractAddress = 'KT1GkF5ty6vfjLhqYdaPQCcYBBDQKbUiC8vF'; // Tezos Proxy Contract - Alphanet
-function setDestination(destination) {
+function setDestination(destination, keystore) {
     return __awaiter(this, void 0, void 0, function () {
         var parameter, result;
         return __generator(this, function (_a) {
