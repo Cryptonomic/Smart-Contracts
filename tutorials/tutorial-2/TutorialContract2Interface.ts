@@ -10,7 +10,7 @@ const keystore = {
     storeType: StoreType.Fundraiser
 };
 
-const contractAddress = ''; // Add the address of a deployed Tutorial Contract 2
+const contractAddress = 'KT1AbPRzgDJecR3cZ2LCcuJ8fRZADmiLuPVc'; // Add the address of a deployed Tutorial Contract 2
 
 /**
  * Entry point for a user to add two integers.
@@ -18,7 +18,7 @@ const contractAddress = ''; // Add the address of a deployed Tutorial Contract 2
  * @param addend1 - The first addend
  * @param addend2 - The second addend
  */
-export async function setMark(addend1: string, addend2: string) {
+export async function addIntegers(addend1: number, addend2: number) {
     const parameter = 'Pair ' + addend1 + ' ' + addend2;
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, TezosParameterFormat.Michelson);
     console.log(`Injected operation group id ${result.operationGroupID}`);

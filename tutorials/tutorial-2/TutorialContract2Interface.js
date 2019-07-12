@@ -44,14 +44,14 @@ var keystore = {
     seed: '',
     storeType: conseiljs_1.StoreType.Fundraiser
 };
-var contractAddress = ''; // Add the address of a deployed Tutorial Contract 2
+var contractAddress = 'KT1AbPRzgDJecR3cZ2LCcuJ8fRZADmiLuPVc'; // Add the address of a deployed Tutorial Contract 2
 /**
  * Entry point for a user to add two integers.
  *
  * @param addend1 - The first addend
  * @param addend2 - The second addend
  */
-function setMark(addend1, addend2) {
+function addIntegers(addend1, addend2) {
     return __awaiter(this, void 0, void 0, function () {
         var parameter, result;
         return __generator(this, function (_a) {
@@ -67,4 +67,4 @@ function setMark(addend1, addend2) {
         });
     });
 }
-exports.setMark = setMark;
+exports.addIntegers = addIntegers;
