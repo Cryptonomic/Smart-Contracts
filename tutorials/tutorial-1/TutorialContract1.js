@@ -44,9 +44,10 @@ var keystore = {
     seed: '',
     storeType: conseiljs_1.StoreType.Fundraiser
 };
-var contractAddress = ''; // Add the address of a deployed Tutorial Contract 1
+var contractAddress = 'KT1SAdvfighduwTbDf44jbXZUEaxoaW7YptJ'; // Add the address of a deployed Tutorial Contract 1
 /**
  * Entry point for a user to register their mark.
+ *
  * @param mark - A string that the user wishes to store
  */
 function setMark(mark) {

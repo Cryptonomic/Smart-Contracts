@@ -10,10 +10,11 @@ const keystore = {
     storeType: StoreType.Fundraiser
 };
 
-const contractAddress = ''; // Add the address of a deployed Tutorial Contract 1
+const contractAddress = 'KT1SAdvfighduwTbDf44jbXZUEaxoaW7YptJ'; // Add the address of a deployed Tutorial Contract 1
 
 /**
  * Entry point for a user to register their mark.
+ * 
  * @param mark - A string that the user wishes to store
  */
 export async function setMark(mark: string) {
