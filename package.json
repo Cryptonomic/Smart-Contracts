@@ -1,17 +1,27 @@
 {
-  "name": "conseiljs-contracts",
+  "name": "Smart-Contracts",
   "version": "1.0.0",
-  "main": "deploy-contract.js",
-  "dependencies": {
-    "conseiljs": "git://github.com/Cryptonomic/ConseilJS.git#feat/tezos-types",
-    "typescript": "^3.5.2"
-  },
-  "devDependencies": {},
+  "description": "Cryptonomic's smart contracts",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cryptonomic/Smart-Contracts.git"
+  },
+  "keywords": [],
   "author": "",
   "license": "ISC",
-  "keywords": [],
-  "description": ""
+  "bugs": {
+    "url": "https://github.com/Cryptonomic/Smart-Contracts/issues"
+  },
+  "homepage": "https://github.com/Cryptonomic/Smart-Contracts#readme",
+  "devDependencies": {
+    "@types/node": "^12.6.2",
+    "typescript": "^3.5.3"
+  },
+  "dependencies": {
+    "conseiljs": "git://github.com/Cryptonomic/ConseilJS.git#feat/tezos-types"
+  }
 }
