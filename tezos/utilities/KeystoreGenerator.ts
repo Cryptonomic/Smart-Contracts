@@ -1,4 +1,4 @@
-import { TezosWalletUtil } from 'conseiljs';
+import { TezosWalletUtil, TezosConseilClient } from 'conseiljs';
 
 interface accountInformation {
     mnemonic: Array<string>;
