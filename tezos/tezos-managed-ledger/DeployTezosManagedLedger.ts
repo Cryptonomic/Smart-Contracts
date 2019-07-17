@@ -1,16 +1,7 @@
-import { TezosNodeWriter, StoreType, TezosParameterFormat } from 'conseiljs';
+import { TezosNodeWriter, TezosParameterFormat } from 'conseiljs';
+import { operationArguments } from '../utilities/OperationArguments'
 
-const tezosNode = 'https://tezos-dev.cryptonomic-infra.tech/';
-
-async function deployContract() {
-    const keystore = {
-        publicKey: 'edpkuuGJ4ssH3N5k7ovwkBe16p8rVX1XLENiZ4FAayrcwUf9sCKXnG',
-        privateKey: 'edskRpVqFG2FHo11aB9pzbnHBiPBWhNWdwtNyQSfEEhDf5jhFbAtNS41vg9as7LSYZv6rEbtJTwyyEg9cNDdcAkSr9Z7hfvquB',
-        publicKeyHash: 'tz1WpPzK6NwWVTJcXqFvYmoA6msQeVy1YP6z',
-        seed: '',
-        storeType: StoreType.Fundraiser
-    };
-
+export async function deployContract(opArgs: operationArguments) {
     const michelson = `
     parameter
    (or (pair address (pair address nat))
@@ -607,9 +598,7 @@ async function deployContract() {
                                           PAIR } } } } } } } } } }
     `;
     const michelson_storage = 'Pair {} (Pair "tz1WpPzK6NwWVTJcXqFvYmoA6msQeVy1YP6z" (Pair False 0))';
-    const result = await TezosNodeWriter.sendContractOriginationOperation(tezosNode, keystore, 0, undefined, false, true, 15000000, '', 5392, 144382, michelson, michelson_storage, TezosParameterFormat.Michelson);
+    const result = await TezosNodeWriter.sendContractOriginationOperation(opArgs.server, opArgs.keyStore, 0, undefined, false, true, 15000000, '', 5392, 144382, michelson, michelson_storage, TezosParameterFormat.Michelson);
 
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }
-
-deployContract();
