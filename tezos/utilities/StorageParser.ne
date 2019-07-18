@@ -22,7 +22,7 @@ const lexer = moo.compile({
 # Pass your lexer object using the @lexer option:
 @lexer lexer
 
-# Michelson Storage Grammar
+# Storage Data
 data ->
     # Primitives
     %string {% id %}
@@ -35,12 +35,12 @@ data ->
   | %doubleArgData _ data _ data {% doubleArgDataFlatten %}
   | %lparen _ %doubleArgData _ data _ data _ %rparen {% doubleArgDataWithParenFlatten %}
 
-    # Advanced Structures
+    # Data Structures
   | %lbrace _ %rbrace {% (d: Array<string>) => "{}" %}
   | %lbrace _ data _ %semicolon:? _ data:? _ %rbrace {% listFlatten %}
   | %lbrace _ element:+ _ %rbrace {% mapFlatten %}
 
-# Map Element
+# Map Elements
 element ->
     %elt _ data _ data _ {% elementFlatten %}
   | %semicolon _ %elt _ data _ data _ {% elementWithSemicolonFlatten %}
@@ -55,7 +55,7 @@ _ -> [\s]:*
     const doubleArgDataFlatten = (d: Array<string>) => { return `${d[2]}, ${d[4]}`; }
     const doubleArgDataWithParenFlatten = (d: Array<string>) => { return `${d[4]}, ${d[6]}`; }
 
-    const listFlatten = (d: Array<string>) => { return `` }
+    const listFlatten = (d: Array<string>) => { return `${d[2]}, ${d[6]}` }
     const mapFlatten = (d: Array<string>) => { return `{${d[2]}}` }
     const elementFlatten = (d: Array<string>) => { return `[${d[2]}, (${d[4]})]`; }
     const elementWithSemicolonFlatten = (d: Array<string>) => { return ` [${d[4]}, (${d[6]})]`; }
