@@ -1,7 +1,12 @@
-import { TezosNodeWriter, TezosParameterFormat } from 'conseiljs';
-import { operationArguments } from '../utilities/OperationArguments'
+import { TezosNodeWriter, TezosParameterFormat, KeyStore } from 'conseiljs';
 
-export async function deployContract(opArgs: operationArguments) {
+/**
+ * Deploys an instance of the Tezos Managed Ledger smart contract.
+ * 
+ * @param tezosNode - The web address of the Tezos node through which the deploy operation is sent
+ * @param keystore - The sender's account information
+ */
+export async function deployContract(tezosNode: string, keystore: KeyStore) {
     const michelson = `
     parameter
    (or (pair address (pair address nat))
@@ -598,7 +603,7 @@ export async function deployContract(opArgs: operationArguments) {
                                           PAIR } } } } } } } } } }
     `;
     const michelson_storage = 'Pair {} (Pair "tz1WpPzK6NwWVTJcXqFvYmoA6msQeVy1YP6z" (Pair False 0))';
-    const result = await TezosNodeWriter.sendContractOriginationOperation(opArgs.server, opArgs.keyStore, 0, undefined, false, true, 15000000, '', 5392, 144382, michelson, michelson_storage, TezosParameterFormat.Michelson);
+    const result = await TezosNodeWriter.sendContractOriginationOperation(tezosNode, keystore, 0, undefined, false, true, 15000000, '', 5392, 144382, michelson, michelson_storage, TezosParameterFormat.Michelson);
 
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }

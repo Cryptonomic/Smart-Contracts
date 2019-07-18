@@ -44,7 +44,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var conseiljs_1 = require("conseiljs");
 var StorageProcessor = __importStar(require("../utilities/StorageProcessor"));
-// Implementation of FA1.2
+// <!-- Implementation of FA1.2 -->
 /**
  * Sends the given amount of tokens from one address to another address.
  *
@@ -162,7 +162,7 @@ function getTotalSupply(totalSupply, opArgs) {
     });
 }
 exports.getTotalSupply = getTotalSupply;
-// Additional operations
+// <!-- Additional operations -->
 /**
  * Pauses operations when the parameter is True, and resumes them when the parameter is False.
  * During the pause, no contract can perform transfer or approval operations.
@@ -278,98 +278,141 @@ function burn(from, value, opArgs) {
     });
 }
 exports.burn = burn;
-function viewStorage(opArgs) {
+/**
+ * Gets the entire contents of storage.
+ *
+ * @param contractAddress - The address of a Tezos Managed Ledger smart contract
+ * @param conseilServer - Information for querying a Conseil server
+ * @param network - The Tezos network on which the Tezos Managed Ledger is deployed
+ * @returns The entire contents of storage
+ */
+function viewStorage(contractAddress, conseilServer, network) {
     return __awaiter(this, void 0, void 0, function () {
         var storage, formattedStorage;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, StorageProcessor.processStorage(opArgs.to)];
+                case 0: return [4 /*yield*/, StorageProcessor.processStorage(contractAddress, conseilServer, network)];
                 case 1:
                     storage = _a.sent();
                     formattedStorage = { ledger: storage[0], admin: storage[1], paused: storage[2], totalSupply: storage[3] };
-                    console.log(formattedStorage);
                     return [2 /*return*/, formattedStorage];
             }
         });
     });
 }
 exports.viewStorage = viewStorage;
-function viewAllowance(address, opArgs) {
+/**
+ * Gets the token allowance permitted by a given account to the sender.
+ *
+ * @param address - The account permitting the token allowance to the sender
+ * @param contractAddress - The address of a Tezos Managed Ledger smart contract
+ * @param conseilServer - Information for querying a Conseil server
+ * @param network - The Tezos network on which the Tezos Managed Ledger is deployed
+ * @returns The token allowance permitted by a given account to the sender
+ */
+function viewAllowance(address, contractAddress, conseilServer, network) {
     return __awaiter(this, void 0, void 0, function () {
         var storage, ledger, account, allowance;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, StorageProcessor.processStorage(opArgs.to)];
+                case 0: return [4 /*yield*/, StorageProcessor.processStorage(contractAddress, conseilServer, network)];
                 case 1:
                     storage = _a.sent();
                     ledger = StorageProcessor.processMap(storage[0]);
                     account = ledger.get(address);
                     allowance = StorageProcessor.processElement(account, 1);
-                    console.log("Allowance of " + address + ": " + allowance);
                     return [2 /*return*/, allowance];
             }
         });
     });
 }
 exports.viewAllowance = viewAllowance;
-function viewBalance(address, opArgs) {
+/**
+ * Gets the token balance of a given account.
+ *
+ * @param address - The account from which the token balance is retrieved
+ * @param contractAddress - The address of a Tezos Managed Ledger smart contract
+ * @param conseilServer - Information for querying a Conseil server
+ * @param network - The Tezos network on which the Tezos Managed Ledger is deployed
+ * @returns The token balance of a given account
+ */
+function viewBalance(address, contractAddress, conseilServer, network) {
     return __awaiter(this, void 0, void 0, function () {
         var storage, ledger, account, balance;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, StorageProcessor.processStorage(opArgs.to)];
+                case 0: return [4 /*yield*/, StorageProcessor.processStorage(contractAddress, conseilServer, network)];
                 case 1:
                     storage = _a.sent();
                     ledger = StorageProcessor.processMap(storage[0]);
-                    console.log(ledger);
                     account = ledger.get(address);
                     balance = StorageProcessor.processElement(account, 0);
-                    console.log("Balance of " + address + ": " + balance);
                     return [2 /*return*/, balance];
             }
         });
     });
 }
 exports.viewBalance = viewBalance;
-function viewTotalSupply(opArgs) {
+/**
+ * Gets the total supply of tokens.
+ *
+ * @param contractAddress - The address of a Tezos Managed Ledger smart contract
+ * @param conseilServer - Information for querying a Conseil server
+ * @param network - The Tezos network on which the Tezos Managed Ledger is deployed
+ * @returns The total supply of tokens
+ */
+function viewTotalSupply(contractAddress, conseilServer, network) {
     return __awaiter(this, void 0, void 0, function () {
         var storage;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, StorageProcessor.processStorage(opArgs.to)];
+                case 0: return [4 /*yield*/, StorageProcessor.processStorage(contractAddress, conseilServer, network)];
                 case 1:
                     storage = _a.sent();
-                    console.log("Total Supply: " + storage[3]);
                     return [2 /*return*/, storage[3]];
             }
         });
     });
 }
 exports.viewTotalSupply = viewTotalSupply;
-function viewPaused(opArgs) {
+/**
+ * Gets the pause state.
+ *
+ * @param contractAddress - The address of a Tezos Managed Ledger smart contract
+ * @param conseilServer - Information for querying a Conseil server
+ * @param network - The Tezos network on which the Tezos Managed Ledger is deployed
+ * @returns The pause state
+ */
+function viewPaused(contractAddress, conseilServer, network) {
     return __awaiter(this, void 0, void 0, function () {
         var storage;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, StorageProcessor.processStorage(opArgs.to)];
+                case 0: return [4 /*yield*/, StorageProcessor.processStorage(contractAddress, conseilServer, network)];
                 case 1:
                     storage = _a.sent();
-                    console.log("Paused: " + storage[2]);
                     return [2 /*return*/, storage[2]];
             }
         });
     });
 }
 exports.viewPaused = viewPaused;
-function viewAdmin(opArgs) {
+/**
+ * Gets the address of the administrator.
+ *
+ * @param contractAddress - The address of a Tezos Managed Ledger smart contract
+ * @param conseilServer - Information for querying a Conseil server
+ * @param network - The Tezos network on which the Tezos Managed Ledger is deployed
+ * @returns The address of the administrator
+ */
+function viewAdmin(contractAddress, conseilServer, network) {
     return __awaiter(this, void 0, void 0, function () {
         var storage;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, StorageProcessor.processStorage(opArgs.to)];
+                case 0: return [4 /*yield*/, StorageProcessor.processStorage(contractAddress, conseilServer, network)];
                 case 1:
                     storage = _a.sent();
-                    console.log("Admin: " + storage[1]);
                     return [2 /*return*/, storage[1]];
             }
         });

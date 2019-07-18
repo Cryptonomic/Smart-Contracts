@@ -1,8 +1,8 @@
-import { TezosNodeWriter, TezosParameterFormat } from 'conseiljs';
+import { TezosNodeWriter, TezosParameterFormat, ConseilServerInfo } from 'conseiljs';
 import * as StorageProcessor from '../utilities/StorageProcessor'
 import { operationArguments } from '../utilities/OperationArguments'
 
-// Implementation of FA1.2
+// <!-- Implementation of FA1.2 -->
 
 /**
  * Sends the given amount of tokens from one address to another address.
@@ -66,7 +66,7 @@ export async function getTotalSupply(totalSupply: number, opArgs: operationArgum
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }
 
-// Additional operations
+// <!-- Additional operations -->
 
 /**
  * Pauses operations when the parameter is True, and resumes them when the parameter is False.
@@ -128,8 +128,9 @@ export async function burn(from: string, value: number, opArgs: operationArgumen
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }
 
-// View storage
+// <!-- View Storage Functions -->
 
+// Storage elements of a Tezos Managed Ledger
 interface tokenStorage {
     ledger: string;
     admin: string;
@@ -137,46 +138,89 @@ interface tokenStorage {
     totalSupply: string;
 }
 
-export async function viewStorage(opArgs: operationArguments) {
-    const storage: string[] = await StorageProcessor.processStorage(opArgs.to);
+/**
+ * Gets the entire contents of storage.
+ * 
+ * @param contractAddress - The address of a Tezos Managed Ledger smart contract
+ * @param conseilServer - Information for querying a Conseil server
+ * @param network - The Tezos network on which the Tezos Managed Ledger is deployed
+ * @returns The entire contents of storage
+ */
+export async function viewStorage(contractAddress: string, conseilServer: ConseilServerInfo, network: string): Promise<tokenStorage> {
+    const storage: string[] = await StorageProcessor.processStorage(contractAddress, conseilServer, network);
     const formattedStorage: tokenStorage = { ledger: storage[0], admin: storage[1], paused: storage[2], totalSupply: storage[3] }
-    console.log(formattedStorage);
     return formattedStorage;
 }
 
-export async function viewAllowance(address: string, opArgs: operationArguments) {
-    const storage: string[] = await StorageProcessor.processStorage(opArgs.to);
+/**
+ * Gets the token allowance permitted by a given account to the sender.
+ * 
+ * @param address - The account permitting the token allowance to the sender
+ * @param contractAddress - The address of a Tezos Managed Ledger smart contract
+ * @param conseilServer - Information for querying a Conseil server
+ * @param network - The Tezos network on which the Tezos Managed Ledger is deployed
+ * @returns The token allowance permitted by a given account to the sender
+ */
+export async function viewAllowance(address: string, contractAddress: string, conseilServer: ConseilServerInfo, network: string): Promise<string> {
+    const storage: string[] = await StorageProcessor.processStorage(contractAddress, conseilServer, network);
     const ledger: Map<string, string> = StorageProcessor.processMap(storage[0]);
     const account: string = ledger.get(address) as string;
     const allowance: string = StorageProcessor.processElement(account, 1);
-    console.log("Allowance of " + address + ": " + allowance);
     return allowance;
 }
 
-export async function viewBalance(address: string, opArgs: operationArguments) {
-    const storage: string[] = await StorageProcessor.processStorage(opArgs.to);
+/**
+ * Gets the token balance of a given account.
+ * 
+ * @param address - The account from which the token balance is retrieved
+ * @param contractAddress - The address of a Tezos Managed Ledger smart contract
+ * @param conseilServer - Information for querying a Conseil server
+ * @param network - The Tezos network on which the Tezos Managed Ledger is deployed
+ * @returns The token balance of a given account
+ */
+export async function viewBalance(address: string, contractAddress: string, conseilServer: ConseilServerInfo, network: string) {
+    const storage: string[] = await StorageProcessor.processStorage(contractAddress, conseilServer, network);
     const ledger: Map<string, string> = StorageProcessor.processMap(storage[0]);
-    console.log(ledger);
     const account: string = ledger.get(address) as string;
     const balance: string = StorageProcessor.processElement(account, 0);
-    console.log("Balance of " + address + ": " + balance);
     return balance;
 }
 
-export async function viewTotalSupply(opArgs: operationArguments) {
-    const storage: string[] = await StorageProcessor.processStorage(opArgs.to);
-    console.log("Total Supply: " + storage[3]);
+/**
+ * Gets the total supply of tokens.
+ * 
+ * @param contractAddress - The address of a Tezos Managed Ledger smart contract
+ * @param conseilServer - Information for querying a Conseil server
+ * @param network - The Tezos network on which the Tezos Managed Ledger is deployed
+ * @returns The total supply of tokens
+ */
+export async function viewTotalSupply(contractAddress: string, conseilServer: ConseilServerInfo, network: string) {
+    const storage: string[] = await StorageProcessor.processStorage(contractAddress, conseilServer, network);
     return storage[3];
 }
 
-export async function viewPaused(opArgs: operationArguments) {
-    const storage: string[] = await StorageProcessor.processStorage(opArgs.to);
-    console.log("Paused: " + storage[2]);
+/**
+ * Gets the pause state.
+ * 
+ * @param contractAddress - The address of a Tezos Managed Ledger smart contract
+ * @param conseilServer - Information for querying a Conseil server
+ * @param network - The Tezos network on which the Tezos Managed Ledger is deployed
+ * @returns The pause state
+ */
+export async function viewPaused(contractAddress: string, conseilServer: ConseilServerInfo, network: string) {
+    const storage: string[] = await StorageProcessor.processStorage(contractAddress, conseilServer, network);
     return storage[2];
 }
 
-export async function viewAdmin(opArgs: operationArguments) {
-    const storage: string[] = await StorageProcessor.processStorage(opArgs.to);
-    console.log("Admin: " + storage[1]);
+/**
+ * Gets the address of the administrator.
+ * 
+ * @param contractAddress - The address of a Tezos Managed Ledger smart contract
+ * @param conseilServer - Information for querying a Conseil server
+ * @param network - The Tezos network on which the Tezos Managed Ledger is deployed
+ * @returns The address of the administrator
+ */
+export async function viewAdmin(contractAddress: string, conseilServer: ConseilServerInfo, network: string) {
+    const storage: string[] = await StorageProcessor.processStorage(contractAddress, conseilServer, network);
     return storage[1];
 }
