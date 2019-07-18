@@ -1,14 +1,10 @@
-import { TezosConseilClient } from 'conseiljs';
+import { TezosConseilClient, ConseilServerInfo } from 'conseiljs';
+import * as nearley from 'nearley';
 import * as StorageParser from './StorageParser';
 
-const network = 'alphanet';
-const conseilServer = { url: 'https://conseil-dev.cryptonomic-infra.tech:443', apiKey: 'hooman' };
-
-const nearley = require("nearley");
-
-export async function processStorage(address: string): Promise<string[]> {
+export async function processStorage(address: string, conseilServer: ConseilServerInfo, network: string): Promise<string[]> {
     const account: any[] = await TezosConseilClient.getAccount(conseilServer, network, address);
-    const parser = new nearley.Parser(nearley.Grammar.fromCompiled(StorageParser));
+    const parser: any = new nearley.Parser(nearley.Grammar.fromCompiled(StorageParser));
     parser.feed(account[0].storage);
     const rawStorage: string = parser.results[0];
     const processedStorage = splitStorageString(rawStorage);

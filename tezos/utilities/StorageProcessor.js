@@ -43,11 +43,9 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var conseiljs_1 = require("conseiljs");
+var nearley = __importStar(require("nearley"));
 var StorageParser = __importStar(require("./StorageParser"));
-var network = 'alphanet';
-var conseilServer = { url: 'https://conseil-dev.cryptonomic-infra.tech:443', apiKey: 'hooman' };
-var nearley = require("nearley");
-function processStorage(address) {
+function processStorage(address, conseilServer, network) {
     return __awaiter(this, void 0, void 0, function () {
         var account, parser, rawStorage, processedStorage;
         return __generator(this, function (_a) {
