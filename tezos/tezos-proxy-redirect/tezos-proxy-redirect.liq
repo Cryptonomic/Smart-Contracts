@@ -23,9 +23,9 @@ let%init storage = {
     @param storage The storage of this smart contract. *)
 let%entry setDestination
     (destination : address)
-    storage =
+    (storage : storage) =
   if Current.sender () = storage.owner then
     let storage = storage.destination <- destination in
     ([], storage)
   else 
-    failwith ("You do not own this proxy contract")
+    failwith ("You do not own this Proxy Redirect")

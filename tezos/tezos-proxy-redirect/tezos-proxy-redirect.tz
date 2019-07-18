@@ -25,5 +25,5 @@ code { DUP ;
             PAIR @storage %owner ;
             NIL operation ;
             PAIR }
-          { PUSH string "You do not own this proxy contract" ; FAILWITH } ;
+          { PUSH string "You do not own this Proxy Redirect" ; FAILWITH } ;
        DIP { DROP ; DROP } };
