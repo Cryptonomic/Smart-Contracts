@@ -2,7 +2,22 @@
   "name": "Smart-Contracts",
   "version": "1.0.0",
   "description": "Cryptonomic's smart contracts",
-  "main": "index.js",
+  "devDependencies": {
+    "@types/nearley": "^2.11.0",
+    "@types/node": "^12.6.2",
+    "nearley": "^2.16.0",
+    "typescript": "^3.5.3",
+    "webpack": "^4.36.1",
+    "webpack-cli": "^3.3.6"
+  },
+  "dependencies": {
+    "@types/express": "^4.17.0",
+    "common.js": "^1.1.1",
+    "conseiljs": "git://github.com/Cryptonomic/ConseilJS.git#feat/tezos-types",
+    "express": "^4.17.1",
+    "fs": "0.0.1-security",
+    "ts-loader": "^6.0.4"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -16,12 +31,5 @@
   "bugs": {
     "url": "https://github.com/Cryptonomic/Smart-Contracts/issues"
   },
-  "homepage": "https://github.com/Cryptonomic/Smart-Contracts#readme",
-  "devDependencies": {
-    "@types/node": "^12.6.2",
-    "typescript": "^3.5.3"
-  },
-  "dependencies": {
-    "conseiljs": "git://github.com/Cryptonomic/ConseilJS.git#feat/tezos-types"
-  }
+  "homepage": "https://github.com/Cryptonomic/Smart-Contracts#readme"
 }
