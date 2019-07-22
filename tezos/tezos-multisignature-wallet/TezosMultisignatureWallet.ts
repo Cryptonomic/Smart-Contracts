@@ -33,23 +33,22 @@ export async function transfer(counter: number, amount: number, dest: string, si
  * @param delegate - (option key_hash) - new multisig delegate
  * @param sigs - (list (option signature)) - signatures
  */
-export async function action(counter: number, delegate: string, sigs: string) {
-    const parameter = 'Pair (Pair ' + counter + ' (Right ' + delegate + '))';
+export async function changeDelegate(counter: number, delegate: string, sigs: string) {
+    const parameter = 'Pair (Pair ' + counter + ' (Right (Left' + delegate + ')) ' + sigs;
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }
 
 /**
  * change the keys controlling the multisig
+ * 
  * @param counter - (nat) counter, used to prevent replay attacks
  * @param threshold - (nat) new threshold
  * @param keys - (list key) new list of keys
  * @param sigs - (list (option signature)) - signatures
  */
-/*
-export async function getAllowance(counter: number, threshold: number, keys: string, sigs: string) {
-    const parameter = 'Right (Right (Left (Pair (Pair ' + owner + ' ' + spender + ') ' + remaining + '))))';
+export async function changeKeys(counter: number, threshold: number, keys: string, sigs: string) {
+    const parameter = 'Pair (Pair ' + counter + ' (Right (Right (Pair ' + threshold + ' ' + keys + ')))) ' + sigs;
     const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
     console.log(`Injected operation group id ${result.operationGroupID}`);
 }
-*/

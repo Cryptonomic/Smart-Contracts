@@ -77,13 +77,13 @@ exports.transfer = transfer;
  * @param delegate - (option key_hash) - new multisig delegate
  * @param sigs - (list (option signature)) - signatures
  */
-function action(counter, delegate, sigs) {
+function changeDelegate(counter, delegate, sigs) {
     return __awaiter(this, void 0, void 0, function () {
         var parameter, result;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    parameter = 'Pair (Pair ' + counter + ' (Right ' + delegate + '))';
+                    parameter = 'Pair (Pair ' + counter + ' (Right (Left' + delegate + ')) ' + sigs;
                     return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
                 case 1:
                     result = _a.sent();
@@ -93,18 +93,29 @@ function action(counter, delegate, sigs) {
         });
     });
 }
-exports.action = action;
+exports.changeDelegate = changeDelegate;
 /**
  * change the keys controlling the multisig
+ *
  * @param counter - (nat) counter, used to prevent replay attacks
  * @param threshold - (nat) new threshold
  * @param keys - (list key) new list of keys
  * @param sigs - (list (option signature)) - signatures
  */
-/*
-export async function getAllowance(counter: number, threshold: number, keys: string, sigs: string) {
-    const parameter = 'Right (Right (Left (Pair (Pair ' + owner + ' ' + spender + ') ' + remaining + '))))';
-    const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
-    console.log(`Injected operation group id ${result.operationGroupID}`);
+function changeKeys(counter, threshold, keys, sigs) {
+    return __awaiter(this, void 0, void 0, function () {
+        var parameter, result;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    parameter = 'Pair (Pair ' + counter + ' (Right (Right (Pair ' + threshold + ' ' + keys + ')))) ' + sigs;
+                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
+                case 1:
+                    result = _a.sent();
+                    console.log("Injected operation group id " + result.operationGroupID);
+                    return [2 /*return*/];
+            }
+        });
+    });
 }
-*/ 
+exports.changeKeys = changeKeys;
