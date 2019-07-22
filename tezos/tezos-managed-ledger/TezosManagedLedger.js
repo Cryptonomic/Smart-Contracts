@@ -54,16 +54,13 @@ var StorageProcessor = __importStar(require("../utilities/StorageProcessor"));
  */
 function transfer(from, to, value, opArgs) {
     return __awaiter(this, void 0, void 0, function () {
-        var parameter, result;
+        var parameter;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    parameter = 'Left (Pair ' + from + ' (Pair ' + to + ' ' + value + '))';
+                    parameter = 'Left (Pair "' + from + '" (Pair "' + to + '" ' + value + '))';
                     return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
-                case 1:
-                    result = _a.sent();
-                    console.log("Injected operation group id " + result.operationGroupID);
-                    return [2 /*return*/];
+                case 1: return [2 /*return*/, _a.sent()];
             }
         });
     });
@@ -78,16 +75,13 @@ exports.transfer = transfer;
  */
 function approve(spender, value, opArgs) {
     return __awaiter(this, void 0, void 0, function () {
-        var parameter, result;
+        var parameter;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    parameter = 'Right (Left (Pair ' + spender + ' ' + value + '))';
+                    parameter = 'Right (Left (Pair "' + spender + '" ' + value + '))';
                     return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
-                case 1:
-                    result = _a.sent();
-                    console.log("Injected operation group id " + result.operationGroupID);
-                    return [2 /*return*/];
+                case 1: return [2 /*return*/, _a.sent()];
             }
         });
     });
@@ -102,16 +96,13 @@ exports.approve = approve;
  */
 function getAllowance(owner, spender, remaining, opArgs) {
     return __awaiter(this, void 0, void 0, function () {
-        var parameter, result;
+        var parameter;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    parameter = 'Right (Right (Left (Pair (Pair ' + owner + ' ' + spender + ') ' + remaining + '))))';
+                    parameter = 'Right (Right (Left (Pair (Pair "' + owner + '" "' + spender + '") ' + remaining + '))))';
                     return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
-                case 1:
-                    result = _a.sent();
-                    console.log("Injected operation group id " + result.operationGroupID);
-                    return [2 /*return*/];
+                case 1: return [2 /*return*/, _a.sent()];
             }
         });
     });
@@ -125,16 +116,13 @@ exports.getAllowance = getAllowance;
  */
 function getBalance(owner, balance, opArgs) {
     return __awaiter(this, void 0, void 0, function () {
-        var parameter, result;
+        var parameter;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    parameter = 'Right (Right (Right (Left (Pair ' + owner + ' ' + balance + '))))';
+                    parameter = 'Right (Right (Right (Left (Pair "' + owner + '" ' + balance + '))))';
                     return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
-                case 1:
-                    result = _a.sent();
-                    console.log("Injected operation group id " + result.operationGroupID);
-                    return [2 /*return*/];
+                case 1: return [2 /*return*/, _a.sent()];
             }
         });
     });
@@ -147,16 +135,13 @@ exports.getBalance = getBalance;
  */
 function getTotalSupply(totalSupply, opArgs) {
     return __awaiter(this, void 0, void 0, function () {
-        var parameter, result;
+        var parameter;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     parameter = 'Right (Right (Right (Right (Left (Pair Unit ' + totalSupply + ')))))';
                     return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
-                case 1:
-                    result = _a.sent();
-                    console.log("Injected operation group id " + result.operationGroupID);
-                    return [2 /*return*/];
+                case 1: return [2 /*return*/, _a.sent()];
             }
         });
     });
@@ -168,21 +153,18 @@ exports.getTotalSupply = getTotalSupply;
  * During the pause, no contract can perform transfer or approval operations.
  * The administrator is still allowed to perform his operations.
  *
- * @param pause - Whether the blockchain is frozen or not
+ * @param pause - The pause state of operations
  */
 function setPause(pause, opArgs) {
     return __awaiter(this, void 0, void 0, function () {
-        var input, parameter, result;
+        var input, parameter;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     input = String(pause).charAt(0).toUpperCase() + String(pause).slice(1);
                     parameter = 'Right (Right (Right (Right (Right (Left ' + input + ')))))';
                     return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
-                case 1:
-                    result = _a.sent();
-                    console.log("Injected operation group id " + result.operationGroupID);
-                    return [2 /*return*/];
+                case 1: return [2 /*return*/, _a.sent()];
             }
         });
     });
@@ -195,16 +177,13 @@ exports.setPause = setPause;
  */
 function setAdministrator(administrator, opArgs) {
     return __awaiter(this, void 0, void 0, function () {
-        var parameter, result;
+        var parameter;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    parameter = 'Right (Right (Right (Right (Right (Right (Left ' + administrator + '))))))';
+                    parameter = 'Right (Right (Right (Right (Right (Right (Left "' + administrator + '"))))))';
                     return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
-                case 1:
-                    result = _a.sent();
-                    console.log("Injected operation group id " + result.operationGroupID);
-                    return [2 /*return*/];
+                case 1: return [2 /*return*/, _a.sent()];
             }
         });
     });
@@ -217,16 +196,13 @@ exports.setAdministrator = setAdministrator;
  */
 function getAdministrator(administrator, opArgs) {
     return __awaiter(this, void 0, void 0, function () {
-        var parameter, result;
+        var parameter;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    parameter = 'Right (Right (Right (Right (Right (Right (Right (Left (Pair Unit ' + administrator + '))))))))';
+                    parameter = 'Right (Right (Right (Right (Right (Right (Right (Left (Pair Unit "' + administrator + '"))))))))';
                     return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
-                case 1:
-                    result = _a.sent();
-                    console.log("Injected operation group id " + result.operationGroupID);
-                    return [2 /*return*/];
+                case 1: return [2 /*return*/, _a.sent()];
             }
         });
     });
@@ -240,16 +216,13 @@ exports.getAdministrator = getAdministrator;
  */
 function mint(to, value, opArgs) {
     return __awaiter(this, void 0, void 0, function () {
-        var parameter, result;
+        var parameter;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    parameter = 'Right (Right (Right (Right (Right (Right (Right (Right (Left (Pair ' + to + ' ' + value + ')))))))))';
+                    parameter = 'Right (Right (Right (Right (Right (Right (Right (Right (Left (Pair "' + to + '" ' + value + ')))))))))';
                     return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
-                case 1:
-                    result = _a.sent();
-                    console.log("Injected operation group id " + result.operationGroupID);
-                    return [2 /*return*/];
+                case 1: return [2 /*return*/, _a.sent()];
             }
         });
     });
@@ -263,16 +236,13 @@ exports.mint = mint;
  */
 function burn(from, value, opArgs) {
     return __awaiter(this, void 0, void 0, function () {
-        var parameter, result;
+        var parameter;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    parameter = 'Right (Right (Right (Right (Right (Right (Right (Right (Right (Pair ' + from + ' ' + value + ')))))))))';
+                    parameter = 'Right (Right (Right (Right (Right (Right (Right (Right (Right (Pair "' + from + '" ' + value + ')))))))))';
                     return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
-                case 1:
-                    result = _a.sent();
-                    console.log("Injected operation group id " + result.operationGroupID);
-                    return [2 /*return*/];
+                case 1: return [2 /*return*/, _a.sent()];
             }
         });
     });
@@ -405,7 +375,7 @@ exports.viewPaused = viewPaused;
  * @param network - The Tezos network on which the Tezos Managed Ledger is deployed
  * @returns The address of the administrator
  */
-function viewAdmin(contractAddress, conseilServer, network) {
+function viewAdministrator(contractAddress, conseilServer, network) {
     return __awaiter(this, void 0, void 0, function () {
         var storage;
         return __generator(this, function (_a) {
@@ -418,4 +388,4 @@ function viewAdmin(contractAddress, conseilServer, network) {
         });
     });
 }
-exports.viewAdmin = viewAdmin;
+exports.viewAdministrator = viewAdministrator;

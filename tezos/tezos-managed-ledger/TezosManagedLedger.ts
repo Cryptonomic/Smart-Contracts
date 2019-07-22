@@ -1,6 +1,6 @@
 import { TezosNodeWriter, TezosParameterFormat, ConseilServerInfo } from 'conseiljs';
 import * as StorageProcessor from '../utilities/StorageProcessor'
-import { operationArguments } from '../utilities/OperationArguments'
+import { operationArguments, operationResult } from '../utilities/OperationInformation'
 
 // <!-- Implementation of FA1.2 -->
 
@@ -11,10 +11,9 @@ import { operationArguments } from '../utilities/OperationArguments'
  * @param to - The address of the account to which the tokens are sent
  * @param value - The amount of tokens to send
  */
-export async function transfer(from: string, to: string, value: number, opArgs: operationArguments) {
-    const parameter = 'Left (Pair ' + from + ' (Pair ' + to + ' ' + value + '))';
-    const result = await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
-    console.log(`Injected operation group id ${result.operationGroupID}`);
+export async function transfer(from: string, to: string, value: number, opArgs: operationArguments): Promise<operationResult> {
+    const parameter = 'Left (Pair "' + from + '" (Pair "' + to + '" ' + value + '))';
+    return await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
 }
 
 /**
@@ -24,10 +23,9 @@ export async function transfer(from: string, to: string, value: number, opArgs: 
  * @param spender - The address of the account that can withdraw from your account
  * @param value - The amount of allowance given to the spender
  */
-export async function approve(spender: string, value: number, opArgs: operationArguments) {
-    const parameter = 'Right (Left (Pair ' + spender + ' ' + value + '))';
-    const result = await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
-    console.log(`Injected operation group id ${result.operationGroupID}`);
+export async function approve(spender: string, value: number, opArgs: operationArguments): Promise<operationResult> {
+    const parameter = 'Right (Left (Pair "' + spender + '" ' + value + '))';
+    return await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
 }
 
 /**
@@ -37,10 +35,9 @@ export async function approve(spender: string, value: number, opArgs: operationA
  * @param spender - The address of the account receiving the allowance
  * @param remaining - A contract of type nat
  */
-export async function getAllowance(owner: string, spender: string, remaining: string, opArgs: operationArguments) {
-    const parameter = 'Right (Right (Left (Pair (Pair ' + owner + ' ' + spender + ') ' + remaining + '))))';
-    const result = await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
-    console.log(`Injected operation group id ${result.operationGroupID}`);
+export async function getAllowance(owner: string, spender: string, remaining: string, opArgs: operationArguments): Promise<operationResult> {
+    const parameter = 'Right (Right (Left (Pair (Pair "' + owner + '" "' + spender + '") ' + remaining + '))))';
+    return await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
 }
 
 /**
@@ -49,10 +46,9 @@ export async function getAllowance(owner: string, spender: string, remaining: st
  * @param owner - The address of the account from which the account balance is retrieved
  * @param balance - A contract of type nat
  */
-export async function getBalance(owner: string, balance: string, opArgs: operationArguments) {
-    const parameter = 'Right (Right (Right (Left (Pair ' + owner + ' ' + balance + '))))';
-    const result = await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
-    console.log(`Injected operation group id ${result.operationGroupID}`);
+export async function getBalance(owner: string, balance: string, opArgs: operationArguments): Promise<operationResult> {
+    const parameter = 'Right (Right (Right (Left (Pair "' + owner + '" ' + balance + '))))';
+    return await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
 }
 
 /**
@@ -60,10 +56,9 @@ export async function getBalance(owner: string, balance: string, opArgs: operati
  * 
  * @param totalSupply - A contract of type nat
  */
-export async function getTotalSupply(totalSupply: number, opArgs: operationArguments) {
+export async function getTotalSupply(totalSupply: number, opArgs: operationArguments): Promise<operationResult> {
     const parameter = 'Right (Right (Right (Right (Left (Pair Unit ' + totalSupply + ')))))';
-    const result = await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
-    console.log(`Injected operation group id ${result.operationGroupID}`);
+    return await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
 }
 
 // <!-- Additional operations -->
@@ -73,13 +68,12 @@ export async function getTotalSupply(totalSupply: number, opArgs: operationArgum
  * During the pause, no contract can perform transfer or approval operations.
  * The administrator is still allowed to perform his operations.
  * 
- * @param pause - Whether the blockchain is frozen or not
+ * @param pause - The pause state of operations
  */
-export async function setPause(pause: boolean, opArgs: operationArguments) {
+export async function setPause(pause: boolean, opArgs: operationArguments): Promise<operationResult> {
     const input = String(pause).charAt(0).toUpperCase() + String(pause).slice(1);
     const parameter = 'Right (Right (Right (Right (Right (Left ' + input + ')))))';
-    const result = await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
-    console.log(`Injected operation group id ${result.operationGroupID}`);
+    return await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
 }
 
 /**
@@ -87,10 +81,9 @@ export async function setPause(pause: boolean, opArgs: operationArguments) {
  * 
  * @param administrator - The address of the new administrator
  */
-export async function setAdministrator(administrator: string, opArgs: operationArguments) {
-    const parameter = 'Right (Right (Right (Right (Right (Right (Left ' + administrator + '))))))';
-    const result = await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
-    console.log(`Injected operation group id ${result.operationGroupID}`);
+export async function setAdministrator(administrator: string, opArgs: operationArguments): Promise<operationResult> {
+    const parameter = 'Right (Right (Right (Right (Right (Right (Left "' + administrator + '"))))))';
+    return await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
 }
 
 /**
@@ -98,10 +91,9 @@ export async function setAdministrator(administrator: string, opArgs: operationA
  * 
  * @param administrator - A contract of type string
  */
-export async function getAdministrator(administrator: string, opArgs: operationArguments) {
-    const parameter = 'Right (Right (Right (Right (Right (Right (Right (Left (Pair Unit ' + administrator + '))))))))';
-    const result = await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
-    console.log(`Injected operation group id ${result.operationGroupID}`);
+export async function getAdministrator(administrator: string, opArgs: operationArguments): Promise<operationResult> {
+    const parameter = 'Right (Right (Right (Right (Right (Right (Right (Left (Pair Unit "' + administrator + '"))))))))';
+    return await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
 }
 
 /**
@@ -110,10 +102,9 @@ export async function getAdministrator(administrator: string, opArgs: operationA
  * @param to - The address to which the newly minted tokens are sent
  * @param value - The amount of tokens to mint
  */
-export async function mint(to: string, value: number, opArgs: operationArguments) {
-    const parameter = 'Right (Right (Right (Right (Right (Right (Right (Right (Left (Pair ' + to + ' ' + value + ')))))))))';
-    const result = await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
-    console.log(`Injected operation group id ${result.operationGroupID}`);
+export async function mint(to: string, value: number, opArgs: operationArguments): Promise<operationResult> {
+    const parameter = 'Right (Right (Right (Right (Right (Right (Right (Right (Left (Pair "' + to + '" ' + value + ')))))))))';
+    return await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
 }
 
 /**
@@ -122,10 +113,9 @@ export async function mint(to: string, value: number, opArgs: operationArguments
  * @param from - The account from which the tokens are destroyed
  * @param value - The amount of tokens to destroy
  */
-export async function burn(from: string, value: number, opArgs: operationArguments) {
-    const parameter = 'Right (Right (Right (Right (Right (Right (Right (Right (Right (Pair ' + from + ' ' + value + ')))))))))';
-    const result = await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
-    console.log(`Injected operation group id ${result.operationGroupID}`);
+export async function burn(from: string, value: number, opArgs: operationArguments): Promise<operationResult> {
+    const parameter = 'Right (Right (Right (Right (Right (Right (Right (Right (Right (Pair "' + from + '" ' + value + ')))))))))';
+    return await TezosNodeWriter.sendContractInvocationOperation(opArgs.server, opArgs.keyStore, opArgs.to, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
 }
 
 // <!-- View Storage Functions -->
@@ -220,7 +210,7 @@ export async function viewPaused(contractAddress: string, conseilServer: Conseil
  * @param network - The Tezos network on which the Tezos Managed Ledger is deployed
  * @returns The address of the administrator
  */
-export async function viewAdmin(contractAddress: string, conseilServer: ConseilServerInfo, network: string) {
+export async function viewAdministrator(contractAddress: string, conseilServer: ConseilServerInfo, network: string) {
     const storage: string[] = await StorageProcessor.processStorage(contractAddress, conseilServer, network);
     return storage[1];
 }
