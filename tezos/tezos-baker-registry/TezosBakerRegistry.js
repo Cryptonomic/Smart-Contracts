@@ -34,80 +34,115 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 var conseiljs_1 = require("conseiljs");
-var tezosNode = 'https://tezos-dev.cryptonomic-infra.tech/';
-var keystore = {
-    publicKey: 'edpkuuGJ4ssH3N5k7ovwkBe16p8rVX1XLENiZ4FAayrcwUf9sCKXnG',
-    privateKey: 'edskRpVqFG2FHo11aB9pzbnHBiPBWhNWdwtNyQSfEEhDf5jhFbAtNS41vg9as7LSYZv6rEbtJTwyyEg9cNDdcAkSr9Z7hfvquB',
-    publicKeyHash: 'tz1WpPzK6NwWVTJcXqFvYmoA6msQeVy1YP6z',
-    seed: '',
-    storeType: conseiljs_1.StoreType.Fundraiser
-};
-var contractAddress = 'KT1NpCh6tNQDmbmAVbGLxwRBx8jJD4rEFnmC'; // Tezos Baker Registry - Alphanet
-function updateName(name) {
+var fs_1 = __importDefault(require("fs"));
+/**
+ * Deploys an instance of the Tezos Baker Registry.
+ *
+ * @param {string} initialStorage - The initial storage in Michelson
+ * @param {string} tezosNode - The URL of the Tezos node to connect to
+ * @param {KeyStore} keyStore - The sender's key store with key pair and public key hash
+ * @returns {Promise<OperationResult>} The result of the operation
+ */
+function deployContract(initialStorage, tezosNode, keyStore) {
+    if (initialStorage === void 0) { initialStorage = 'Pair {} (Pair {} "Author: Teckhua Chiang, Company: Cryptonomic")'; }
     return __awaiter(this, void 0, void 0, function () {
-        var parameter, result;
+        var contractCode;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    parameter = 'Left ' + name;
-                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
-                case 1:
-                    result = _a.sent();
-                    console.log("Injected operation group id " + result.operationGroupID);
-                    return [2 /*return*/];
+                    contractCode = fs_1.default.readFileSync('tezos-baker-registry', 'utf8');
+                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractOriginationOperation(tezosNode, keyStore, 0, undefined, false, true, 100000, '', 1000, 100000, contractCode, initialStorage, conseiljs_1.TezosParameterFormat.Michelson)];
+                case 1: return [2 /*return*/, _a.sent()];
+            }
+        });
+    });
+}
+exports.deployContract = deployContract;
+/**
+ * Entry point for a baker to update their name.
+ *
+ * @param {string} name - A string representing the updated name
+ * @param {InvocationArguments} invokeArgs - The arguments for a contract invocation operation
+ * @returns {Promise<OperationResult>} The result of the operation
+ */
+function updateName(name, invokeArgs) {
+    return __awaiter(this, void 0, void 0, function () {
+        var parameters;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    parameters = 'Left ' + name;
+                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(invokeArgs.tezosNode, invokeArgs.keyStore, invokeArgs.contractAddress, 0, 50000, '', 1000, 100000, parameters, conseiljs_1.TezosParameterFormat.Michelson)];
+                case 1: return [2 /*return*/, _a.sent()];
             }
         });
     });
 }
 exports.updateName = updateName;
-function updatePaymentAddress(paymentAddress) {
+/**
+ * Entry point for a baker to update their payment address.
+ *
+ * @param {string} paymentAddress - A string representing the updated payment address
+ * @param {InvocationArguments} invokeArgs - The arguments for a contract invocation operation
+ * @returns {Promise<OperationResult>} The result of the operation
+ */
+function updatePaymentAddress(paymentAddress, invokeArgs) {
     return __awaiter(this, void 0, void 0, function () {
-        var parameter, result;
+        var parameters;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    parameter = 'Right (Left ' + paymentAddress + ')';
-                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
-                case 1:
-                    result = _a.sent();
-                    console.log("Injected operation group id " + result.operationGroupID);
-                    return [2 /*return*/];
+                    parameters = 'Right (Left ' + paymentAddress + ')';
+                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(invokeArgs.tezosNode, invokeArgs.keyStore, invokeArgs.contractAddress, 0, 50000, '', 1000, 100000, parameters, conseiljs_1.TezosParameterFormat.Michelson)];
+                case 1: return [2 /*return*/, _a.sent()];
             }
         });
     });
 }
 exports.updatePaymentAddress = updatePaymentAddress;
-function updateTerms(cycle, fee, minimum) {
+/**
+ * Entry point for a baker to update their fee and minimum as of a cycle.
+ *
+ * @param {number} cycle - An int representing the effective cycle
+ * @param {number} fee - An int representing the updated fee
+ * @param {number} minimum - A tez amount representing the updated minimum
+ * @param {InvocationArguments} invokeArgs - The arguments for a contract invocation operation
+ * @returns {Promise<OperationResult>} The result of the operation
+ */
+function updateTerms(cycle, fee, minimum, invokeArgs) {
     return __awaiter(this, void 0, void 0, function () {
-        var parameter, result;
+        var parameters;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    parameter = 'Right (Right (Left (Pair ' + cycle + ' (Pair ' + fee + ' ' + minimum + '))))';
-                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
-                case 1:
-                    result = _a.sent();
-                    console.log("Injected operation group id " + result.operationGroupID);
-                    return [2 /*return*/];
+                    parameters = 'Right (Right (Left (Pair ' + cycle + ' (Pair ' + fee + ' ' + minimum + '))))';
+                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(invokeArgs.tezosNode, invokeArgs.keyStore, invokeArgs.contractAddress, 0, 50000, '', 1000, 100000, parameters, conseiljs_1.TezosParameterFormat.Michelson)];
+                case 1: return [2 /*return*/, _a.sent()];
             }
         });
     });
 }
 exports.updateTerms = updateTerms;
-function deleteRegistration() {
+/**
+ * Entry point for a baker to delete their registration information.
+ *
+ * @param {InvocationArguments} invokeArgs - The arguments for a contract invocation operation
+ * @returns {Promise<OperationResult>} The result of the operation
+ */
+function deleteRegistration(invokeArgs) {
     return __awaiter(this, void 0, void 0, function () {
-        var parameter, result;
+        var parameters;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    parameter = 'Right (Right (Right Unit))';
-                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 50000, '', 1000, 100000, parameter, conseiljs_1.TezosParameterFormat.Michelson)];
-                case 1:
-                    result = _a.sent();
-                    console.log("Injected operation group id " + result.operationGroupID);
-                    return [2 /*return*/];
+                    parameters = 'Right (Right (Right Unit))';
+                    return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractInvocationOperation(invokeArgs.tezosNode, invokeArgs.keyStore, invokeArgs.contractAddress, 0, 50000, '', 1000, 100000, parameters, conseiljs_1.TezosParameterFormat.Michelson)];
+                case 1: return [2 /*return*/, _a.sent()];
             }
         });
     });
