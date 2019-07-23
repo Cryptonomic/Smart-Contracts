@@ -1,12 +1,7 @@
-import { KeyStore, AlphaOperationsWithMetadata } from 'conseiljs';
+import { KeyStore } from 'conseiljs';
 
-export interface operationArguments {
-    server: string,
+export interface InvocationArguments {
+    tezosNode: string,
     keyStore: KeyStore;
-    to: string;
-}
-
-export interface operationResult {
-    results: AlphaOperationsWithMetadata,
-    operationGroupID: string;
+    contractAddress: string;
 }
