@@ -1,54 +1,60 @@
-import { TezosNodeWriter, StoreType, TezosParameterFormat } from 'conseiljs';
+import { TezosNodeWriter, TezosParameterFormat, OperationResult, KeyStore } from 'conseiljs';
+import fs from 'fs';
+import { InvocationArguments } from '../utilities/InvocationArguments';
 
-const tezosNode = 'https://tezos-dev.cryptonomic-infra.tech/';
-
-const keystore = {
-    publicKey: 'edpkuuGJ4ssH3N5k7ovwkBe16p8rVX1XLENiZ4FAayrcwUf9sCKXnG',
-    privateKey: 'edskRpVqFG2FHo11aB9pzbnHBiPBWhNWdwtNyQSfEEhDf5jhFbAtNS41vg9as7LSYZv6rEbtJTwyyEg9cNDdcAkSr9Z7hfvquB',
-    publicKeyHash: 'tz1WpPzK6NwWVTJcXqFvYmoA6msQeVy1YP6z',
-    seed: '',
-    storeType: StoreType.Fundraiser
-};
-
-const contractAddress = 'KT1BzMC1KL6bEkyiGXUGTd6AGjL1ibFxyxyM'; // Tezos Multisignature Wallet - Alphanet
+/**
+ * Deploys an instance of the Tezos Multisignature Wallet.
+ * 
+ * @param {string} initialStorage - The initial storage in Michelson
+ * @param {string} tezosNode - The URL of the Tezos node to connect to
+ * @param {KeyStore} keyStore - The sender's key store with key pair and public key hash
+ * @returns {Promise<OperationResult>} The result of the operation
+ */
+export async function deployContract(initialStorage: string = 'Pair 0 (Pair 2 {})', tezosNode: string, keyStore: KeyStore, invokeArgs: InvocationArguments): Promise<OperationResult> {
+    const contractCode: string = fs.readFileSync('tezos-multisignature-wallet.tz','utf8');
+    return await TezosNodeWriter.sendContractOriginationOperation(tezosNode, keyStore, 0, undefined, false, true, 100000, '', 1000, 100000, contractCode, initialStorage, TezosParameterFormat.Michelson);
+}
 
 /**
  * transfer tokens
  * 
- * @param counter - (nat) counter, used to prevent replay attacks
- * @param amount - (mutez) amount to transfer
- * @param dest - (contract unit) destination to transfer to
- * @param sigs - (list (option signature)) signatures
+ * @param {number} counter - (nat) counter, used to prevent replay attacks
+ * @param {number} amount - (mutez) amount to transfer
+ * @param {string} dest - (contract unit) destination to transfer to
+ * @param {string} sigs - (list (option signature)) signatures
+ * @param {InvocationArguments} invokeArgs - The arguments for a contract invocation operation
+ * @returns {Promise<OperationResult>} The result of the operation
  */
-export async function transfer(counter: number, amount: number, dest: string, sigs: string) {
+export async function transfer(counter: number, amount: number, dest: string, sigs: string, invokeArgs: InvocationArguments) {
     const parameter = 'Pair (Pair '+ counter + ' (Left (Pair ' + amount + ' ' + dest + '))) ' + sigs;
-    const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
-    console.log(`Injected operation group id ${result.operationGroupID}`);
+    return await TezosNodeWriter.sendContractInvocationOperation(invokeArgs.tezosNode, invokeArgs.keyStore, invokeArgs.contractAddress, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
 }
 
 /**
  * change the delegate to this address
  * 
- * @param counter - (nat) counter, used to prevent replay attacks
- * @param delegate - (option key_hash) - new multisig delegate
- * @param sigs - (list (option signature)) - signatures
+ * @param {number} counter - (nat) counter, used to prevent replay attacks
+ * @param {string} delegate - (option key_hash) - new multisig delegate
+ * @param {string} sigs - (list (option signature)) - signatures
+ * @param {InvocationArguments} invokeArgs - The arguments for a contract invocation operation
+ * @returns {Promise<OperationResult>} The result of the operation
  */
-export async function changeDelegate(counter: number, delegate: string, sigs: string) {
+export async function changeDelegate(counter: number, delegate: string, sigs: string, invokeArgs: InvocationArguments) {
     const parameter = 'Pair (Pair ' + counter + ' (Right (Left' + delegate + ')) ' + sigs;
-    const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
-    console.log(`Injected operation group id ${result.operationGroupID}`);
+    return await TezosNodeWriter.sendContractInvocationOperation(invokeArgs.tezosNode, invokeArgs.keyStore, invokeArgs.contractAddress, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
 }
 
 /**
  * change the keys controlling the multisig
  * 
- * @param counter - (nat) counter, used to prevent replay attacks
- * @param threshold - (nat) new threshold
- * @param keys - (list key) new list of keys
- * @param sigs - (list (option signature)) - signatures
+ * @param {number} counter - (nat) counter, used to prevent replay attacks
+ * @param {number} threshold - (nat) new threshold
+ * @param {string} keys - (list key) new list of keys
+ * @param {string} sigs - (list (option signature)) - signatures
+ * @param {InvocationArguments} invokeArgs - The arguments for a contract invocation operation
+ * @returns {Promise<OperationResult>} The result of the operation
  */
-export async function changeKeys(counter: number, threshold: number, keys: string, sigs: string) {
+export async function changeKeys(counter: number, threshold: number, keys: string, sigs: string, invokeArgs: InvocationArguments) {
     const parameter = 'Pair (Pair ' + counter + ' (Right (Right (Pair ' + threshold + ' ' + keys + ')))) ' + sigs;
-    const result = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keystore, contractAddress, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
-    console.log(`Injected operation group id ${result.operationGroupID}`);
+    return await TezosNodeWriter.sendContractInvocationOperation(invokeArgs.tezosNode, invokeArgs.keyStore, invokeArgs.contractAddress, 0, 150000, '', 5392, 144382, parameter, TezosParameterFormat.Michelson);
 }
