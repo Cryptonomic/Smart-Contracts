@@ -10,7 +10,7 @@ import { InvocationArguments } from '../utilities/InvocationArguments';
  * @param {KeyStore} keyStore - The sender's key store with key pair and public key hash
  * @returns {Promise<OperationResult>} The result of the operation
  */
-export async function deployContract(initialStorage: string = 'Pair 0 (Pair 2 {})', tezosNode: string, keyStore: KeyStore, invokeArgs: InvocationArguments): Promise<OperationResult> {
+export async function deployContract(initialStorage: string = 'Pair 0 (Pair 2 {})', tezosNode: string, keyStore: KeyStore): Promise<OperationResult> {
     const contractCode: string = fs.readFileSync('tezos-multisignature-wallet.tz','utf8');
     return await TezosNodeWriter.sendContractOriginationOperation(tezosNode, keyStore, 0, undefined, false, true, 100000, '', 1000, 100000, contractCode, initialStorage, TezosParameterFormat.Michelson);
 }
