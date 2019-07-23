@@ -1,5 +1,5 @@
 {
-  "name": "Smart-Contracts",
+  "name": "smart-contracts",
   "version": "1.0.0",
   "description": "Cryptonomic's smart contracts",
   "devDependencies": {
@@ -9,7 +9,7 @@
     "typescript": "^3.5.3"
   },
   "dependencies": {
-    "conseiljs": "git://github.com/Cryptonomic/ConseilJS.git#feat/tezos-types"
+    "conseiljs": "^0.2.7"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
