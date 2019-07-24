@@ -12,11 +12,15 @@
     <body onload="viewStorage()">
         <div class="container">
             <div class="jumbotron">
-                <img src="./images/cryptonomic.png" class="cryptonomicLogo">
+                <a href="https://cryptonomic.tech/">
+                    <img src="./images/cryptonomic.png" class="cryptonomicLogo">
+                </a>
                 <h1>Tezos Managed Ledger Tutorial</h1>
             </div>
 
             <div class="controller">
+
+                <!-- Deploy Contract -->
 
                 <div class="entrypoint">
                     <button type="button" class="entrypointButton floatLeft" onclick="deploy()">Deploy Tezos Managed Ledger</button>
@@ -24,7 +28,7 @@
                     <input type="text" class="entrypointInput" id="contractAddress" value="KT1V29tWwy8B4FBZT2aVpyrzMtBntwj6Hxs4"></input>
                 </div>
 
-                <!-- Entry Points -->
+                <!-- Invoke Contract -->
 
                 <div class="entrypoint">
                     <span class="entrypointDescription">Transfer</span>
@@ -78,7 +82,7 @@
                     <button type="button" class="entrypointButton floatRight" onclick="burn()">Burn</button><br>
                 </div>
 
-                <!-- View Functions -->
+                <!-- View Storage -->
 
                 <div class="entrypoint">
                     <span class="entrypointDescription">View the storage manually</span>
@@ -113,6 +117,8 @@
                     <span class="entrypointDescription">View the administrator</span>
                     <button type="button" class="entrypointButton floatRight" onclick="viewAdministrator()">View Administrator</button><br>
                 </div>
+
+                <!-- Stamp -->
 
                 <div class="stamp">
                     <span>Author: Teckhua Chiang | Artist: Angela Chiang | Company: Cryptonomic Inc.</span>
