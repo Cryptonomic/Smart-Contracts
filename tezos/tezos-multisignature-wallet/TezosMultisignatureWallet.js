@@ -48,7 +48,7 @@ var fs_1 = __importDefault(require("fs"));
  * @param {KeyStore} keyStore - The sender's key store with key pair and public key hash
  * @returns {Promise<OperationResult>} The result of the operation
  */
-function deployContract(initialStorage, tezosNode, keyStore, invokeArgs) {
+function deployContract(initialStorage, tezosNode, keyStore) {
     if (initialStorage === void 0) { initialStorage = 'Pair 0 (Pair 2 {})'; }
     return __awaiter(this, void 0, void 0, function () {
         var contractCode;
