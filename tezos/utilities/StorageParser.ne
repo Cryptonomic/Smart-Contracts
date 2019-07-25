@@ -1,22 +1,22 @@
 @preprocessor typescript
 
 @{%
-const moo = require("moo");
+    const moo = require("moo");
 
-const lexer = moo.compile({
-    wspace: /[ \t]+/,
-    lparen: '(',
-    rparen: ')',
-    lbrace: '{',
-    rbrace: '}',
-    zeroArgData: ['Unit', 'True', 'False', 'None'],
-    singleArgData: ['Left', 'Right', 'Some'],
-    doubleArgData: ['Pair'],
-    elt: ['Elt'],
-    number: /-?[0-9]+/,
-    string: /\".*?\"/,
-    semicolon: ';'
-});
+    const lexer = moo.compile({
+        wspace: /[ \t]+/,
+        lparen: '(',
+        rparen: ')',
+        lbrace: '{',
+        rbrace: '}',
+        zeroArgData: ['Unit', 'True', 'False', 'None'],
+        singleArgData: ['Left', 'Right', 'Some'],
+        doubleArgData: ['Pair'],
+        elt: ['Elt'],
+        number: /-?[0-9]+/,
+        string: /\".*?\"/,
+        semicolon: ';'
+    });
 %}
 
 # Pass your lexer object using the @lexer option:
