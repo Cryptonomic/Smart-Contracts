@@ -1,18 +1,17 @@
 import * as DeployTezosManagedLedger from './interfaces/DeployTezosManagedLedger';
 import * as TezosManagedLedger from './interfaces/TezosManagedLedger';
-import * as StorageProcessor from './utilities/StorageProcessor';
 import { operationArguments, operationResult } from './utilities/OperationInformation';
 import { StoreType, KeyStore } from 'conseiljs';
 
 const tezosNode: string = 'https://tezos-dev.cryptonomic-infra.tech/';
 
-    const keystore: KeyStore = {
-        publicKey: 'edpkuuGJ4ssH3N5k7ovwkBe16p8rVX1XLENiZ4FAayrcwUf9sCKXnG',
-        privateKey: 'edskRpVqFG2FHo11aB9pzbnHBiPBWhNWdwtNyQSfEEhDf5jhFbAtNS41vg9as7LSYZv6rEbtJTwyyEg9cNDdcAkSr9Z7hfvquB',
-        publicKeyHash: 'tz1WpPzK6NwWVTJcXqFvYmoA6msQeVy1YP6z',
-        seed: '',
-        storeType: StoreType.Fundraiser
-    };
+const keystore: KeyStore = {
+    publicKey: 'edpkuuGJ4ssH3N5k7ovwkBe16p8rVX1XLENiZ4FAayrcwUf9sCKXnG',
+    privateKey: 'edskRpVqFG2FHo11aB9pzbnHBiPBWhNWdwtNyQSfEEhDf5jhFbAtNS41vg9as7LSYZv6rEbtJTwyyEg9cNDdcAkSr9Z7hfvquB',
+    publicKeyHash: 'tz1WpPzK6NwWVTJcXqFvYmoA6msQeVy1YP6z',
+    seed: '',
+    storeType: StoreType.Fundraiser
+};
 
 const network: string = 'alphanet';
 const conseilServer = { url: 'https://conseil-dev.cryptonomic-infra.tech:443', apiKey: 'BUIDLonTezos-001' };
