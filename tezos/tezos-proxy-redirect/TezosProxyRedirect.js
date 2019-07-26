@@ -55,7 +55,7 @@ function deployContract(initialStorage, tezosNode, keyStore) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    contractCode = fs_1.default.readFileSync('tezos-proxy-redirect.tz', 'utf8');
+                    contractCode = fs_1.default.readFileSync(__dirname + '/tezos-proxy-redirect.tz', 'utf8');
                     return [4 /*yield*/, conseiljs_1.TezosNodeWriter.sendContractOriginationOperation(tezosNode, keyStore, 0, undefined, false, true, 100000, '', 1000, 100000, contractCode, initialStorage, conseiljs_1.TezosParameterFormat.Michelson)];
                 case 1: return [2 /*return*/, _a.sent()];
             }

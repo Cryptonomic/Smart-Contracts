@@ -12,7 +12,7 @@ import { InvocationArguments } from '../utilities/InvocationArguments';
  * @returns {Promise<OperationResult>} The result of the operation
  */
 export async function deployContract(initialStorage: string = 'Pair {} (Pair "tz1WpPzK6NwWVTJcXqFvYmoA6msQeVy1YP6z" (Pair False 0))', tezosNode: string, keyStore: KeyStore): Promise<OperationResult> {
-    const contractCode: string = fs.readFileSync('tezos-managed-ledger.tz','utf8');
+    const contractCode: string = fs.readFileSync(__dirname + '/tezos-managed-ledger.tz', 'utf8');
     return await TezosNodeWriter.sendContractOriginationOperation(tezosNode, keyStore, 0, undefined, false, true, 100000, '', 1000, 100000, contractCode, initialStorage, TezosParameterFormat.Michelson);
 }
 
