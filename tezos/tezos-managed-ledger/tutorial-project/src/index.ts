@@ -19,8 +19,8 @@ const conseilServer = { url: 'https://conseil-dev.cryptonomic-infra.tech:443', a
 // Deploy Function
 
 export async function deploy() {
-    await DeployTezosManagedLedger.deployContract(tezosNode, keystore);
-    document.getElementById('console').innerHTML = `Successfully deployed Tezos Managed Ledger`;
+    const result: operationResult = await DeployTezosManagedLedger.deployContract(tezosNode, keystore);
+    document.getElementById('console').innerHTML = `Injected operation group id ${result.operationGroupID} <br> Successfully deployed Tezos Managed Ledger`;
 }
 
 // Operation Functions
