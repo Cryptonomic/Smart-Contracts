@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Tezos Managed Ledger Tutorial</title>
+
+        <link rel="icon" href="./images/token.png">
+        <link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" type="text/css" href="styles.css">
+        <script src="main.js"></script>
+    </head>
+    <body onload="viewStorage()">
+        <div class="container">
+            <div class="jumbotron">
+                <a href="https://cryptonomic.tech/">
+                    <img src="./images/cryptonomic.png" class="cryptonomicLogo">
+                </a>
+                <h1>Tezos Managed Ledger Tutorial</h1>
+            </div>
+
+            <div class="controller">
+
+                <!-- Deploy Contract -->
+
+                <div class="entrypoint">
+                    <button type="button" class="entrypointButton floatLeft" onclick="deploy()">Deploy Tezos Managed Ledger</button>
+                    <span style="padding-left: 10px">or insert existing Token Managed Ledger address:</span>
+                    <input type="text" class="entrypointInput" id="contractAddress" value="KT1V29tWwy8B4FBZT2aVpyrzMtBntwj6Hxs4"></input>
+                </div>
+
+                <!-- Invoke Contract -->
+
+                <div class="entrypoint">
+                    <span class="entrypointDescription">Transfer</span>
+                    <input type="text" class="entrypointInput" id="transferValue" value="1000"></input>
+                    <span class="entrypointDescription">from</span>
+                    <input type="text" class="entrypointInput" id="transferFrom" value="tz1U8b7PV5w6WEyFNRtFX3RPGVTcmAUAgNn1"></input>
+                    <span class="entrypointDescription">to</span>
+                    <input type="text" class="entrypointInput" id="transferTo" value="tz1Po8u9NrkFKDsXgkiAYKfLrjvmao2TYBce"></input>                    
+
+                    <button type="button" class="entrypointButton floatRight" onclick="transfer()">Transfer</button><br>
+                </div>
+
+                <div class="entrypoint">
+                    <span class="entrypointDescription">Approve</span>
+                    <input type="text" class="entrypointInput" id="approveValue" value="100"></input>
+                    <span class="entrypointDescription">to</span>
+                    <input type="text" class="entrypointInput" id="approveSpender" value="tz1U8b7PV5w6WEyFNRtFX3RPGVTcmAUAgNn1"></input>
+
+                    <button type="button" class="entrypointButton floatRight" onclick="approve()">Approve</button><br>
+                </div>
+
+                <div class="entrypoint">
+                    <span class="entrypointDescription">Set pause state to</span>
+                    <input type="text" class="entrypointInput" id="pause" value="True"></input>
+
+                    <button type="button" class="entrypointButton floatRight" onclick="setPause()">Set Pause</button><br>
+                </div>
+
+                <div class="entrypoint">
+                    <span class="entrypointDescription">Set administrator to</span>
+                    <input type="text" class="entrypointInput" id="administrator" value="tz1WpPzK6NwWVTJcXqFvYmoA6msQeVy1YP6z"></input>
+
+                    <button type="button" class="entrypointButton floatRight" onclick="setAdministrator()">Set Administrator</button><br>
+                </div>
+
+                <div class="entrypoint">
+                    <span class="entrypointDescription">Mint</span>
+                    <input type="text" class="entrypointInput" id="mintValue" value="100"></input>
+                    <span class="entrypointDescription">to</span>
+                    <input type="text" class="entrypointInput" id="mintTo" value="tz1U8b7PV5w6WEyFNRtFX3RPGVTcmAUAgNn1"></input>
+
+                    <button type="button" class="entrypointButton floatRight" onclick="mint()">Mint</button><br>
+                </div>
+
+                <div class="entrypoint">
+                    <span class="entrypointDescription">Burn</span>
+                    <input type="text" class="entrypointInput" id="burnValue" value="100"></input>
+                    <span class="entrypointDescription">from</span>
+                    <input type="text" class="entrypointInput" id="burnFrom" value="tz1U8b7PV5w6WEyFNRtFX3RPGVTcmAUAgNn1"></input>
+
+                    <button type="button" class="entrypointButton floatRight" onclick="burn()">Burn</button><br>
+                </div>
+
+                <!-- View Storage -->
+
+                <div class="entrypoint">
+                    <span class="entrypointDescription">View the storage manually</span>
+                    <button type="button" class="entrypointButton floatRight" onclick="viewStorage()">View Storage</button><br>
+                </div>
+
+                <div class="entrypoint">
+                    <span class="entrypointDescription">View the allowance from</span>
+                    <input type="text" class="entrypointInput" id="viewAllowanceAddress" value="tz1Po8u9NrkFKDsXgkiAYKfLrjvmao2TYBce"></input>
+
+                    <button type="button" class="entrypointButton floatRight" onclick="viewAllowance()">View Allowance</button><br>
+                </div>
+
+                <div class="entrypoint">
+                    <span class="entrypointDescription">View the balance of</span>
+                    <input type="text" class="entrypointInput" id="viewBalanceAddress" value="tz1Po8u9NrkFKDsXgkiAYKfLrjvmao2TYBce"></input>
+
+                    <button type="button" class="entrypointButton floatRight" onclick="viewBalance()">View Balance</button><br>
+                </div>
+
+                <div class="entrypoint">
+                    <span class="entrypointDescription">View the total supply</span>
+                    <button type="button" class="entrypointButton floatRight" onclick="viewTotalSupply()">View Total Supply</button><br>
+                </div>
+
+                <div class="entrypoint">
+                        <span class="entrypointDescription">View the pause state</span>
+                    <button type="button" class="entrypointButton floatRight" onclick="viewPaused()">View Paused</button><br>
+                </div>
+                
+                <div class="entrypoint">
+                    <span class="entrypointDescription">View the administrator</span>
+                    <button type="button" class="entrypointButton floatRight" onclick="viewAdministrator()">View Administrator</button><br>
+                </div>
+
+                <!-- Stamp -->
+
+                <div class="stamp">
+                    <span>Author: Teckhua Chiang | Artist: Angela Chiang | Company: Cryptonomic Inc.</span>
+                </div>
+            </div>
+
+            <!-- Output -->
+
+            <div class="contractStorage">
+                <span>CONTRACT STORAGE:</span><br><br>
+                <div id="contractStorage"></div>
+            </div>
+            
+            <div class="console">
+                <span>CONSOLE LOG:</span><br><br>
+                <div id="console"></div>
+            </div>
+        </div>
+    </body>
+</html>
