@@ -1,7 +1,5 @@
-import * as DeployTezosManagedLedger from './interfaces/DeployTezosManagedLedger';
-import * as TezosManagedLedger from './interfaces/TezosManagedLedger';
 import { operationArguments, operationResult } from './utilities/OperationInformation';
-import { StoreType, KeyStore } from 'conseiljs';
+import { TezosContractIntrospector, StoreType, KeyStore } from 'conseiljs';
 
 const tezosNode: string = 'https://tezos-dev.cryptonomic-infra.tech/';
 
