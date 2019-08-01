@@ -1,0 +1,28 @@
+{
+  "name": "smart-contracts",
+  "version": "1.0.0",
+  "description": "Cryptonomic's smart contracts",
+  "devDependencies": {
+    "@types/nearley": "^2.11.0",
+    "@types/node": "^12.6.2",
+    "nearley": "^2.16.0",
+    "typescript": "^3.5.3"
+  },
+  "dependencies": {
+    "conseiljs": "^0.2.7"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cryptonomic/Smart-Contracts.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Cryptonomic/Smart-Contracts/issues"
+  },
+  "homepage": "https://github.com/Cryptonomic/Smart-Contracts#readme"
+}

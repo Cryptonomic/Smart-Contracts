@@ -1,0 +1,33 @@
+{
+  "name": "tezos-managed-ledger-tutorial",
+  "version": "1.0.0",
+  "description": "Tezos Managed Ledger Tutorial",
+  "devDependencies": {
+    "@types/nearley": "^2.11.0",
+    "@types/node": "^12.6.2",
+    "moo": "^0.5.0",
+    "nearley": "^2.16.0",
+    "terser-webpack-plugin": "^1.3.0",
+    "ts-loader": "^6.0.4",
+    "typescript": "^3.5.3",
+    "webpack": "^4.36.1",
+    "webpack-cli": "^3.3.6"
+  },
+  "dependencies": {
+    "conseiljs": "^0.2.7"
+  },
+  "scripts": {
+    "build": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cryptonomic/Smart-Contracts.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Cryptonomic/Smart-Contracts/issues"
+  },
+  "homepage": "https://github.com/Cryptonomic/Smart-Contracts#readme"
+}
