@@ -6,4 +6,6 @@ This tutorial demonstrates how to use ConseilJS to deploy and interact with an i
 
 To view the app, simply drag `dist/index.html` into your favorite browser.
 
-To build the project run `npm i && npm run build`
+To build the project run `npm i && npm run build`.
+
+Note that the contract included in the code is a modified version of FA1.2 that uses a `map` instead of a `big_map` to store token allocations and allowances. This may not scale well to a very large number of holders, but it is an effective way to demonstrate a toy token contract.
