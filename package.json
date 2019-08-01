@@ -9,7 +9,7 @@
     "typescript": "^3.5.3"
   },
   "dependencies": {
-    "conseiljs": "^0.2.7"
+    "conseiljs": "../ConseilJS"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

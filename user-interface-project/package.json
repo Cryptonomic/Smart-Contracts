@@ -13,7 +13,7 @@
     "webpack-cli": "^3.3.6"
   },
   "dependencies": {
-    "conseiljs": "git://github.com/Cryptonomic/ConseilJS.git#feat/tezos-types"
+    "conseiljs": "../../ConseilJS"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
