@@ -1,7 +1,7 @@
 import * as DeployTezosManagedLedger from './interfaces/DeployTezosManagedLedger';
 import * as TezosManagedLedger from './interfaces/TezosManagedLedger';
 import { operationArguments, operationResult } from './utilities/OperationInformation';
-import { StoreType, KeyStore } from 'conseiljs';
+import { StoreType, KeyStore, TezosConseilClient } from 'conseiljs';
 
 const tezosNode: string = 'https://tezos-dev.cryptonomic-infra.tech/';
 
@@ -31,7 +31,7 @@ export async function transfer() {
     const value: number = parseInt((<HTMLInputElement>document.getElementById('transferValue')).value);
 
     const result: operationResult = await TezosManagedLedger.transfer(from, to, value, generateOpArgs());
-    renewStorage(result);
+    updateStorageView(result);
 }
 
 export async function approve() {
@@ -39,7 +39,7 @@ export async function approve() {
     const value: number = parseInt((<HTMLInputElement>document.getElementById('approveValue')).value);
 
     const result: operationResult = await TezosManagedLedger.approve(spender, value, generateOpArgs());
-    renewStorage(result);
+    updateStorageView(result);
 }
 
 // Management Functions
@@ -48,14 +48,14 @@ export async function setPause() {
     const pause: boolean = (<HTMLInputElement>document.getElementById('pause')).value.toLowerCase() === "true";
 
     let result: operationResult = await TezosManagedLedger.setPause(pause, generateOpArgs());
-    renewStorage(result);
+    updateStorageView(result);
 }
 
 export async function setAdministrator() {
     const administrator: string = (<HTMLInputElement>document.getElementById('administrator')).value;
 
     const result: operationResult = await TezosManagedLedger.setAdministrator(administrator, generateOpArgs());
-    renewStorage(result);
+    updateStorageView(result);
 }
 
 export async function mint() {
@@ -63,7 +63,7 @@ export async function mint() {
     const value: number = parseInt((<HTMLInputElement>document.getElementById('mintValue')).value);
 
     const result: operationResult = await TezosManagedLedger.mint(to, value, generateOpArgs());
-    renewStorage(result);
+    updateStorageView(result);
 }
 
 export async function burn() {
@@ -71,12 +71,15 @@ export async function burn() {
     const value: number = parseInt((<HTMLInputElement>document.getElementById('burnValue')).value);
 
     const result: operationResult = await TezosManagedLedger.burn(from, value, generateOpArgs());
-    renewStorage(result);
+    updateStorageView(result);
 }
 
 // View Functions
 
-export async function viewStorage() {
+export async function viewStorage(hash: string = '') {
+    if (hash.length > 0) {
+        await TezosConseilClient.awaitOperationConfirmation(conseilServer, network, hash, 5);
+    }
     const storage = await TezosManagedLedger.viewStorage(getContractAddress(), conseilServer, network);
 
     const ledger: string = storage.ledger;
@@ -121,30 +124,22 @@ export async function viewAdministrator() {
 
 // Webpage Functions
 
-export async function renewStorage(result: operationResult) {
-    let waitState = 1;
-    const previousStorage = document.getElementById('contractStorage').innerHTML;
-    while (document.getElementById('contractStorage').innerHTML === previousStorage) {
-        await delay(1000);
-        if (waitState === 1) {
-            document.getElementById('console').innerHTML = `Injected operation group id ${result.operationGroupID} <br> Processing.`;
-            waitState++;
-        } else if (waitState === 2) {
-            document.getElementById('console').innerHTML = `Injected operation group id ${result.operationGroupID} <br> Processing..`;
-            waitState++;
-        } else {
-            document.getElementById('console').innerHTML = `Injected operation group id ${result.operationGroupID} <br> Processing...`;
-            waitState = 1;
-        }
-        viewStorage();
+export async function updateStorageView(result: operationResult) {
+    const opgroupid = result.operationGroupID.replace(/"/g, '').trim();
+    document.getElementById('console').innerHTML = `Injected ${opgroupid} <br> Waiting for blockchain confirmation...`;
+
+    try {
+        await viewStorage(opgroupid);
+        document.getElementById('console').innerHTML = '';
+    } catch (error) {
+        document.getElementById('console').innerHTML = `Operation failed with error: ${error} <br>`;
     }
-    document.getElementById('console').innerHTML = `Ready to accept next command`;
+
+    document.getElementById('console').innerHTML += 'Ready to accept next command';
 }
 
 async function delay(milliseconds: number) {
-    return new Promise<void>(resolve => {
-        setTimeout(resolve, milliseconds);
-    });
+    return new Promise<void>(resolve => { setTimeout(resolve, milliseconds); });
 }
 
 export function getContractAddress(): string {
