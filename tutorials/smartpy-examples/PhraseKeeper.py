@@ -1,4 +1,5 @@
 import smartpy as sp
+
 class PhraseKeeper(sp.Contract):
     def __init__(self, initialPhrase):
         self.init(phrase = initialPhrase)
