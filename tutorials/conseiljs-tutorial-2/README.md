@@ -1,4 +1,4 @@
-# Tutorial 2
+# ConseilJS Tutorial 2
 Deploy Tutorial Contract 2 onto the Tezos Alphanet with the ConseilJS Deployment Interface:
 ```bash
 node DeployTutorialContract2.js
