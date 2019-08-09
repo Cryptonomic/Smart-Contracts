@@ -62,6 +62,6 @@
   },
   "exclude": [
     "node_modules",
-    "**/tutorial-project"
+    "**/*project"
   ]
 }
