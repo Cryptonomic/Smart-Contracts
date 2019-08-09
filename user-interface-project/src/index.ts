@@ -1,20 +1,46 @@
 import { TezosContractIntrospector, KeyStore, StoreType, ConseilServerInfo, EntryPoint } from 'conseiljs';
 
-export async function generateEntryPoints() {
-    const tezosNode: string = 'https://tezos-dev.cryptonomic-infra.tech/';
-    const keystore: KeyStore = {
-        publicKey: 'edpkuuGJ4ssH3N5k7ovwkBe16p8rVX1XLENiZ4FAayrcwUf9sCKXnG',
-        privateKey: 'edskRpVqFG2FHo11aB9pzbnHBiPBWhNWdwtNyQSfEEhDf5jhFbAtNS41vg9as7LSYZv6rEbtJTwyyEg9cNDdcAkSr9Z7hfvquB',
-        publicKeyHash: 'tz1WpPzK6NwWVTJcXqFvYmoA6msQeVy1YP6z',
-        seed: '',
-        storeType: StoreType.Fundraiser
-    };
-    const network: string = 'alphanet';
-    const conseilServer: ConseilServerInfo = { url: 'https://conseil-dev.cryptonomic-infra.tech:443', apiKey: 'BUIDLonTezos-001' };
+const tezosNode: string = 'https://tezos-dev.cryptonomic-infra.tech/';
+const keystore: KeyStore = {
+    publicKey: 'edpkuuGJ4ssH3N5k7ovwkBe16p8rVX1XLENiZ4FAayrcwUf9sCKXnG',
+    privateKey: 'edskRpVqFG2FHo11aB9pzbnHBiPBWhNWdwtNyQSfEEhDf5jhFbAtNS41vg9as7LSYZv6rEbtJTwyyEg9cNDdcAkSr9Z7hfvquB',
+    publicKeyHash: 'tz1WpPzK6NwWVTJcXqFvYmoA6msQeVy1YP6z',
+    seed: '',
+    storeType: StoreType.Fundraiser
+};
+const network: string = 'alphanet';
+const conseilServer: ConseilServerInfo = { url: 'https://conseil-dev.cryptonomic-infra.tech:443', apiKey: 'BUIDLonTezos-001' };
 
+<div class="entrypoint">
+    <span class="entrypointDescription">Transfer</span>
+    <input type="text" class="entrypointInput" id="transferValue" value="1000"></input>
+    <span class="entrypointDescription">from</span>
+    <input type="text" class="entrypointInput" id="transferFrom" value="tz1U8b7PV5w6WEyFNRtFX3RPGVTcmAUAgNn1"></input>
+    <span class="entrypointDescription">to</span>
+    <input type="text" class="entrypointInput" id="transferTo" value="tz1Po8u9NrkFKDsXgkiAYKfLrjvmao2TYBce"></input>                    
+
+    <button type="button" class="entrypointButton floatRight" onclick="transfer()">Transfer</button><br>
+</div>
+
+export async function viewEntryPoints() {
+    const entryPoints: EntryPoint[] = await generateEntryPoints();
+    let html = "";
+    entryPoints.forEach(entryPoint => {
+        html += `<div class="entrypoint">`
+        
+        html += `<span class="entrypointDescription">Transfer</span>`
+        html = html + (`${entryPoint.name}(${entryPoint.parameters.map(parameter => (parameter.name || 'unnamed') + '/' + parameter.type).join(', ')})`)
+
+        html += `<button type="button" class="entrypointButton floatRight" onclick="transfer()">Transfer</button><br>`
+        html += `</div>`
+        html += `\n`
+    });
+    document.getElementById('entryPoints').innerHTML = html;
+}
+
+export async function generateEntryPoints(): Promise<EntryPoint[]> {
     const contractAddress: string = (<HTMLInputElement>document.getElementById('contractAddress')).value;
-    const entryPoints: EntryPoint[] = await TezosContractIntrospector.generateEntryPointsFromAddress(conseilServer, network, contractAddress);
-    document.getElementById('entryPoints').innerHTML = entryPoints.toString();
+    return await TezosContractIntrospector.generateEntryPointsFromAddress(conseilServer, network, contractAddress);
 }
 
 // Management Functions
