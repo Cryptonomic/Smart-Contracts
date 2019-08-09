@@ -15,22 +15,22 @@ declare var rbrace: any;
 declare var semicolon: any;
 declare var elt: any;
 
-const moo = require("moo");
+    const moo = require("moo");
 
-const lexer = moo.compile({
-    wspace: /[ \t]+/,
-    lparen: '(',
-    rparen: ')',
-    lbrace: '{',
-    rbrace: '}',
-    zeroArgData: ['Unit', 'True', 'False', 'None'],
-    singleArgData: ['Left', 'Right', 'Some'],
-    doubleArgData: ['Pair'],
-    elt: ['Elt'],
-    number: /-?[0-9]+/,
-    string: /\".*?\"/,
-    semicolon: ';'
-});
+    const lexer = moo.compile({
+        wspace: /[ \t]+/,
+        lparen: '(',
+        rparen: ')',
+        lbrace: '{',
+        rbrace: '}',
+        zeroArgData: ['Unit', 'True', 'False', 'None'],
+        singleArgData: ['Left', 'Right', 'Some'],
+        doubleArgData: ['Pair'],
+        elt: ['Elt'],
+        number: /-?[0-9]+/,
+        string: /\".*?\"/,
+        semicolon: ';'
+    });
 
 
     const singleArgDataFlatten = (d: Array<string>) => { return `${d[2]};`; }
@@ -38,7 +38,7 @@ const lexer = moo.compile({
     const doubleArgDataFlatten = (d: Array<string>) => { return `${d[2]}, ${d[4]}`; }
     const doubleArgDataWithParenFlatten = (d: Array<string>) => { return `${d[4]}, ${d[6]}`; }
 
-    const listFlatten = (d: Array<string>) => { return `` }
+    const listFlatten = (d: Array<string>) => { return `${d[2]}, ${d[6]}` }
     const mapFlatten = (d: Array<string>) => { return `{${d[2]}}` }
     const elementFlatten = (d: Array<string>) => { return `[${d[2]}, (${d[4]})]`; }
     const elementWithSemicolonFlatten = (d: Array<string>) => { return ` [${d[4]}, (${d[6]})]`; }
