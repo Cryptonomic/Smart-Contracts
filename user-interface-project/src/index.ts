@@ -46,8 +46,8 @@ export async function invokeEntryPoint(entryPointName: string, contractAddress: 
             entryPoint.parameters.forEach((parameter, index) => {
                 args.push((<HTMLInputElement>document.getElementById(`${entryPoint.name + parameter.name + index}`)).value);
             })
-            const invocationParameter: string = entryPoint.generateParameter(...args);
 
+            const invocationParameter: string = entryPoint.generateParameter(...args);
             const result: OperationResult = await TezosNodeWriter.sendContractInvocationOperation(tezosNode, keyStore, contractAddress, 0, 50000, '', 1000, 100000, invocationParameter, TezosParameterFormat.Michelson);
             renewStorage(result);
         }
@@ -57,20 +57,24 @@ export async function invokeEntryPoint(entryPointName: string, contractAddress: 
 export async function renewStorage(result: OperationResult) {
     let waitState = 1;
     const previousStorage = document.getElementById('contractStorage').innerHTML;
+    document.getElementById('console').innerHTML = `Injected operation group id ${result.operationGroupID}`;
+
     while (document.getElementById('contractStorage').innerHTML === previousStorage) {
         await delay(1000);
         if (waitState === 1) {
-            document.getElementById('console').innerHTML = `Injected operation group id ${result.operationGroupID} <br> Processing.`;
+            document.getElementById('processing').innerHTML = `Processing.`;
             waitState++;
         } else if (waitState === 2) {
-            document.getElementById('console').innerHTML = `Injected operation group id ${result.operationGroupID} <br> Processing..`;
+            document.getElementById('processing').innerHTML = `Processing..`;
             waitState++;
         } else {
-            document.getElementById('console').innerHTML = `Injected operation group id ${result.operationGroupID} <br> Processing...`;
+            document.getElementById('processing').innerHTML = `Processing...`;
             waitState = 1;
         }
         viewStorage();
     }
+    
+    document.getElementById('processing').innerHTML = ``;
     document.getElementById('console').innerHTML = `Ready to accept next command`;
 }
 
