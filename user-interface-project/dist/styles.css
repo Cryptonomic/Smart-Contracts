@@ -61,6 +61,7 @@ body {
 
 .entrypointInput {
     border: none;
+    width: 100px;
     margin-left: 5px;
     margin-right: 5px;
     border-bottom: solid 1px white;
