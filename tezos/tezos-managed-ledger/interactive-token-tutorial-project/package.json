@@ -1,10 +1,11 @@
 {
-  "name": "Tezos-Managed-Ledger-Tutorial",
+  "name": "tezos-managed-ledger-tutorial",
   "version": "1.0.0",
   "description": "Tezos Managed Ledger Tutorial",
   "devDependencies": {
     "@types/nearley": "^2.11.0",
     "@types/node": "^12.6.2",
+    "moo": "^0.5.0",
     "nearley": "^2.16.0",
     "terser-webpack-plugin": "^1.3.0",
     "ts-loader": "^6.0.4",
@@ -13,10 +14,9 @@
     "webpack-cli": "^3.3.6"
   },
   "dependencies": {
-    "conseiljs": "git://github.com/Cryptonomic/ConseilJS.git#feat/tezos-types"
+    "conseiljs": "^0.2.7"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack"
   },
   "repository": {
