@@ -11,7 +11,7 @@ class TNSDomainManager(sp.Contract):
                     owner = sp.TAddress,
                     resolver = sp.TAddress, 
                     registeredAt = sp.TTimestamp,
-                    registrationPeriod = sp.TNat)),
+                    registrationPeriod = sp.TInt)),
             stamp = stamp,
             addressRegistry = sp.big_map(
                 tkey = sp.TAddress,
