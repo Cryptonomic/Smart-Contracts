@@ -46,6 +46,7 @@ class TNSDomainManager(sp.Contract):
     @sp.entry_point
     def updateRegistrationPeriod(self, params):
        self.validateUpdate(sp.sender, params.name)
+       self.validateNewPeriod(params.name, params.registrationPeriod)
        self.data.nameRegistry[params.name].registrationPeriod = params.registrationPeriod
 
     # @param name
@@ -65,7 +66,7 @@ class TNSDomainManager(sp.Contract):
 
     # Verify that name has not expired, requires name to be in self.data.nameRegistry
     def checkExpired(self, name):
-        return sp.now <= self.data.nameRegistry[name].registeredAt.add_seconds(self.data.nameRegistry[name].registrationPeriod)
+        return sp.now > self.data.nameRegistry[name].registeredAt.add_seconds(self.data.nameRegistry[name].registrationPeriod)
 
     # Verify that the invoker has update rights on the record requested
     def checkNamePermissions(self, sender, record):
@@ -74,6 +75,10 @@ class TNSDomainManager(sp.Contract):
     # Verify that name is valid
     def validateName(self, name):
         sp.verify(self.checkName(name), "Invalid name")
+    
+    # Verify that the the new registration period is valid
+    def validateNewPeriod(self, name, newPeriod):
+        sp.verify(sp.now < self.data.nameRegistry[name].registeredAt.add_seconds(newPeriod), "Cannot set expired registration period")
 
     # Verify that name is not already registered
     def validateAvailable(self, name):
@@ -86,7 +91,7 @@ class TNSDomainManager(sp.Contract):
     # corresponding to name.
     def validateUpdate(self, sender, name):
         sp.verify(self.checkRegistered(name), "Name not registered")
-        sp.verify(self.checkExpired(name), "Name registration has expired")
+        sp.verify(~self.checkExpired(name), "Name registration has expired")
         sp.verify(self.checkNamePermissions(sender, self.data.nameRegistry[name]),
             "Invalid permissions")
 
@@ -129,7 +134,7 @@ def test():
         resolver = resolverAddr,
         registrationPeriod = regPeriod).run(
             sender = ownerAddr,
-            now = sp.timestamp(30),
+            now = sp.timestamp(1),
             valid = False)
     # verify storage is unchanged
     scenario.verify(domainManager.data.nameRegistry[name1] ==
@@ -144,7 +149,7 @@ def test():
             resolver = resolverAddr,
             registrationPeriod = regPeriod).run(
                 sender = ownerAddr, 
-                now = sp.timestamp(1),
+                now = sp.timestamp(2),
                 valid = False)
     scenario.verify(~(domainManager.data.nameRegistry.contains("")))
 
@@ -153,21 +158,36 @@ def test():
     newResolverAddr = sp.address("tz1-newResolver")
     scenario += domainManager.updateResolver(
             name = name1,
-            resolver = newResolverAddr).run(sender = ownerAddr)
+            resolver = newResolverAddr).run(
+                sender = ownerAddr,
+                now = sp.timestamp(3))
     scenario.verify(domainManager.data.nameRegistry[name1].resolver == newResolverAddr)
 
-    scenario.h3("Testing successful TTL update")
-    newTTL = 2
-    scenario += domainManager.updateTTL(
+    scenario.h3("Testing successful registration period update")
+    newRegPeriod = 4
+    scenario += domainManager.updateRegistrationPeriod(
             name = name1,
-            registrationPeriod = newTTL).run(sender = ownerAddr)
-    scenario.verify(domainManager.data.nameRegistry[name1].registrationPeriod == newTTL)
+            registrationPeriod = newRegPeriod).run(
+                sender = ownerAddr,
+                now = sp.timestamp(3))
+    scenario.verify(domainManager.data.nameRegistry[name1].registrationPeriod == newRegPeriod)
+    scenario.h3("Testing unsuccessful registration period update: set to expire")
+    badRegPeriod = 2
+    scenario += domainManager.updateRegistrationPeriod(
+            name = name1,
+            registrationPeriod = badRegPeriod).run(
+                sender = ownerAddr,
+                now = sp.timestamp(3),
+                valid = False)
+    scenario.verify(domainManager.data.nameRegistry[name1].registrationPeriod == newRegPeriod)
 
     scenario.h3("Testing successful ownership transfer")
     newOwnerAddr = sp.address("tz1-newOwner")
     scenario += domainManager.transferNameOwnership(
             name = name1,
-            newNameOwner = newOwnerAddr).run(sender = ownerAddr)
+            newNameOwner = newOwnerAddr).run(
+                sender = ownerAddr,
+                now = sp.timestamp(3))
     scenario.verify(domainManager.data.nameRegistry[name1].owner == newOwnerAddr)
     scenario.h3("Testing that old owner cannot modify subdomain")
     scenario += domainManager.transferNameOwnership(
