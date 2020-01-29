@@ -2,8 +2,8 @@
 import smartpy as sp
 
 class TNSDomainManager(sp.Contract):
-    def __init__(self, owner, stamp):
-        self.init(domainOwner = owner,
+    def __init__(self, manager, stamp):
+        self.init(domainManager = manager,
             nameRegistry = sp.big_map(
                 tkey = sp.TString,
                 tvalue = sp.TRecord(
@@ -11,7 +11,8 @@ class TNSDomainManager(sp.Contract):
                     owner = sp.TAddress,
                     resolver = sp.TAddress, 
                     registeredAt = sp.TTimestamp,
-                    registrationPeriod = sp.TInt)),
+                    registrationPeriod = sp.TInt,
+                    modified = sp.TBool)),
             stamp = stamp,
             addressRegistry = sp.big_map(
                 tkey = sp.TAddress,
@@ -70,7 +71,12 @@ class TNSDomainManager(sp.Contract):
 
     # Verify that the invoker has update rights on the record requested
     def checkNamePermissions(self, sender, record):
-        return sender == record.owner
+        sp.if sender == record.owner:
+            return True
+        sp.if sender == self.data.domainManager:
+            record.modified = True
+            return True
+        return False
 
     # Verify that name is valid
     def validateName(self, name):
