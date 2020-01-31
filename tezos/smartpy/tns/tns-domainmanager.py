@@ -37,7 +37,7 @@ class TNSDomainManager(sp.Contract):
     def transferNameOwnership(self, params):
         self.validateUpdate(sp.sender, params.name)
         self.data.nameRegistry[params.name].owner = params.newNameOwner
-       self.data.nameRegistry[params.name].modified = True
+        self.data.nameRegistry[params.name].modified = True
 
     # @param (name, resolver)
     @sp.entry_point
@@ -75,7 +75,7 @@ class TNSDomainManager(sp.Contract):
 
     # Verify that the invoker has update rights on the record requested
     def checkNamePermissions(self, sender, record):
-        return sender == record.owner | sender == self.data.domainManager
+        return (sender == record.owner) | (sender == self.data.domainManager)
 
     # Verify that name is valid
     def validateName(self, name):
@@ -107,7 +107,8 @@ def test():
     scenario.h1("Tezos Name Service Domain Manager")
 
     # init test values
-    managerAddr = sp.address("tz1-owner")
+    managerAddr = sp.address("tz1aoLg7LtcbwJ2a7kfMj9MhUDs3fvehw6aa")
+    ownerAddr = sp.address("tz1-owner")
     resolverAddr = sp.address("tz1-resolver")
     testAddr = sp.address("tz1-notOwnerOrManager")
     name1 = "domain1"
@@ -124,36 +125,38 @@ def test():
         name = name1,
         resolver = resolverAddr,
         registrationPeriod = regPeriod).run(
-            sender = managerAddr, 
+            sender = ownerAddr, 
             now = sp.timestamp(0))
     scenario.verify(domainManager.data.nameRegistry[name1] ==
         sp.record(name = name1,
-            owner = managerAddr,
+            owner = ownerAddr,
             resolver = resolverAddr,
             registeredAt = sp.timestamp(0),
-            registrationPeriod = regPeriod))
+            registrationPeriod = regPeriod,
+            modified = False))
     scenario.verify(domainManager.data.addressRegistry[resolverAddr] == name1)
     scenario.h3("Testing failed domain registration - already exists")
     scenario += domainManager.registerName(
         name = name1,
         resolver = resolverAddr,
         registrationPeriod = regPeriod).run(
-            sender = managerAddr,
+            sender = ownerAddr,
             now = sp.timestamp(1),
             valid = False)
     # verify storage is unchanged
     scenario.verify(domainManager.data.nameRegistry[name1] ==
         sp.record(name = name1,
-            owner = managerAddr,
+            owner = ownerAddr,
             resolver = resolverAddr,
             registeredAt = sp.timestamp(0),
-            registrationPeriod = regPeriod))
+            registrationPeriod = regPeriod,
+            modified = False))
     scenario.h3("Testing invalid name registration")
     scenario += domainManager.registerName(
             name = "",
             resolver = resolverAddr,
             registrationPeriod = regPeriod).run(
-                sender = managerAddr, 
+                sender = ownerAddr, 
                 now = sp.timestamp(2),
                 valid = False)
     scenario.verify(~(domainManager.data.nameRegistry.contains("")))
@@ -164,48 +167,50 @@ def test():
     scenario += domainManager.updateResolver(
             name = name1,
             resolver = newResolverAddr).run(
-                sender = managerAddr,
+                sender = ownerAddr,
                 now = sp.timestamp(3))
     scenario.verify(domainManager.data.nameRegistry[name1].resolver == newResolverAddr)
+    scenario.verify(domainManager.data.nameRegistry[name1].modified == True)
 
     scenario.h3("Testing successful registration period update")
     newRegPeriod = 4
     scenario += domainManager.updateRegistrationPeriod(
             name = name1,
             registrationPeriod = newRegPeriod).run(
-                sender = managerAddr,
+                sender = ownerAddr,
                 now = sp.timestamp(3))
     scenario.verify(domainManager.data.nameRegistry[name1].registrationPeriod == newRegPeriod)
+    scenario.verify(domainManager.data.nameRegistry[name1].modified == True)
     scenario.h3("Testing unsuccessful registration period update: set to expire")
     badRegPeriod = 2
     scenario += domainManager.updateRegistrationPeriod(
             name = name1,
             registrationPeriod = badRegPeriod).run(
-                sender = managerAddr,
+                sender = ownerAddr,
                 now = sp.timestamp(3),
                 valid = False)
     scenario.verify(domainManager.data.nameRegistry[name1].registrationPeriod == newRegPeriod)
 
     scenario.h3("Testing successful ownership transfer")
-    newManagerAddr = sp.address("tz1-newOwner")
+    newownerAddr = sp.address("tz1-newOwner")
     scenario += domainManager.transferNameOwnership(
             name = name1,
-            newNameOwner = newManagerAddr).run(
-                sender = managerAddr,
+            newNameOwner = newownerAddr).run(
+                sender = ownerAddr,
                 now = sp.timestamp(3))
-    scenario.verify(domainManager.data.nameRegistry[name1].owner == newManagerAddr)
+    scenario.verify(domainManager.data.nameRegistry[name1].owner == newownerAddr)
     scenario.h3("Testing that old owner cannot modify subdomain")
     scenario += domainManager.transferNameOwnership(
             name = name1,
-            newNameOwner = managerAddr).run(sender = managerAddr, valid = False)
-    scenario.verify(domainManager.data.nameRegistry[name1].owner == newManagerAddr)
+            newNameOwner = ownerAddr).run(sender = ownerAddr, valid = False)
+    scenario.verify(domainManager.data.nameRegistry[name1].owner == newownerAddr)
 
     scenario.h2("Testing subdomain deletion")
     scenario.h3("Testing unsuccessful deletion of unregistered/deleted domain")
     unregisteredName = "domain2"
-    scenario += domainManager.deleteName(name = unregisteredName).run(sender = newManagerAddr, valid = False)
+    scenario += domainManager.deleteName(name = unregisteredName).run(sender = newownerAddr, valid = False)
     scenario.h3("Testing unsuccessful deletion of domain because of bad permissions")
-    scenario += domainManager.deleteName(name = name1).run(sender = managerAddr, valid = False)
+    scenario += domainManager.deleteName(name = name1).run(sender = ownerAddr, valid = False)
     scenario.h3("Testing successful deletion")
-    scenario += domainManager.deleteName(name = name1).run(sender = newManagerAddr)
+    scenario += domainManager.deleteName(name = name1).run(sender = newownerAddr)
     scenario.verify(~(domainManager.data.nameRegistry.contains(name1)))
