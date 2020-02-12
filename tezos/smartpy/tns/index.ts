@@ -10,6 +10,7 @@ const conseilServer = { url: 'https://conseil-dev.cryptonomic-infra.tech:443', a
 // const contractAddress = 'KT1LTkvHQiBvo7gMcA6qZAqb2ztwnAR8G4pc';
 const contractAddress = 'KT1QoRuESD7T2PrcXrvT6xeYGe7b9tQWKJgd';
 const networkBlockTime = 30 + 1;
+const faucets = '/Users/itama/Google Drive/Programming/cryptonomic/faucets';
 
 let entryPoints = [];
 const registerNameIndex = 1;
@@ -29,7 +30,8 @@ let faucetAccount = {};
 
 async function initAccount(keyAddress: string): Promise<KeyStore> {
     console.log('~~~~~~~ initAccount');
-    let faucetFiles: string[] = glob.sync(`${keyAddress}.json`);
+    // let faucetFiles: string[] = glob.sync(`../../../../faucets/${keyAddress}.json`);
+    let faucetFiles: string[] = glob.sync(`${faucets}/${keyAddress}.json`);
 
     if (faucetFiles.length === 0) {
         throw new Error('Did not find any faucet files, please go to faucet.tzalpha.net to get one');
@@ -217,15 +219,8 @@ async function getNameInfo(name: string) {
     const packedKey = TezosMessageUtils.encodeBigMapKey(Buffer.from(TezosMessageUtils.writePackedData(name, 'string'), 'hex'));
     const mapResult = await TezosNodeReader.getValueForBigMapKey(tezosNode, nameRegistryBigMapID, packedKey);
     console.log(`value: ${JSON.stringify(mapResult)}`);
-    // tvalue = sp.TRecord(
-    //     name = sp.TString,  arg[0][0][0][0][1]
-    //     owner = sp.TAddress, arg[0][0][0][1]
-    //     resolver = sp.TAddress, arg[1]
-    //     registeredAt = sp.TTimestamp, arg[0][0][1]
-    //     registrationPeriod = sp.TInt, arg[0][1]
-    //     modified = sp.TBool)), arg[0][0][0][0][0]
     return {
-        name: name, // bakerName        
+        name: name, // name        
         owner: jsonpath.query(mapResult, '$.args[0].args[0].args[0].args[1].string')[0],  // owner
         resolver: jsonpath.query(mapResult, '$.args[1].string')[0], // resolver
         registeredAt: new Date(jsonpath.query(mapResult, '$.args[0].args[0].args[1].string')[0]), // registeredAt
@@ -243,44 +238,45 @@ async function queryContractMap(mapid: number, key: string) {
 async function run() {
     let keystore = await initAccount('tz1aoLg7LtcbwJ2a7kfMj9MhUDs3fvehw6aa');
     let keystore2 = await initAccount('tz1augmKQXU6PGRUq6KQ4ocDmWJRhrZ7G5kw')
+    console.log(keystore);
 
-    console.log(`~~~~~~~ calculating fee`);
-    const fee = Number((await TezosConseilClient.getFeeStatistics(conseilServer, conseilServer.network, OperationKindType.Transaction))[0]['high']);
+    // console.log(`~~~~~~~ calculating fee`);
+    // const fee = Number((await TezosConseilClient.getFeeStatistics(conseilServer, conseilServer.network, OperationKindType.Transaction))[0]['high']);
 
-    console.log(`~~~~~~~ generating entrypoints`);
-    entryPoints = await TezosContractIntrospector.generateEntryPointsFromAddress(conseilServer, conseilServer.network, contractAddress);
-    console.log(entryPoints)
+    // console.log(`~~~~~~~ generating entrypoints`);
+    // entryPoints = await TezosContractIntrospector.generateEntryPointsFromAddress(conseilServer, conseilServer.network, contractAddress);
+    // console.log(entryPoints)
 
-    let name = 'domain3';
-    console.log(`~~~~~~~ invoking registerName`);
-    await registerName(tezosNode, keystore, name, keystore.publicKeyHash, 99999, 500000, 20000, 200000);
-    console.log(`~~~~~~~ querying nameRegistry for name "domain3"`);
-    await queryContractMap(nameRegistryBigMapID , 'domain3');
+    // let name = 'domain3';
+    // console.log(`~~~~~~~ invoking registerName`);
+    // await registerName(tezosNode, keystore, name, keystore.publicKeyHash, 99999, 500000, 20000, 200000);
+    // console.log(`~~~~~~~ querying nameRegistry for name "domain3"`);
+    // await queryContractMap(nameRegistryBigMapID , 'domain3');
     
-    console.log(`~~~~~~~ invoking transferNameOwnership`);
-    await transferNameOwnership(tezosNode, keystore, name, keystore2.publicKeyHash, 500000, 20000, 200000);
-    console.log(`~~~~~~~ querying nameRegistry for name "domain3" to check updated owner`);
-    await queryContractMap(nameRegistryBigMapID , 'domain3');
+    // console.log(`~~~~~~~ invoking transferNameOwnership`);
+    // await transferNameOwnership(tezosNode, keystore, name, keystore2.publicKeyHash, 500000, 20000, 200000);
+    // console.log(`~~~~~~~ querying nameRegistry for name "domain3" to check updated owner`);
+    // await queryContractMap(nameRegistryBigMapID , 'domain3');
 
-    console.log(`~~~~~~~ invoking updateResolver`);    
-    await updateResolver(tezosNode, keystore, name, keystore2.publicKeyHash, 500000, 20000, 200000);
-    console.log(`~~~~~~~ querying nameRegistry for name "domain3" to check updated resolver`);
-    await queryContractMap(nameRegistryBigMapID , 'domain3');
+    // console.log(`~~~~~~~ invoking updateResolver`);    
+    // await updateResolver(tezosNode, keystore, name, keystore2.publicKeyHash, 500000, 20000, 200000);
+    // console.log(`~~~~~~~ querying nameRegistry for name "domain3" to check updated resolver`);
+    // await queryContractMap(nameRegistryBigMapID , 'domain3');
 
-    console.log(`~~~~~~~ invoking updateRegistrationPeriod`);
-    await updateRegistrationPeriod(tezosNode, keystore, name, 9234632, 500000, 20000, 200000);
-    console.log(`~~~~~~~ querying nameRegistry for name "domain3" to check updated registration period`);
-    await queryContractMap(nameRegistryBigMapID , 'domain3');
+    // console.log(`~~~~~~~ invoking updateRegistrationPeriod`);
+    // await updateRegistrationPeriod(tezosNode, keystore, name, 9234632, 500000, 20000, 200000);
+    // console.log(`~~~~~~~ querying nameRegistry for name "domain3" to check updated registration period`);
+    // await queryContractMap(nameRegistryBigMapID , 'domain3');
 
-    console.log(`~~~~~~~ invoking deleteName`);
-    await deleteName(tezosNode, keystore, 'domain3', 500000, 20000, 200000);
-    console.log(`~~~~~~~ querying nameRegistry for name "domain3" to check if it was deleted`);
-    await queryContractMap(nameRegistryBigMapID , name);
+    // console.log(`~~~~~~~ invoking deleteName`);
+    // await deleteName(tezosNode, keystore, 'domain3', 500000, 20000, 200000);
+    // console.log(`~~~~~~~ querying nameRegistry for name "domain3" to check if it was deleted`);
+    // await queryContractMap(nameRegistryBigMapID , name);
 
-    let name2 = 'domain1';
-    console.log(`~~~~~~~ querying BigMap for name 'domain1`);
-    let nameInfo = await getNameInfo(name2);
-    console.log(nameInfo);
+    // let name2 = 'domain1';
+    // console.log(`~~~~~~~ querying BigMap for name 'domain1`);
+    // let nameInfo = await getNameInfo(name2);
+    // console.log(nameInfo);
 }
 
 run();
