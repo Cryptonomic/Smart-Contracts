@@ -14,7 +14,7 @@ class Instrument(sp.Contract):
             discountSchedule = sp.map(tkey = sp.TNat, tvalue = sp.TMutez),
             startTime = sp.TTimestamp,
             duration = sp.TTimestamp,
-            intervl = sp.TNat,
+            interval = sp.TNat,
             baker = sp.TAddress,
             availableXTZCollateral = sp.TMutez,
             lockedXTZAmount = sp.TMutez,
