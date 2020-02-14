@@ -8,44 +8,24 @@ class Instrument(sp.Contract):
     # @param duration Length of time (in seconds) for which this instrument will live. 
     # @param interval Length of time (in seconds) by which interest compounds. 
     # @param baker The baker to which the contract is delegating. 
-    def __init__(self, discountSchedule, duration, interval, baker):
-        # type constraints
+    def __init__(self, discountSchedule, duration, interval, baker, issuer):
         self.init(
-            discountSchedule = sp.map(tkey = sp.TNat, tvalue = sp.TMutez),
-            startTime = sp.TTimestamp,
-            duration = sp.TTimestamp,
-            interval = sp.TNat,
-            baker = sp.TAddress,
-            availableXTZCollateral = sp.TMutez,
-            lockedXTZAmount = sp.TMutez,
-            balances = sp.big_map(
-                tkey = sp.TAddress,
-                tvalue = sp.TRecord(
-                    balance = sp.TNat,
-                    approvals = sp.big_map(tkey = sp.TAddress, tvalue = sp.TNat))),
-            administrator = sp.TAddress, 
-            totalSupply = sp.TNat)
+            discountSchedule = discountSchedule,
+            startTime = sp.timestamp_from_utc_now(),
+            duration = duration,
+            interval = interval,
+            baker = baker,
+            totalSupply = 0,
+            availableSupply = 0,
+            administrator = issuer,
+            availableXTZCollateral = 0,
+            lockedXTZAmount = 0,
+            balances = sp.big_map()
+        )
 
-        # init instrument parameters
-        self.data.discountSchedule = discountSchedule
-        # sanity check on schedule length
-        sp.verify(discountSchedule.contains(duration/interval), "Malformed discount schedule")
-
-        self.data.startTime = sp.now
-        self.data.duration = duration
-        self.data.interval = interval
-        
-        self.data.baker = baker
-        sp.set_delegate(baker)
-
-        # init token parameters
-        self.data.paused = False
-        self.data.totalSupply = 0
-        self.data.administrator = sp.sender
-
-        # init ledger
-        self.data.availableCollateral = sp.amount
-        self.data.lockedXTZAmount = sp.tez(0)
+    @sp.entry_point
+    def activate(self, params):
+        pass
 
     # The default entrypoint is used to deposit XTZ in exchange for tokens. 
     @sp.entry_point
@@ -150,7 +130,7 @@ class Instrument(sp.Contract):
     @sp.entry_point
     def increaseAvailableCollateral(self, params):
         # validate invocation
-        validateIssuer(sp.sender)
+        sp.verify(sp.sender == self.data.administrator)
         
         # adjust ledger
         self.data.availableCollateral += sp.amount 
@@ -160,7 +140,7 @@ class Instrument(sp.Contract):
     @sp.entry_point
     def decreaseAvailableCollateral(self, params):
         # validate invocation
-        validateIssuer(sp.sender)
+        sp.verify(sp.sender == self.data.administrator)
         validateDecreaseAvailableCollateral(params.amount)
         
         # adjust ledger
@@ -277,8 +257,9 @@ def test():
     duration = 60*60*24*10
     interval = 60*60*24
     baker = sp.address("tz1aoLg7LtcbwJ2a7kfMj9MhUDs3fvehw6aa")
+    issuer = sp.address("tz1aoLg7LtcbwJ2a7kfMj9MhUDs3fvehw6aa")
 
     # init contract
-    instrument = Instrument(discountSchedule, duration, interval, baker)
+    instrument = Instrument(discountSchedule, duration, interval, baker, issuer)
     scenario += instrument
     
