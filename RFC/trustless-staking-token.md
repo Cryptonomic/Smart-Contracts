@@ -85,7 +85,7 @@ Additionally the simple fact that the returns are tied to a normal calendar<sup>
 
 This instrument also helps validators smooth out their returns. Presently a protocol upgrade is undergoing a vote process on Tezos that will make short-term inflationary returns smaller while maintaining a similar long-term target. By using this contract instead of direct delegation, smaller validators, who would be impacted the most by this change, can entice more delegators.
 
-Lastly, delegation rewards in Tezos start on a 12-cycle delay and end with 5-cycle back-log. This means that under normal circumstances an account won't receive any rewards until that delay has passed. Once the account ceases to delegate to the given validator, the rewards will keep on arriving for five additional cycles, making it difficult to close a position of transfer the entirety of the XTZ balance to a different asset. This instrument solves that problem.
+Lastly, delegation rewards in Tezos start on a 12-cycle delay and end with 5-cycle back-log. This means that under normal circumstances an account won't receive any rewards until that delay has passed. Once the account ceases to delegate to the given validator, the rewards will keep on arriving for five additional cycles, making it difficult to close a position or transfer the entirety of the XTZ balance to a different asset. This instrument solves that problem.
 
 # Implications
 
