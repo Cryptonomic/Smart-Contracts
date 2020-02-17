@@ -81,7 +81,7 @@ It is worth itemizing the security features of this contract.
 
 Guaranteed returns are the headline feature of this instrument. While a large portion of blockchain early adopters may scoff at the idea of foregoing the maximum possible yield, there is a range of risk-sensitive institutions that will find this feature appealing. The hope is that traditionally conservative funds like retirement administrators will see the value of blockchain investment with this contract and this will in turn broaden blockchain adoption in traditional finance.
 
-Additionally the simple fact that the returns are tied to a normal calendar<sup>[10]</sup>, not a blockchain-specific construct like a “cycle”, makes investment easier to understand to a larger set of people. Instead of learning the intricacies of Tezos chain mechanics they may simply view this instrument like a more flexible CD<sup>[7]</sup>.
+Additionally the simple fact that the returns are tied to a normal calendar<sup>[10]</sup>, not a blockchain-specific construct like a “cycle”, makes investment easier to understand to a larger set of people. Instead of learning the intricacies of Tezos chain mechanics they may simply view this instrument like a traditional Certificate of Deposit (an interest bearing account with a set maturity date)<sup>[7]</sup>. More correctly however this intrument behaves like a Bond.
 
 This instrument also helps validators smooth out their returns. Presently a protocol upgrade is undergoing a vote process on Tezos that will make short-term inflationary returns smaller while maintaining a similar long-term target. By using this contract instead of direct delegation, smaller validators, who would be impacted the most by this change, can entice more delegators.
 
@@ -119,7 +119,7 @@ The work is on-going and can be reviewed on [GitHub](https://github.com/Cryptono
 4. The contract code can be deployed by an account other than the issuer/administrator.
 5. Block rewards are generated, though not released at the beginning of every cycle. The validator account is credited on a 5-cycle delay. Compounding period should have a minimum duration of one cycle which is 68+ hours at the current 60-second block time.
 6. This condition can be relaxed without loss of safety, but is left in place to simplify contract logic.
-7. Albeit a CD tied to a potentially highly volatile crypto-currency.
+7. Albeit a Certificate of Deposit tied to a potentially highly volatile crypto-currency.
 8. All proposals on Tezos thus far have passed with overwhelming support and little to no dissent.
 9. Tezos refers to their design as “[Liquid Proof of Stake”](https://medium.com/tezos/liquid-proof-of-stake-aec2f7ef1da7).
 10. The Michelson smart contract language has a `NOW` directive.
