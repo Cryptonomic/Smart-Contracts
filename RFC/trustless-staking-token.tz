@@ -1,4 +1,4 @@
-# smartpy compilation of Trustless Staking Token (https://github.com/Cryptonomic/Smart-Contracts/commit/69c604aa5f411e82fde14ce02a100a8c7caff846)
+# smartpy compilation of Trustless Staking Token (https://github.com/Cryptonomic/Smart-Contracts/commit/7f462dec4e29267bcfb281518464f39c3ef16605)
 
 parameter (or (or (or (pair %approve (address %destination) (nat %tokenBalance)) (unit %default)) (or (unit %deposit) (nat %redeem))) (or (or (pair %send (address %destination) (nat %tokenBalance)) (option %setDelegate key_hash)) (or (pair %transfer (address %destination) (pair (address %source) (nat %tokenBalance))) (mutez %withdrawCollateral))));
 storage   (pair (pair (pair (big_map %balances address (pair (map %approvals address nat) (nat %balance))) (nat %duration)) (pair (mutez %freeCollateral) (nat %interval))) (pair (pair (address %issuer) (option %payer key_hash)) (pair (int %periods) (pair (map %schedule int mutez) (timestamp %start)))));
@@ -64,156 +64,53 @@ code
                 SWAP;
                 DUP;
                 DUG 2;
-                CAAAR;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
                 SENDER;
+                DUP;
+                DUG 2;
                 GET;
                 IF_SOME
                   {
                   }
                   {
-                    PUSH string "Get-item:-1";
+                    PUSH string "set_in_top-any";
                     FAILWITH;
                   };
-                CAR;
-                SWAP;
                 DUP;
-                DUG 2;
+                CDR;
+                SWAP;
                 CAR;
-                MEM;
-                IF
-                  {
-                    SWAP;
-                    DUP;
-                    DUG 2;
-                    DUP;
-                    CDR;
-                    SWAP;
-                    CAR;
-                    DUP;
-                    CDR;
-                    SWAP;
-                    CAR;
-                    DUP;
-                    CDR;
-                    SWAP;
-                    CAR;
-                    DUP;
-                    SENDER;
-                    DUP;
-                    DUG 2;
-                    GET;
-                    IF_SOME
-                      {
-                      }
-                      {
-                        PUSH string "set_in_top-any";
-                        FAILWITH;
-                      };
-                    DUP;
-                    CDR;
-                    SWAP;
-                    CAR;
-                    DIG 7;
-                    DUP;
-                    DUG 8;
-                    CDR;
-                    DIG 9;
-                    DUP;
-                    DUG 10;
-                    CAAAR;
-                    SENDER;
-                    GET;
-                    IF_SOME
-                      {
-                      }
-                      {
-                        PUSH string "Get-item:-1";
-                        FAILWITH;
-                      };
-                    CAR;
-                    DIG 9;
-                    DUP;
-                    DUG 10;
-                    CAR;
-                    GET;
-                    IF_SOME
-                      {
-                      }
-                      {
-                        PUSH string "Get-item:112";
-                        FAILWITH;
-                      };
-                    ADD;
-                    SOME;
-                    DIG 8;
-                    DUP;
-                    DUG 9;
-                    CAR;
-                    UPDATE;
-                    PAIR;
-                    SOME;
-                    SWAP;
-                    UPDATE;
-                    PAIR;
-                    PAIR;
-                    PAIR;
-                    DUG 2;
-                    SWAP;
-                    DROP;
-                  }
-                  {
-                    SWAP;
-                    DUP;
-                    DUG 2;
-                    DUP;
-                    CDR;
-                    SWAP;
-                    CAR;
-                    DUP;
-                    CDR;
-                    SWAP;
-                    CAR;
-                    DUP;
-                    CDR;
-                    SWAP;
-                    CAR;
-                    DUP;
-                    SENDER;
-                    DUP;
-                    DUG 2;
-                    GET;
-                    IF_SOME
-                      {
-                      }
-                      {
-                        PUSH string "set_in_top-any";
-                        FAILWITH;
-                      };
-                    DUP;
-                    CDR;
-                    SWAP;
-                    CAR;
-                    DIG 7;
-                    DUP;
-                    DUG 8;
-                    CDR;
-                    SOME;
-                    DIG 8;
-                    DUP;
-                    DUG 9;
-                    CAR;
-                    UPDATE;
-                    PAIR;
-                    SOME;
-                    SWAP;
-                    UPDATE;
-                    PAIR;
-                    PAIR;
-                    PAIR;
-                    DUG 2;
-                    SWAP;
-                    DROP;
-                  };
+                DIG 7;
+                DUP;
+                DUG 8;
+                CDR;
+                SOME;
+                DIG 8;
+                DUP;
+                DUG 9;
+                CAR;
+                UPDATE;
+                PAIR;
+                SOME;
+                SWAP;
+                UPDATE;
+                PAIR;
+                PAIR;
+                PAIR;
+                DUG 2;
+                DROP;
                 DROP;
               }
               {
@@ -364,7 +261,7 @@ code
                   {
                   }
                   {
-                    PUSH string "Get-item:127";
+                    PUSH string "Get-item:129";
                     FAILWITH;
                   };
                 AMOUNT;
@@ -409,7 +306,7 @@ code
                       {
                       }
                       {
-                        PUSH string "Get-item:127";
+                        PUSH string "Get-item:129";
                         FAILWITH;
                       };
                     AMOUNT;
@@ -755,7 +652,7 @@ code
                   {
                   }
                   {
-                    PUSH string "Get-item:127";
+                    PUSH string "Get-item:129";
                     FAILWITH;
                   };
                 DIG 5;
@@ -865,7 +762,7 @@ code
                   {
                   }
                   {
-                    PUSH string "Get-item:127";
+                    PUSH string "Get-item:129";
                     FAILWITH;
                   };
                 DIG 4;
@@ -993,7 +890,7 @@ code
                       {
                       }
                       {
-                        PUSH string "Get-item:70";
+                        PUSH string "Get-item:75";
                         FAILWITH;
                       };
                     CDR;
@@ -1193,7 +1090,7 @@ code
                   {
                   }
                   {
-                    PUSH string "Get-item:83";
+                    PUSH string "Get-item:88";
                     FAILWITH;
                   };
                 CAR;
@@ -1206,7 +1103,7 @@ code
                   {
                   }
                   {
-                    PUSH string "Get-item:82";
+                    PUSH string "Get-item:87";
                     FAILWITH;
                   };
                 COMPARE;
@@ -1276,7 +1173,7 @@ code
                       {
                       }
                       {
-                        PUSH string "Get-item:82";
+                        PUSH string "Get-item:87";
                         FAILWITH;
                       };
                     CDR;
@@ -1376,7 +1273,7 @@ code
                   {
                   }
                   {
-                    PUSH string "Get-item:83";
+                    PUSH string "Get-item:88";
                     FAILWITH;
                   };
                 CDR;
@@ -1450,7 +1347,7 @@ code
                   {
                   }
                   {
-                    PUSH string "Get-item:83";
+                    PUSH string "Get-item:88";
                     FAILWITH;
                   };
                 CAR;
@@ -1463,7 +1360,7 @@ code
                   {
                   }
                   {
-                    PUSH string "Get-item:82";
+                    PUSH string "Get-item:87";
                     FAILWITH;
                   };
                 SUB;
