@@ -1,7 +1,7 @@
 # Reference implementation of the Trustless Staking Token for Tezos
 # Written using SmartPy (https://smartpy.io/demo)
 # Mike Radin, with input from Itamar Reif & the SmartPy team
-# 2020, February
+# 2020, February; version 1.1
 
 import smartpy as sp
 
@@ -19,8 +19,8 @@ class Instrument(sp.Contract):
             balances = sp.big_map(
                 tkey = sp.TAddress,
                 tvalue = sp.TRecord(
-                    balance = sp.TMutez,
-                    approvals = sp.TMap(k = sp.TAddress, v = sp.TMutez)
+                    balance = sp.TNat,
+                    approvals = sp.TMap(k = sp.TAddress, v = sp.TNat),
                 )
             )
         )
@@ -31,18 +31,28 @@ class Instrument(sp.Contract):
 
     @sp.entry_point
     def deposit(self, params):
+        sp.verify(sp.amount > sp.mutez(0), message = "Deposit too low")
         sp.verify(sp.sender != self.data.issuer, message = "Invalid address")
         period = self.getPeriod()
-        expectedReturn = sp.split_tokens(sp.split_tokens(sp.amount, 1, self.data.schedule[period]), 1_000_000, 1) - sp.amount
-        sp.verify(expectedReturn <= self.data.freeCollateral, message = "Insufficient collateral")
 
-        self.data.freeCollateral -= expectedReturn
+        tokenBalance = sp.local('tokenBalance', 0)
+        requiredCollateral = sp.local('requiredCollateral', sp.tez(0))
+        expectedReturn = sp.ediv(sp.amount, self.data.schedule[period])
+        coins = sp.ediv(sp.amount, sp.tez(1))
+        sp.if (expectedReturn.is_some()) & (coins.is_some()):
+            tokenBalance.value = sp.fst(expectedReturn.open_some())
+            wholeCoins = sp.fst(coins.open_some())
+            sp.verify(tokenBalance.value > wholeCoins, message = "Deposit too low")
+            requiredCollateral.value = sp.tez(sp.as_nat(tokenBalance.value - wholeCoins))
 
-        tokenBalance = sp.amount + expectedReturn # TODO: should be nat, not mutez
+        sp.verify(requiredCollateral.value <= self.data.freeCollateral, message = "Insufficient collateral")
+
+        self.data.freeCollateral -= requiredCollateral.value
+
         sp.if ~ self.data.balances.contains(sp.sender):
-            self.data.balances[sp.sender] = sp.record(balance = tokenBalance, approvals = {})
+            self.data.balances[sp.sender] = sp.record(balance = tokenBalance.value, approvals = {})
         sp.else:
-            self.data.balances[sp.sender].balance += tokenBalance
+            self.data.balances[sp.sender].balance += tokenBalance.value
 
     @sp.entry_point
     def redeem(self, params):
@@ -51,12 +61,12 @@ class Instrument(sp.Contract):
 
         period = self.getPeriod() # TODO: needs a concept of minimum holding period
 
-        xtzBalance = sp.split_tokens(sp.split_tokens(params.tokenAmount, self.data.schedule[period], 1), 1, 1_000_000)
-        releasedCollateral = params.tokenAmount - xtzBalance
+        xtzBalance = sp.split_tokens(self.data.schedule[period], params.tokenAmount, 1)
+        releasedCollateral = sp.tez(params.tokenAmount) - xtzBalance
 
         self.data.freeCollateral += releasedCollateral
 
-        self.data.balances[sp.sender].balance -= params.tokenAmount
+        self.data.balances[sp.sender].balance = sp.as_nat(self.data.balances[sp.sender].balance - params.tokenAmount)
         sp.send(sp.sender, xtzBalance)
 
     @sp.entry_point
@@ -70,18 +80,7 @@ class Instrument(sp.Contract):
         sp.else:
             self.data.balances[params.destination].balance += params.tokenBalance
 
-        self.data.balances[sp.sender].balance -= params.tokenBalance
-
-    @sp.entry_point
-    def approve(self, params):
-        sp.verify(self.data.balances.contains(sp.sender), message = "Address has no balance")
-        sp.verify(sp.sender != params.destination, message = "Invalid destination")
-        sp.verify(self.data.balances[sp.sender].balance >= params.tokenBalance, message = "Insufficient token balance")
-
-        sp.if ~ self.data.balances[sp.sender].approvals.contains(params.destination):
-            self.data.balances[sp.sender].approvals[params.destination] = params.tokenBalance
-        sp.else:
-            self.data.balances[sp.sender].approvals[params.destination] += params.tokenBalance
+        self.data.balances[sp.sender].balance = sp.as_nat(self.data.balances[sp.sender].balance - params.tokenBalance)
 
     @sp.entry_point
     def transfer(self, params):
@@ -95,8 +94,8 @@ class Instrument(sp.Contract):
         sp.else:
             self.data.balances[params.destination].balance += params.tokenBalance
 
-        self.data.balances[params.source].balance -= params.tokenBalance
-        self.data.balances[params.source].approvals[params.destination] -= params.tokenBalance
+        self.data.balances[params.source].balance = sp.as_nat(self.data.balances[params.source].balance - params.tokenBalance)
+        self.data.balances[params.source].approvals[params.destination] = sp.as_nat(self.data.balances[params.source].approvals[params.destination] - params.tokenBalance)
 
     @sp.entry_point
     def setDelegate(self, params):
@@ -112,13 +111,24 @@ class Instrument(sp.Contract):
         self.data.freeCollateral -= params.amount
         sp.send(sp.sender, params.amount)
 
+    @sp.entry_point
+    def approve(self, params):
+        sp.verify(self.data.balances.contains(sp.sender), message = "Address has no balance")
+        sp.verify(sp.sender != params.destination, message = "Invalid destination")
+        sp.verify(self.data.balances[sp.sender].balance >= params.tokenBalance, message = "Insufficient token balance")
+
+        sp.if ~ self.data.balances[sp.sender].approvals.contains(params.destination):
+            self.data.balances[sp.sender].approvals[params.destination] = params.tokenBalance
+        sp.else:
+            self.data.balances[sp.sender].approvals[params.destination] += params.tokenBalance
+
     def getPeriod(self):
         y = sp.local('y', self.data.periods)
         sp.if sp.now > self.data.start.add_seconds(sp.to_int(self.data.duration)):
             y.value = self.data.periods
         sp.else:
             ttm = sp.as_nat(self.data.duration - sp.as_nat(sp.now - self.data.start))
-            y.value = (sp.as_nat(self.data.periods) - (ttm / self.data.interval))
+            y.value = (sp.as_nat(self.data.periods) - (ttm // self.data.interval))
         return y.value
 
 @sp.add_test("Instrument")
@@ -126,7 +136,7 @@ def test():
     scenario = sp.test_scenario()
     scenario.h1("Trustless Staking Token Tests")
 
-    schedule = { 0: 952380, 1 : 957557, 2 : 962763, 3 : 967996, 4 : 973258, 5 : 978548, 6 : 983868, 7 : 989216, 8 : 994593, 9 : 1000000 }
+    schedule = { 0: sp.mutez(952380), 1 : sp.mutez(957557), 2 : sp.mutez(962763), 3 : sp.mutez(967996), 4 : sp.mutez(973258), 5 : sp.mutez(978548), 6 : sp.mutez(983868), 7 : sp.mutez(989216), 8 : sp.mutez(994593), 9 : sp.mutez(1000000) }
     duration = 60*60*24*10
     interval = 60*60*24
     periods = 10
@@ -158,14 +168,14 @@ def test():
     time = 60*60*24*1 + 1
     scenario.p("Cindy fails to redeem 100 tokens")
 
-    scenario += instrument.redeem(tokenAmount = sp.tez(100)).run(sender = cindy, now = time, valid = False)
+    scenario += instrument.redeem(tokenAmount = 100).run(sender = cindy, now = time, valid = False)
 
     scenario.h4("Period 2")
     time = 60*60*24*2 + 1
     scenario.p("Robert approves an allowance of 500 tokens for David")
     scenario.p("Robert deposits 1000xtz for a token balance of xxx")
 
-    scenario += instrument.approve(destination = david.address, tokenBalance = sp.tez(500)).run(sender = bob, now = time)
+    scenario += instrument.approve(destination = david.address, tokenBalance = 500).run(sender = bob, now = time)
     scenario += instrument.deposit().run(sender = bob, amount = sp.tez(1000), now = time)
 
     scenario.h4("Period 3")
@@ -173,8 +183,8 @@ def test():
     scenario.p("David pulls 400 tokens from Robert's allowance")
     scenario.p("Robert redeems 1050 tokens for xxx xtz")
 
-    scenario += instrument.transfer(destination = david.address, source = bob.address, tokenBalance = sp.tez(400)).run(sender = david, now = time)
-    scenario += instrument.redeem(tokenAmount = sp.tez(1050)).run(sender = bob, now = time)
+    scenario += instrument.transfer(destination = david.address, source = bob.address, tokenBalance = 400).run(sender = david, now = time)
+    scenario += instrument.redeem(tokenAmount = 1050).run(sender = bob, now = time)
 
     scenario.h4("Period 4")
     time = 60*60*24*4 + 1
