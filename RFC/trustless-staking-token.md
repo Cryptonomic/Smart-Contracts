@@ -122,4 +122,4 @@ The work is on-going and can be reviewed on [GitHub](https://github.com/Cryptono
 7. Albeit a CD tied to a potentially highly volatile crypto-currency.
 8. All proposals on Tezos thus far have passed with overwhelming support and little to no dissent.
 9. Tezos refers to their design as “Liquid Proof of Stake”.
-10. The Michelson smart contract language has a NOW directive.
+10. The Michelson smart contract language has a `NOW` directive.
