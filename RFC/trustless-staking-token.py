@@ -117,10 +117,7 @@ class Instrument(sp.Contract):
         sp.verify(sp.sender != params.destination, message = "Invalid destination")
         sp.verify(self.data.balances[sp.sender].balance >= params.tokenBalance, message = "Insufficient token balance")
 
-        sp.if ~ self.data.balances[sp.sender].approvals.contains(params.destination):
-            self.data.balances[sp.sender].approvals[params.destination] = params.tokenBalance
-        sp.else:
-            self.data.balances[sp.sender].approvals[params.destination] += params.tokenBalance
+        self.data.balances[sp.sender].approvals[params.destination] = params.tokenBalance
 
     def getPeriod(self):
         y = sp.local('y', self.data.periods)
