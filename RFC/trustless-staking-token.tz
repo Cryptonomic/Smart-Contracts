@@ -1,0 +1,1640 @@
+# smartpy compilation of Trustless Staking Token (https://github.com/Cryptonomic/Smart-Contracts/commit/b24adc90984700ff013b2b53e5bf848349a62eb5)
+
+parameter (or (or (or (pair %approve (address %destination) (mutez %tokenBalance)) (unit %default)) (or (unit %deposit) (mutez %redeem))) (or (or (pair %send (address %destination) (mutez %tokenBalance)) (option %setDelegate key_hash)) (or (pair %transfer (address %destination) (pair (address %source) (mutez %tokenBalance))) (mutez %withdrawCollateral))));
+storage   (pair (pair (pair (big_map %balances address (pair (map %approvals address mutez) (mutez %balance))) (nat %duration)) (pair (mutez %freeCollateral) (nat %interval))) (pair (pair (address %issuer) (option %payer key_hash)) (pair (int %periods) (pair (map %schedule int nat) (timestamp %start)))));
+code
+  {
+    DUP;
+    CDR;
+    SWAP;
+    CAR;
+    IF_LEFT
+      {
+        IF_LEFT
+          {
+            IF_LEFT
+              {
+
+
+                SWAP;
+                DUP;
+                DUG 2;
+                CAAAR;
+                SENDER;
+                MEM;
+                IF
+                  {}
+                  {
+                    PUSH string "Address has no balance";
+                    FAILWITH;
+                  };
+
+                DUP;
+                CAR;
+                SENDER;
+                COMPARE;
+                NEQ;
+                IF
+                  {}
+                  {
+                    PUSH string "Invalid destination";
+                    FAILWITH;
+                  };
+
+                DUP;
+                CDR;
+                DIG 2;
+                DUP;
+                DUG 3;
+                CAAAR;
+                SENDER;
+                GET;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "Get-item:-1";
+                    FAILWITH;
+                  };
+                CDR;
+                COMPARE;
+                GE;
+                IF
+                  {}
+                  {
+                    PUSH string "Insufficient token balance";
+                    FAILWITH;
+                  };
+
+                SWAP;
+                DUP;
+                DUG 2;
+                CAAAR;
+                SENDER;
+                GET;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "Get-item:-1";
+                    FAILWITH;
+                  };
+                CAR;
+                SWAP;
+                DUP;
+                DUG 2;
+                CAR;
+                MEM;
+                IF
+                  {
+
+                    SWAP;
+                    DUP;
+                    DUG 2;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    SENDER;
+                    DUP;
+                    DUG 2;
+                    GET;
+                    IF_SOME
+                      {
+
+                      }
+                      {
+                        PUSH string "set_in_top-any";
+                        FAILWITH;
+                      };
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DIG 7;
+                    DUP;
+                    DUG 8;
+                    CDR;
+                    DIG 9;
+                    DUP;
+                    DUG 10;
+                    CAAAR;
+                    SENDER;
+                    GET;
+                    IF_SOME
+                      {
+
+                      }
+                      {
+                        PUSH string "Get-item:-1";
+                        FAILWITH;
+                      };
+                    CAR;
+                    DIG 9;
+                    DUP;
+                    DUG 10;
+                    CAR;
+                    GET;
+                    IF_SOME
+                      {
+
+                      }
+                      {
+                        PUSH string "Get-item:73";
+                        FAILWITH;
+                      };
+                    ADD;
+                    SOME;
+                    DIG 8;
+                    DUP;
+                    DUG 9;
+                    CAR;
+                    UPDATE;
+                    PAIR;
+                    SOME;
+                    SWAP;
+                    UPDATE;
+                    PAIR;
+                    PAIR;
+                    PAIR;
+                    DUG 2;
+                    SWAP;
+                    DROP;
+                  }
+                  {
+
+                    SWAP;
+                    DUP;
+                    DUG 2;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    SENDER;
+                    DUP;
+                    DUG 2;
+                    GET;
+                    IF_SOME
+                      {
+
+                      }
+                      {
+                        PUSH string "set_in_top-any";
+                        FAILWITH;
+                      };
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DIG 7;
+                    DUP;
+                    DUG 8;
+                    CDR;
+                    SOME;
+                    DIG 8;
+                    DUP;
+                    DUG 9;
+                    CAR;
+                    UPDATE;
+                    PAIR;
+                    SOME;
+                    SWAP;
+                    UPDATE;
+                    PAIR;
+                    PAIR;
+                    PAIR;
+                    DUG 2;
+                    SWAP;
+                    DROP;
+                  };
+                DROP;
+              }
+              {
+
+
+                SWAP;
+                DUP;
+                DUG 2;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                CAR;
+                SWAP;
+                CDDR;
+                AMOUNT;
+                DIG 5;
+                DUP;
+                DUG 6;
+                CADAR;
+                ADD;
+                PAIR;
+                SWAP;
+                PAIR;
+                PAIR;
+                DUG 2;
+                DROP;
+                DROP;
+              };
+            NIL operation;
+          }
+          {
+            IF_LEFT
+              {
+
+
+                SWAP;
+                DUP;
+                DUG 2;
+                CDAAR;
+                SENDER;
+                COMPARE;
+                NEQ;
+                IF
+                  {}
+                  {
+                    PUSH string "Invalid address";
+                    FAILWITH;
+                  };
+
+                SWAP;
+                DUP;
+                DUG 2;
+                CDDAR;
+
+                DIG 2;
+                DUP;
+                DUG 3;
+                CDDDDR;
+                DIG 3;
+                DUP;
+                DUG 4;
+                CAADR;
+                INT;
+                ADD;
+                NOW;
+                COMPARE;
+                GT;
+                IF
+                  {
+
+                    DIG 2;
+                    DUP;
+                    DUG 3;
+                    SWAP;
+                    DROP;
+                    CDDAR;
+                  }
+                  {
+
+                    DIG 2;
+                    DUP;
+                    DUG 3;
+                    CADDR;
+                    DIG 3;
+                    DUP;
+                    DUG 4;
+                    CDDDDR;
+                    NOW;
+                    SUB;
+                    ISNAT;
+                    IF_SOME
+                      {}
+                      {
+                        PUSH unit Unit;
+                        FAILWITH;
+                      };
+                    DIG 4;
+                    DUP;
+                    DUG 5;
+                    CAADR;
+                    SUB;
+                    ISNAT;
+                    IF_SOME
+                      {}
+                      {
+                        PUSH unit Unit;
+                        FAILWITH;
+                      };
+                    EDIV;
+                    IF_SOME
+                      {
+                        CAR;
+                      }
+                      {
+                        PUSH string "division by zero";
+                        FAILWITH;
+                      };
+                    DIG 3;
+                    DUP;
+                    DUG 4;
+                    CDDAR;
+                    ISNAT;
+                    IF_SOME
+                      {}
+                      {
+                        PUSH unit Unit;
+                        FAILWITH;
+                      };
+                    SUB;
+                    SWAP;
+                    DROP;
+                  };
+
+                DIG 2;
+                DUP;
+                DUG 3;
+                CADAR;
+                AMOUNT;
+                DIG 4;
+                DUP;
+                DUG 5;
+                CDDDAR;
+                DIG 3;
+                DUP;
+                DUG 4;
+                GET;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "Get-item:117";
+                    FAILWITH;
+                  };
+                AMOUNT;
+                PUSH nat 1;
+                MUL;
+                EDIV;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "split_tokens";
+                    FAILWITH;
+                  };
+                CAR;
+                PUSH nat 1000000;
+                MUL;
+                SUB;
+                COMPARE;
+                LE;
+                IF
+                  {}
+                  {
+                    PUSH string "Insufficient collateral";
+                    FAILWITH;
+                  };
+
+                DIG 2;
+                DUP;
+                DUG 3;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                CAR;
+                SWAP;
+                CDDR;
+                AMOUNT;
+                DIG 6;
+                DUP;
+                DUG 7;
+                CDDDAR;
+                DIG 5;
+                DUP;
+                DUG 6;
+                GET;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "Get-item:117";
+                    FAILWITH;
+                  };
+                AMOUNT;
+                PUSH nat 1;
+                MUL;
+                EDIV;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "split_tokens";
+                    FAILWITH;
+                  };
+                CAR;
+                PUSH nat 1000000;
+                MUL;
+                SUB;
+                DIG 6;
+                DUP;
+                DUG 7;
+                CADAR;
+                SUB;
+                PAIR;
+                SWAP;
+                PAIR;
+                PAIR;
+                DUG 3;
+                DIG 2;
+                DROP;
+
+                DIG 2;
+                DUP;
+                DUG 3;
+                CAAAR;
+                SENDER;
+                MEM;
+                IF
+                  {
+
+                    DIG 2;
+                    DUP;
+                    DUG 3;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    SENDER;
+                    DUP;
+                    DUG 2;
+                    GET;
+                    IF_SOME
+                      {
+
+                      }
+                      {
+                        PUSH string "set_in_top-any";
+                        FAILWITH;
+                      };
+                    CAR;
+                    AMOUNT;
+                    DIG 9;
+                    DUP;
+                    DUG 10;
+                    CDDDAR;
+                    DIG 8;
+                    DUP;
+                    DUG 9;
+                    GET;
+                    IF_SOME
+                      {
+
+                      }
+                      {
+                        PUSH string "Get-item:117";
+                        FAILWITH;
+                      };
+                    AMOUNT;
+                    PUSH nat 1;
+                    MUL;
+                    EDIV;
+                    IF_SOME
+                      {
+
+                      }
+                      {
+                        PUSH string "split_tokens";
+                        FAILWITH;
+                      };
+                    CAR;
+                    PUSH nat 1000000;
+                    MUL;
+                    SUB;
+                    AMOUNT;
+                    ADD;
+                    DIG 9;
+                    DUP;
+                    DUG 10;
+                    CAAAR;
+                    SENDER;
+                    GET;
+                    IF_SOME
+                      {
+
+                      }
+                      {
+                        PUSH string "Get-item:-1";
+                        FAILWITH;
+                      };
+                    CDR;
+                    ADD;
+                    SWAP;
+                    PAIR;
+                    SOME;
+                    SWAP;
+                    UPDATE;
+                    PAIR;
+                    PAIR;
+                    PAIR;
+                    DUG 3;
+                    DIG 2;
+                    DROP;
+                  }
+                  {
+
+                    DIG 2;
+                    DUP;
+                    DUG 3;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    AMOUNT;
+                    DIG 7;
+                    DUP;
+                    DUG 8;
+                    CDDDAR;
+                    DIG 6;
+                    DUP;
+                    DUG 7;
+                    GET;
+                    IF_SOME
+                      {
+
+                      }
+                      {
+                        PUSH string "Get-item:117";
+                        FAILWITH;
+                      };
+                    AMOUNT;
+                    PUSH nat 1;
+                    MUL;
+                    EDIV;
+                    IF_SOME
+                      {
+
+                      }
+                      {
+                        PUSH string "split_tokens";
+                        FAILWITH;
+                      };
+                    CAR;
+                    PUSH nat 1000000;
+                    MUL;
+                    SUB;
+                    AMOUNT;
+                    ADD;
+                    PUSH (map address mutez) {};
+                    PAIR %approvals %balance;
+                    SOME;
+                    SENDER;
+                    UPDATE;
+                    PAIR;
+                    PAIR;
+                    PAIR;
+                    DUG 3;
+                    DIG 2;
+                    DROP;
+                  };
+                DROP;
+                DROP;
+                NIL operation;
+              }
+              {
+
+
+                SWAP;
+                DUP;
+                DUG 2;
+                CAAAR;
+                SENDER;
+                MEM;
+                IF
+                  {}
+                  {
+                    PUSH string "Address has no balance";
+                    FAILWITH;
+                  };
+
+                DUP;
+                DIG 2;
+                DUP;
+                DUG 3;
+                CAAAR;
+                SENDER;
+                GET;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "Get-item:-1";
+                    FAILWITH;
+                  };
+                CDR;
+                COMPARE;
+                GE;
+                IF
+                  {}
+                  {
+                    PUSH string "Insufficient token balance";
+                    FAILWITH;
+                  };
+
+                SWAP;
+                DUP;
+                DUG 2;
+                CDDAR;
+
+                DIG 2;
+                DUP;
+                DUG 3;
+                CDDDDR;
+                DIG 3;
+                DUP;
+                DUG 4;
+                CAADR;
+                INT;
+                ADD;
+                NOW;
+                COMPARE;
+                GT;
+                IF
+                  {
+
+                    DIG 2;
+                    DUP;
+                    DUG 3;
+                    SWAP;
+                    DROP;
+                    CDDAR;
+                  }
+                  {
+
+                    DIG 2;
+                    DUP;
+                    DUG 3;
+                    CADDR;
+                    DIG 3;
+                    DUP;
+                    DUG 4;
+                    CDDDDR;
+                    NOW;
+                    SUB;
+                    ISNAT;
+                    IF_SOME
+                      {}
+                      {
+                        PUSH unit Unit;
+                        FAILWITH;
+                      };
+                    DIG 4;
+                    DUP;
+                    DUG 5;
+                    CAADR;
+                    SUB;
+                    ISNAT;
+                    IF_SOME
+                      {}
+                      {
+                        PUSH unit Unit;
+                        FAILWITH;
+                      };
+                    EDIV;
+                    IF_SOME
+                      {
+                        CAR;
+                      }
+                      {
+                        PUSH string "division by zero";
+                        FAILWITH;
+                      };
+                    DIG 3;
+                    DUP;
+                    DUG 4;
+                    CDDAR;
+                    ISNAT;
+                    IF_SOME
+                      {}
+                      {
+                        PUSH unit Unit;
+                        FAILWITH;
+                      };
+                    SUB;
+                    SWAP;
+                    DROP;
+                  };
+
+                DIG 2;
+                DUP;
+                DUG 3;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                CAR;
+                SWAP;
+                CDDR;
+                PUSH nat 1000000;
+                DIG 5;
+                DUP;
+                DUG 6;
+                DIG 7;
+                DUP;
+                DUG 8;
+                CDDDAR;
+                DIG 6;
+                DUP;
+                DUG 7;
+                GET;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "Get-item:117";
+                    FAILWITH;
+                  };
+                MUL;
+                PUSH nat 1;
+                MUL;
+                EDIV;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "split_tokens";
+                    FAILWITH;
+                  };
+                CAR;
+                DIG 5;
+                DUP;
+                DUG 6;
+                SUB;
+                DIG 6;
+                DUP;
+                DUG 7;
+                CADAR;
+                ADD;
+                PAIR;
+                SWAP;
+                PAIR;
+                PAIR;
+                DUG 3;
+                DIG 2;
+                DROP;
+
+                DIG 2;
+                DUP;
+                DUG 3;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                SENDER;
+                DUP;
+                DUG 2;
+                GET;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "set_in_top-any";
+                    FAILWITH;
+                  };
+                CAR;
+                DIG 7;
+                DUP;
+                DUG 8;
+                DIG 9;
+                DUP;
+                DUG 10;
+                CAAAR;
+                SENDER;
+                GET;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "Get-item:-1";
+                    FAILWITH;
+                  };
+                CDR;
+                SUB;
+                SWAP;
+                PAIR;
+                SOME;
+                SWAP;
+                UPDATE;
+                PAIR;
+                PAIR;
+                PAIR;
+                DUG 3;
+                DIG 2;
+                DROP;
+
+                NIL operation;
+                SENDER;
+                CONTRACT unit;
+                IF_SOME
+                  {}
+                  {
+                    PUSH unit Unit;
+                    FAILWITH;
+                  };
+                PUSH nat 1000000;
+                DIG 4;
+                DUP;
+                DUG 5;
+                DIG 6;
+                DUP;
+                DUG 7;
+                CDDDAR;
+                DIG 5;
+                DUP;
+                DUG 6;
+                GET;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "Get-item:117";
+                    FAILWITH;
+                  };
+                MUL;
+                PUSH nat 1;
+                MUL;
+                EDIV;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "split_tokens";
+                    FAILWITH;
+                  };
+                CAR;
+                PUSH unit Unit;
+                TRANSFER_TOKENS;
+                CONS;
+                SWAP;
+                DROP;
+                SWAP;
+                DROP;
+              };
+          };
+      }
+      {
+        IF_LEFT
+          {
+            IF_LEFT
+              {
+
+
+                SWAP;
+                DUP;
+                DUG 2;
+                CAAAR;
+                SENDER;
+                MEM;
+                IF
+                  {}
+                  {
+                    PUSH string "Address has no balance";
+                    FAILWITH;
+                  };
+
+                DUP;
+                CAR;
+                SENDER;
+                COMPARE;
+                NEQ;
+                IF
+                  {}
+                  {
+                    PUSH string "Invalid destination";
+                    FAILWITH;
+                  };
+
+                DUP;
+                CDR;
+                DIG 2;
+                DUP;
+                DUG 3;
+                CAAAR;
+                SENDER;
+                GET;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "Get-item:-1";
+                    FAILWITH;
+                  };
+                CDR;
+                COMPARE;
+                GE;
+                IF
+                  {}
+                  {
+                    PUSH string "WrongCondition: self.data.balances[sp.sender].balance >= params.tokenBalance";
+                    FAILWITH;
+                  };
+
+                SWAP;
+                DUP;
+                DUG 2;
+                CAAAR;
+                SWAP;
+                DUP;
+                DUG 2;
+                CAR;
+                MEM;
+                IF
+                  {
+
+                    SWAP;
+                    DUP;
+                    DUG 2;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    DIG 5;
+                    DUP;
+                    DUG 6;
+                    CAR;
+                    DUP;
+                    DUG 2;
+                    GET;
+                    IF_SOME
+                      {
+
+                      }
+                      {
+                        PUSH string "set_in_top-any";
+                        FAILWITH;
+                      };
+                    CAR;
+                    DIG 6;
+                    DUP;
+                    DUG 7;
+                    CDR;
+                    DIG 8;
+                    DUP;
+                    DUG 9;
+                    CAAAR;
+                    DIG 8;
+                    DUP;
+                    DUG 9;
+                    CAR;
+                    GET;
+                    IF_SOME
+                      {
+
+                      }
+                      {
+                        PUSH string "Get-item:60";
+                        FAILWITH;
+                      };
+                    CDR;
+                    ADD;
+                    SWAP;
+                    PAIR;
+                    SOME;
+                    SWAP;
+                    UPDATE;
+                    PAIR;
+                    PAIR;
+                    PAIR;
+                    DUG 2;
+                    SWAP;
+                    DROP;
+                  }
+                  {
+
+                    SWAP;
+                    DUP;
+                    DUG 2;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DIG 4;
+                    DUP;
+                    DUG 5;
+                    CDR;
+                    PUSH (map address mutez) {};
+                    PAIR %approvals %balance;
+                    SOME;
+                    DIG 5;
+                    DUP;
+                    DUG 6;
+                    CAR;
+                    UPDATE;
+                    PAIR;
+                    PAIR;
+                    PAIR;
+                    DUG 2;
+                    SWAP;
+                    DROP;
+                  };
+
+                SWAP;
+                DUP;
+                DUG 2;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                SENDER;
+                DUP;
+                DUG 2;
+                GET;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "set_in_top-any";
+                    FAILWITH;
+                  };
+                CAR;
+                DIG 6;
+                DUP;
+                DUG 7;
+                CDR;
+                DIG 8;
+                DUP;
+                DUG 9;
+                CAAAR;
+                SENDER;
+                GET;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "Get-item:-1";
+                    FAILWITH;
+                  };
+                CDR;
+                SUB;
+                SWAP;
+                PAIR;
+                SOME;
+                SWAP;
+                UPDATE;
+                PAIR;
+                PAIR;
+                PAIR;
+                DUG 2;
+                DROP;
+                DROP;
+                NIL operation;
+              }
+              {
+
+
+                SWAP;
+                DUP;
+                DUG 2;
+                CDAAR;
+                SENDER;
+                COMPARE;
+                EQ;
+                IF
+                  {}
+                  {
+                    PUSH string "Privileged operation";
+                    FAILWITH;
+                  };
+
+                DUP;
+                NIL operation;
+                SWAP;
+                SET_DELEGATE;
+                CONS;
+                SWAP;
+                DROP;
+              };
+          }
+          {
+            IF_LEFT
+              {
+
+
+                DUP;
+                CAR;
+                SENDER;
+                COMPARE;
+                EQ;
+                IF
+                  {}
+                  {
+                    PUSH string "Invalid source";
+                    FAILWITH;
+                  };
+
+                SWAP;
+                DUP;
+                DUG 2;
+                CAAAR;
+                SWAP;
+                DUP;
+                DUG 2;
+                CDAR;
+                MEM;
+                IF
+                  {}
+                  {
+                    PUSH string "Address has no balance";
+                    FAILWITH;
+                  };
+
+                DUP;
+                CAR;
+                SWAP;
+                DUP;
+                DUG 2;
+                CDAR;
+                COMPARE;
+                NEQ;
+                IF
+                  {}
+                  {
+                    PUSH string "Invalid destination";
+                    FAILWITH;
+                  };
+
+                DUP;
+                CDDR;
+                DIG 2;
+                DUP;
+                DUG 3;
+                CAAAR;
+                DIG 2;
+                DUP;
+                DUG 3;
+                CDAR;
+                GET;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "Get-item:84";
+                    FAILWITH;
+                  };
+                CAR;
+                DIG 2;
+                DUP;
+                DUG 3;
+                CAR;
+                GET;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "Get-item:83";
+                    FAILWITH;
+                  };
+                COMPARE;
+                GE;
+                IF
+                  {}
+                  {
+                    PUSH string "Insufficient token balance";
+                    FAILWITH;
+                  };
+
+                SWAP;
+                DUP;
+                DUG 2;
+                CAAAR;
+                SWAP;
+                DUP;
+                DUG 2;
+                CAR;
+                MEM;
+                IF
+                  {
+
+                    SWAP;
+                    DUP;
+                    DUG 2;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    DIG 5;
+                    DUP;
+                    DUG 6;
+                    CAR;
+                    DUP;
+                    DUG 2;
+                    GET;
+                    IF_SOME
+                      {
+
+                      }
+                      {
+                        PUSH string "set_in_top-any";
+                        FAILWITH;
+                      };
+                    CAR;
+                    DIG 6;
+                    DUP;
+                    DUG 7;
+                    CDDR;
+                    DIG 8;
+                    DUP;
+                    DUG 9;
+                    CAAAR;
+                    DIG 8;
+                    DUP;
+                    DUG 9;
+                    CAR;
+                    GET;
+                    IF_SOME
+                      {
+
+                      }
+                      {
+                        PUSH string "Get-item:83";
+                        FAILWITH;
+                      };
+                    CDR;
+                    ADD;
+                    SWAP;
+                    PAIR;
+                    SOME;
+                    SWAP;
+                    UPDATE;
+                    PAIR;
+                    PAIR;
+                    PAIR;
+                    DUG 2;
+                    SWAP;
+                    DROP;
+                  }
+                  {
+
+                    SWAP;
+                    DUP;
+                    DUG 2;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DIG 4;
+                    DUP;
+                    DUG 5;
+                    CDDR;
+                    PUSH (map address mutez) {};
+                    PAIR %approvals %balance;
+                    SOME;
+                    DIG 5;
+                    DUP;
+                    DUG 6;
+                    CAR;
+                    UPDATE;
+                    PAIR;
+                    PAIR;
+                    PAIR;
+                    DUG 2;
+                    SWAP;
+                    DROP;
+                  };
+
+                SWAP;
+                DUP;
+                DUG 2;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                DIG 5;
+                DUP;
+                DUG 6;
+                CDAR;
+                DUP;
+                DUG 2;
+                GET;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "set_in_top-any";
+                    FAILWITH;
+                  };
+                CAR;
+                DIG 6;
+                DUP;
+                DUG 7;
+                CDDR;
+                DIG 8;
+                DUP;
+                DUG 9;
+                CAAAR;
+                DIG 8;
+                DUP;
+                DUG 9;
+                CDAR;
+                GET;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "Get-item:84";
+                    FAILWITH;
+                  };
+                CDR;
+                SUB;
+                SWAP;
+                PAIR;
+                SOME;
+                SWAP;
+                UPDATE;
+                PAIR;
+                PAIR;
+                PAIR;
+                DUG 2;
+                SWAP;
+                DROP;
+
+                SWAP;
+                DUP;
+                DUG 2;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                DIG 5;
+                DUP;
+                DUG 6;
+                CDAR;
+                DUP;
+                DUG 2;
+                GET;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "set_in_top-any";
+                    FAILWITH;
+                  };
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DIG 7;
+                DUP;
+                DUG 8;
+                CDDR;
+                DIG 9;
+                DUP;
+                DUG 10;
+                CAAAR;
+                DIG 9;
+                DUP;
+                DUG 10;
+                CDAR;
+                GET;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "Get-item:84";
+                    FAILWITH;
+                  };
+                CAR;
+                DIG 9;
+                DUP;
+                DUG 10;
+                CAR;
+                GET;
+                IF_SOME
+                  {
+
+                  }
+                  {
+                    PUSH string "Get-item:83";
+                    FAILWITH;
+                  };
+                SUB;
+                SOME;
+                DIG 8;
+                DUP;
+                DUG 9;
+                CAR;
+                UPDATE;
+                PAIR;
+                SOME;
+                SWAP;
+                UPDATE;
+                PAIR;
+                PAIR;
+                PAIR;
+                DUG 2;
+                DROP;
+                DROP;
+                NIL operation;
+              }
+              {
+
+
+                SWAP;
+                DUP;
+                DUG 2;
+                CDAAR;
+                SENDER;
+                COMPARE;
+                EQ;
+                IF
+                  {}
+                  {
+                    PUSH string "Privileged operation";
+                    FAILWITH;
+                  };
+
+                SWAP;
+                DUP;
+                DUG 2;
+                CADAR;
+                SWAP;
+                DUP;
+                DUG 2;
+                COMPARE;
+                LE;
+                IF
+                  {}
+                  {
+                    PUSH string "Insufficient free collateral";
+                    FAILWITH;
+                  };
+
+                SWAP;
+                DUP;
+                DUG 2;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                CAR;
+                SWAP;
+                CDDR;
+                DIG 3;
+                DUP;
+                DUG 4;
+                DIG 5;
+                DUP;
+                DUG 6;
+                CADAR;
+                SUB;
+                PAIR;
+                SWAP;
+                PAIR;
+                PAIR;
+                DUG 2;
+                SWAP;
+                DROP;
+
+                NIL operation;
+                SENDER;
+                CONTRACT unit;
+                IF_SOME
+                  {}
+                  {
+                    PUSH unit Unit;
+                    FAILWITH;
+                  };
+                DIG 2;
+                DUP;
+                DUG 3;
+                PUSH unit Unit;
+                TRANSFER_TOKENS;
+                CONS;
+                SWAP;
+                DROP;
+              };
+          };
+      };
+    PAIR;
+  }
