@@ -4,7 +4,7 @@ import smartpy as sp
 class TNSDomainManager(sp.Contract):
     def __init__(self, manager, interval, price, maxDuration):
         self.init(domainManager = manager,
-            interval = interval,
+            interval = sp.int(interval),
             price = sp.mutez(price),
             maxDuration = sp.int(maxDuration),
             nameRegistry = sp.big_map(
@@ -58,11 +58,12 @@ class TNSDomainManager(sp.Contract):
        cost = sp.local('cost', sp.mutez(0))
        cost.value = self.getCost(params.amount, params.duration)
 
-       self.data.nameRegistry[params.name].registrationPeriod = param.duration
+       self.data.nameRegistry[params.name].registrationPeriod = params.duration
        self.data.nameRegistry[params.name].modified = True
 
        # refund change
-       sp.if cost.value < (sp.amount - self.data.price): # if change is "significant"
+       sp.if (cost.value < (sp.amount - self.data.price)): 
+           # if change is "significant"
            sp.send(sp.sender, sp.amount - cost.value)
 
     # @param (name, newNameOwner)
@@ -97,8 +98,8 @@ class TNSDomainManager(sp.Contract):
         sp.verify(intervalsDiv.is_some(), message = "Invalid interval length set on origination")
         intervals.value = sp.fst(intervalsDiv.open_some())
         # validate amount
-        sp.verify(checkAmount(amount, intervals.value), message = "Insufficient payment")
-        return self.data.price * intervals.value
+        sp.verify(self.checkAmount(amount, intervals.value), message = "Insufficient payment")
+        return sp.split_tokens(self.data.price, intervals.value, 1)
 
     # Verify that name is valid
     def checkName(self, name):
@@ -110,7 +111,7 @@ class TNSDomainManager(sp.Contract):
 
     # Verify that amount covers intervals
     def checkAmount(self, amount, intervals):
-        return (self.data.price * intervals) <= amount
+        return sp.split_tokens(self.data.price, intervals, 1) <= amount
 
     # Verify that duration does not exceed max
     def checkDuration(self, duration):
@@ -130,7 +131,7 @@ class TNSDomainManager(sp.Contract):
 
     # Verify that the duration is valid
     def validateDuration(self, duration):
-        sp.verify(checkDuration(duration), message = "Duration too long")
+        sp.verify(self.checkDuration(duration), message = "Duration too long")
 
     # Verify that name is not already registered
     def validateAvailable(self, name):
@@ -159,7 +160,7 @@ def test():
     name1 = "domain1"
     regPeriod = 60*10
     interval = 60
-    price = sp.mutez(1000)
+    price = 1000
     maxDuration = 60*60*24*365
 
     # init contract
