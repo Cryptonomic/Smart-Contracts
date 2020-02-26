@@ -274,16 +274,6 @@ def test():
 
     scenario.h3("[FAILED-updateRegistrationPeriod] Payment not enough")
 
-    # scenario.h3("Testing unsuccessful registration period update: set to expire")
-    # badRegPeriod = 2
-    # scenario += domainManager.updateRegistrationPeriod(
-    #         name = exactName,
-    #         registrationPeriod = badRegPeriod).run(
-    #             sender = ownerAddr,
-    #             now = sp.timestamp(3),
-    #             valid = False)
-    # scenario.verify(domainManager.data.nameRegistry[exactName].registrationPeriod == newRegPeriod)
-
     scenario.h3("[ENTRYPOINT] transferNameOwnership")
     scenario.h3("[SUCCESS-transferNameOwnership]")
     newownerAddr = sp.address("tz1-newOwner")
@@ -304,15 +294,15 @@ def test():
     scenario.verify(domainManager.data.nameRegistry[exactName
 ].owner == newownerAddr)
 
-    scenario.h2("Testing subdomain deletion")
-    scenario.h3("Testing unsuccessful deletion of unregistered/deleted domain")
-    unregisteredName = "domain2"
+    scenario.h2("[ENTRYPOINT] deleteName")
+    scenario.h3("[FAILED-deleteName] Unregistered/deleted domain cannot be deleted.")
+    unregisteredName = "unregistered"
     scenario += domainManager.deleteName(name = unregisteredName).run(sender = newownerAddr, valid = False)
-    scenario.h3("Testing unsuccessful deletion of domain because of bad permissions")
+    scenario.h3("[FAILED-deleteName] Bad permissions")
     scenario += domainManager.deleteName(name = exactName
     ).run(sender = ownerAddr, valid = False)
 
-    scenario.h3("Testing successful deletion")
+    scenario.h3("[SUCCESS-deleteName]")
     scenario += domainManager.deleteName(name = exactName
     ).run(sender = newownerAddr)
     scenario.verify(~(domainManager.data.nameRegistry.contains(exactName
