@@ -19,25 +19,25 @@ def test():
     scenario.h1("SmartPy Proxy Contract")
 
     # init test values
-    owner = sp.address("tz1-owner")
-    notOwner = sp.address("tz1-notOwner")
-    oldContract = sp.address("KT1-old")
-    newContract = sp.address("KT1-new")
+    owner = sp.test_account("owner")
+    notOwner = sp.test_account("notOwner")
+    oldContract = sp.test_account("old")
+    newContract = sp.test_account("new")
 
     # init contract
-    proxy = Proxy(oldContract, owner)
+    proxy = Proxy(oldContract.address, owner.address)
     scenario += proxy
     # sanity check
-    scenario.verify(proxy.data.contract == oldContract)
+    scenario.verify(proxy.data.contract == oldContract.address)
 
     # test entrypoints
     scenario.h2("[ENTRYPOINT] setAddr")
     scenario.h3("[SUCCESS-setAddr]")
-    scenario += proxy.setAddr(newAddr = newContract).run(sender = owner)
-    scenario.verify(proxy.data.contract == newContract)
+    scenario += proxy.setAddr(newAddr = newContract.address).run(sender = owner)
+    scenario.verify(proxy.data.contract == newContract.address)
 
     scenario.h3("[FAILED-setAddr] Invalid permissions")
-    scenario += proxy.setAddr(newAddr = oldContract).run(
+    scenario += proxy.setAddr(newAddr = oldContract.address).run(
         sender = notOwner, 
         valid = False)
 
