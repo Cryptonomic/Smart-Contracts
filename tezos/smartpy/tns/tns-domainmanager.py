@@ -123,7 +123,7 @@ class TNSDomainManager(sp.Contract):
 
     # Verify that name is valid
     def validateName(self, name):
-        sp.verify(self.checkName(name), "Invalid name")
+        sp.verify(self.checkName(name), message = "Invalid name")
 
     # Verify that the duration is valid
     def validateDuration(self, duration):
