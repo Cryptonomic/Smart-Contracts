@@ -1,0 +1,1213 @@
+parameter (or (or (string %deleteName) (pair %registerName (int %duration) (pair (string %name) (address %resolver)))) (or (pair %transferNameOwnership (string %name) (address %newNameOwner)) (or (pair %updateRegistrationPeriod (int %duration) (string %name)) (pair %updateResolver (string %name) (address %resolver)))));
+storage   (pair (pair (big_map %addressRegistry address string) (pair (address %domainManager) (int %interval))) (pair (int %maxDuration) (pair (big_map %nameRegistry string (pair (pair (bool %modified) (pair (string %name) (address %owner))) (pair (timestamp %registeredAt) (pair (int %registrationPeriod) (address %resolver))))) (mutez %price))));
+code
+  {
+    DUP;
+    CDR;
+    SWAP;
+    CAR;
+    IF_LEFT
+      {
+        IF_LEFT
+          {
+            SWAP;
+            DUP;
+            DUG 2;
+            CDDAR;
+            SWAP;
+            DUP;
+            DUG 2;
+            MEM;
+            IF
+              {}
+              {
+                PUSH string "Name not registered";
+                FAILWITH;
+              };
+            SWAP;
+            DUP;
+            DUG 2;
+            CDDAR;
+            SWAP;
+            DUP;
+            DUG 2;
+            GET;
+            IF_SOME
+              {}
+              {
+                PUSH string "Get-item:86";
+                FAILWITH;
+              };
+            CDAR;
+            DIG 2;
+            DUP;
+            DUG 3;
+            CDDAR;
+            DIG 2;
+            DUP;
+            DUG 3;
+            GET;
+            IF_SOME
+              {}
+              {
+                PUSH string "Get-item:86";
+                FAILWITH;
+              };
+            CDDAR;
+            ADD;
+            NOW;
+            COMPARE;
+            GT;
+            IF
+              {
+                PUSH string "Name registration has expired";
+                FAILWITH;
+              }
+              {};
+            SWAP;
+            DUP;
+            DUG 2;
+            CDDAR;
+            SWAP;
+            DUP;
+            DUG 2;
+            GET;
+            IF_SOME
+              {}
+              {
+                PUSH string "Get-item:86";
+                FAILWITH;
+              };
+            CADDR;
+            SENDER;
+            COMPARE;
+            EQ;
+            IF
+              {
+                PUSH bool True;
+              }
+              {
+                SWAP;
+                DUP;
+                DUG 2;
+                CADAR;
+                SENDER;
+                COMPARE;
+                EQ;
+              };
+            IF
+              {}
+              {
+                PUSH string "Invalid permissions";
+                FAILWITH;
+              };
+            SWAP;
+            DUP;
+            DUG 2;
+            DUP;
+            CDR;
+            SWAP;
+            CAR;
+            DUP;
+            CDR;
+            SWAP;
+            CAR;
+            NONE string;
+            DIG 5;
+            DUP;
+            DUG 6;
+            CDDAR;
+            DIG 5;
+            DUP;
+            DUG 6;
+            GET;
+            IF_SOME
+              {}
+              {
+                PUSH string "Get-item:86";
+                FAILWITH;
+              };
+            CDDDR;
+            UPDATE;
+            PAIR;
+            PAIR;
+            DUG 2;
+            SWAP;
+            DROP;
+            SWAP;
+            DUP;
+            DUG 2;
+            DUP;
+            CAR;
+            SWAP;
+            CDR;
+            DUP;
+            CAR;
+            SWAP;
+            CDR;
+            DUP;
+            CDR;
+            SWAP;
+            CAR;
+            NONE (pair (pair (bool %modified) (pair (string %name) (address %owner))) (pair (timestamp %registeredAt) (pair (int %registrationPeriod) (address %resolver))));
+            DIG 5;
+            DUP;
+            DUG 6;
+            UPDATE;
+            PAIR;
+            SWAP;
+            PAIR;
+            SWAP;
+            PAIR;
+            DUG 2;
+            DROP;
+            DROP;
+            NIL operation;
+          }
+          {
+            DUP;
+            CDAR;
+            PUSH string "";
+            COMPARE;
+            NEQ;
+            IF
+              {}
+              {
+                PUSH string "WrongCondition: params.name != ''";
+                FAILWITH;
+              };
+            SWAP;
+            DUP;
+            DUG 2;
+            CDDAR;
+            SWAP;
+            DUP;
+            DUG 2;
+            CDAR;
+            MEM;
+            IF
+              {
+                SWAP;
+                DUP;
+                DUG 2;
+                CDDAR;
+                SWAP;
+                DUP;
+                DUG 2;
+                CDAR;
+                GET;
+                IF_SOME
+                  {}
+                  {
+                    PUSH string "Get-item:29";
+                    FAILWITH;
+                  };
+                CDAR;
+                DIG 2;
+                DUP;
+                DUG 3;
+                CDDAR;
+                DIG 2;
+                DUP;
+                DUG 3;
+                CDAR;
+                GET;
+                IF_SOME
+                  {}
+                  {
+                    PUSH string "Get-item:29";
+                    FAILWITH;
+                  };
+                CDDAR;
+                ADD;
+                NOW;
+                COMPARE;
+                GT;
+                NOT;
+              }
+              {
+                PUSH bool False;
+              };
+            IF
+              {
+                PUSH string "Name is currently registered";
+                FAILWITH;
+              }
+              {};
+            SWAP;
+            DUP;
+            DUG 2;
+            CDAR;
+            SWAP;
+            DUP;
+            DUG 2;
+            CAR;
+            COMPARE;
+            LT;
+            IF
+              {}
+              {
+                PUSH string "Duration too long";
+                FAILWITH;
+              };
+            PUSH mutez 0;
+            AMOUNT;
+            DIG 3;
+            DUP;
+            DUG 4;
+            CDDDR;
+            DIG 4;
+            DUP;
+            DUG 5;
+            CADDR;
+            ISNAT;
+            IF_SOME
+              {}
+              {
+                PUSH unit Unit;
+                FAILWITH;
+              };
+            DIG 4;
+            DUP;
+            DUG 5;
+            CAR;
+            ISNAT;
+            IF_SOME
+              {}
+              {
+                PUSH unit Unit;
+                FAILWITH;
+              };
+            EDIV;
+            IF_SOME
+              {
+                CAR;
+              }
+              {
+                PUSH string "division by zero";
+                FAILWITH;
+              };
+            MUL;
+            COMPARE;
+            LE;
+            IF
+              {}
+              {
+                PUSH string "Insufficient payment";
+                FAILWITH;
+              };
+            DIG 2;
+            DUP;
+            DUG 3;
+            CDDDR;
+            DIG 3;
+            DUP;
+            DUG 4;
+            CADDR;
+            ISNAT;
+            IF_SOME
+              {}
+              {
+                PUSH unit Unit;
+                FAILWITH;
+              };
+            DIG 3;
+            DUP;
+            DUG 4;
+            CAR;
+            ISNAT;
+            IF_SOME
+              {}
+              {
+                PUSH unit Unit;
+                FAILWITH;
+              };
+            EDIV;
+            IF_SOME
+              {
+                CAR;
+              }
+              {
+                PUSH string "division by zero";
+                FAILWITH;
+              };
+            MUL;
+            SWAP;
+            DROP;
+            DIG 2;
+            DUP;
+            DUG 3;
+            DUP;
+            CAR;
+            SWAP;
+            CDR;
+            DUP;
+            CAR;
+            SWAP;
+            CDR;
+            DUP;
+            CDR;
+            SWAP;
+            CAR;
+            DIG 5;
+            DUP;
+            DUG 6;
+            CDDR;
+            DIG 6;
+            DUP;
+            DUG 7;
+            CAR;
+            PAIR %registrationPeriod %resolver;
+            NOW;
+            PAIR %registeredAt;
+            SENDER;
+            DIG 7;
+            DUP;
+            DUG 8;
+            CDAR;
+            PAIR %name %owner;
+            PUSH bool False;
+            PAIR %modified;
+            PAIR;
+            SOME;
+            DIG 6;
+            DUP;
+            DUG 7;
+            CDAR;
+            UPDATE;
+            PAIR;
+            SWAP;
+            PAIR;
+            SWAP;
+            PAIR;
+            DUG 3;
+            DIG 2;
+            DROP;
+            DIG 2;
+            DUP;
+            DUG 3;
+            DUP;
+            CDR;
+            SWAP;
+            CAR;
+            DUP;
+            CDR;
+            SWAP;
+            CAR;
+            DIG 4;
+            DUP;
+            DUG 5;
+            CDAR;
+            SOME;
+            DIG 5;
+            DUP;
+            DUG 6;
+            CDDR;
+            UPDATE;
+            PAIR;
+            PAIR;
+            DUG 3;
+            DIG 2;
+            DROP;
+            DUP;
+            AMOUNT;
+            COMPARE;
+            GT;
+            IF
+              {
+                NIL operation;
+                SENDER;
+                CONTRACT unit;
+                IF_SOME
+                  {}
+                  {
+                    PUSH unit Unit;
+                    FAILWITH;
+                  };
+                DIG 2;
+                DUP;
+                DUG 3;
+                AMOUNT;
+                SUB;
+                PUSH unit Unit;
+                TRANSFER_TOKENS;
+                CONS;
+              }
+              {
+                NIL operation;
+              };
+            SWAP;
+            DROP;
+            SWAP;
+            DROP;
+          };
+      }
+      {
+        IF_LEFT
+          {
+            SWAP;
+            DUP;
+            DUG 2;
+            CDDAR;
+            SWAP;
+            DUP;
+            DUG 2;
+            CAR;
+            MEM;
+            IF
+              {}
+              {
+                PUSH string "Name not registered";
+                FAILWITH;
+              };
+            SWAP;
+            DUP;
+            DUG 2;
+            CDDAR;
+            SWAP;
+            DUP;
+            DUG 2;
+            CAR;
+            GET;
+            IF_SOME
+              {}
+              {
+                PUSH string "Get-item:72";
+                FAILWITH;
+              };
+            CDAR;
+            DIG 2;
+            DUP;
+            DUG 3;
+            CDDAR;
+            DIG 2;
+            DUP;
+            DUG 3;
+            CAR;
+            GET;
+            IF_SOME
+              {}
+              {
+                PUSH string "Get-item:72";
+                FAILWITH;
+              };
+            CDDAR;
+            ADD;
+            NOW;
+            COMPARE;
+            GT;
+            IF
+              {
+                PUSH string "Name registration has expired";
+                FAILWITH;
+              }
+              {};
+            SWAP;
+            DUP;
+            DUG 2;
+            CDDAR;
+            SWAP;
+            DUP;
+            DUG 2;
+            CAR;
+            GET;
+            IF_SOME
+              {}
+              {
+                PUSH string "Get-item:72";
+                FAILWITH;
+              };
+            CADDR;
+            SENDER;
+            COMPARE;
+            EQ;
+            IF
+              {
+                PUSH bool True;
+              }
+              {
+                SWAP;
+                DUP;
+                DUG 2;
+                CADAR;
+                SENDER;
+                COMPARE;
+                EQ;
+              };
+            IF
+              {}
+              {
+                PUSH string "Invalid permissions";
+                FAILWITH;
+              };
+            SWAP;
+            DUP;
+            DUG 2;
+            DUP;
+            CAR;
+            SWAP;
+            CDR;
+            DUP;
+            CAR;
+            SWAP;
+            CDR;
+            DUP;
+            CDR;
+            SWAP;
+            CAR;
+            DUP;
+            DIG 5;
+            DUP;
+            DUG 6;
+            CAR;
+            DUP;
+            DUG 2;
+            GET;
+            IF_SOME
+              {}
+              {
+                PUSH string "set_in_top-any";
+                FAILWITH;
+              };
+            DUP;
+            CDR;
+            SWAP;
+            CAR;
+            DUP;
+            CAR;
+            SWAP;
+            CDAR;
+            DIG 8;
+            DUP;
+            DUG 9;
+            CDR;
+            SWAP;
+            PAIR;
+            SWAP;
+            PAIR;
+            PAIR;
+            SOME;
+            SWAP;
+            UPDATE;
+            PAIR;
+            SWAP;
+            PAIR;
+            SWAP;
+            PAIR;
+            DUG 2;
+            SWAP;
+            DROP;
+            SWAP;
+            DUP;
+            DUG 2;
+            DUP;
+            CAR;
+            SWAP;
+            CDR;
+            DUP;
+            CAR;
+            SWAP;
+            CDR;
+            DUP;
+            CDR;
+            SWAP;
+            CAR;
+            DUP;
+            DIG 5;
+            DUP;
+            DUG 6;
+            CAR;
+            DUP;
+            DUG 2;
+            GET;
+            IF_SOME
+              {}
+              {
+                PUSH string "set_in_top-any";
+                FAILWITH;
+              };
+            DUP;
+            CDR;
+            SWAP;
+            CADR;
+            PUSH bool True;
+            PAIR;
+            PAIR;
+            SOME;
+            SWAP;
+            UPDATE;
+            PAIR;
+            SWAP;
+            PAIR;
+            SWAP;
+            PAIR;
+            DUG 2;
+            DROP;
+            DROP;
+            NIL operation;
+          }
+          {
+            IF_LEFT
+              {
+                SWAP;
+                DUP;
+                DUG 2;
+                CDDAR;
+                SWAP;
+                DUP;
+                DUG 2;
+                CDR;
+                MEM;
+                IF
+                  {}
+                  {
+                    PUSH string "Name not registered";
+                    FAILWITH;
+                  };
+                SWAP;
+                DUP;
+                DUG 2;
+                CDDAR;
+                SWAP;
+                DUP;
+                DUG 2;
+                CDR;
+                GET;
+                IF_SOME
+                  {}
+                  {
+                    PUSH string "Get-item:54";
+                    FAILWITH;
+                  };
+                CDAR;
+                DIG 2;
+                DUP;
+                DUG 3;
+                CDDAR;
+                DIG 2;
+                DUP;
+                DUG 3;
+                CDR;
+                GET;
+                IF_SOME
+                  {}
+                  {
+                    PUSH string "Get-item:54";
+                    FAILWITH;
+                  };
+                CDDAR;
+                ADD;
+                NOW;
+                COMPARE;
+                GT;
+                IF
+                  {
+                    PUSH string "Name registration has expired";
+                    FAILWITH;
+                  }
+                  {};
+                SWAP;
+                DUP;
+                DUG 2;
+                CDDAR;
+                SWAP;
+                DUP;
+                DUG 2;
+                CDR;
+                GET;
+                IF_SOME
+                  {}
+                  {
+                    PUSH string "Get-item:54";
+                    FAILWITH;
+                  };
+                CADDR;
+                SENDER;
+                COMPARE;
+                EQ;
+                IF
+                  {
+                    PUSH bool True;
+                  }
+                  {
+                    SWAP;
+                    DUP;
+                    DUG 2;
+                    CADAR;
+                    SENDER;
+                    COMPARE;
+                    EQ;
+                  };
+                IF
+                  {}
+                  {
+                    PUSH string "Invalid permissions";
+                    FAILWITH;
+                  };
+                SWAP;
+                DUP;
+                DUG 2;
+                CDAR;
+                SWAP;
+                DUP;
+                DUG 2;
+                CAR;
+                DIG 3;
+                DUP;
+                DUG 4;
+                CDDAR;
+                DIG 3;
+                DUP;
+                DUG 4;
+                CDR;
+                GET;
+                IF_SOME
+                  {}
+                  {
+                    PUSH string "Get-item:54";
+                    FAILWITH;
+                  };
+                CDDAR;
+                ADD;
+                COMPARE;
+                LT;
+                IF
+                  {}
+                  {
+                    PUSH string "Duration too long";
+                    FAILWITH;
+                  };
+                PUSH mutez 0;
+                AMOUNT;
+                DIG 3;
+                DUP;
+                DUG 4;
+                CDDDR;
+                DIG 4;
+                DUP;
+                DUG 5;
+                CADDR;
+                ISNAT;
+                IF_SOME
+                  {}
+                  {
+                    PUSH unit Unit;
+                    FAILWITH;
+                  };
+                DIG 4;
+                DUP;
+                DUG 5;
+                CAR;
+                ISNAT;
+                IF_SOME
+                  {}
+                  {
+                    PUSH unit Unit;
+                    FAILWITH;
+                  };
+                EDIV;
+                IF_SOME
+                  {
+                    CAR;
+                  }
+                  {
+                    PUSH string "division by zero";
+                    FAILWITH;
+                  };
+                MUL;
+                COMPARE;
+                LE;
+                IF
+                  {}
+                  {
+                    PUSH string "Insufficient payment";
+                    FAILWITH;
+                  };
+                DIG 2;
+                DUP;
+                DUG 3;
+                CDDDR;
+                DIG 3;
+                DUP;
+                DUG 4;
+                CADDR;
+                ISNAT;
+                IF_SOME
+                  {}
+                  {
+                    PUSH unit Unit;
+                    FAILWITH;
+                  };
+                DIG 3;
+                DUP;
+                DUG 4;
+                CAR;
+                ISNAT;
+                IF_SOME
+                  {}
+                  {
+                    PUSH unit Unit;
+                    FAILWITH;
+                  };
+                EDIV;
+                IF_SOME
+                  {
+                    CAR;
+                  }
+                  {
+                    PUSH string "division by zero";
+                    FAILWITH;
+                  };
+                MUL;
+                SWAP;
+                DROP;
+                DIG 2;
+                DUP;
+                DUG 3;
+                DUP;
+                CAR;
+                SWAP;
+                CDR;
+                DUP;
+                CAR;
+                SWAP;
+                CDR;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                DIG 6;
+                DUP;
+                DUG 7;
+                CDR;
+                DUP;
+                DUG 2;
+                GET;
+                IF_SOME
+                  {}
+                  {
+                    PUSH string "set_in_top-any";
+                    FAILWITH;
+                  };
+                DUP;
+                CAR;
+                SWAP;
+                CDR;
+                DUP;
+                CAR;
+                SWAP;
+                CDDR;
+                DIG 9;
+                DUP;
+                DUG 10;
+                CAR;
+                PAIR;
+                SWAP;
+                PAIR;
+                SWAP;
+                PAIR;
+                SOME;
+                SWAP;
+                UPDATE;
+                PAIR;
+                SWAP;
+                PAIR;
+                SWAP;
+                PAIR;
+                DUG 3;
+                DIG 2;
+                DROP;
+                DIG 2;
+                DUP;
+                DUG 3;
+                DUP;
+                CAR;
+                SWAP;
+                CDR;
+                DUP;
+                CAR;
+                SWAP;
+                CDR;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                DIG 6;
+                DUP;
+                DUG 7;
+                CDR;
+                DUP;
+                DUG 2;
+                GET;
+                IF_SOME
+                  {}
+                  {
+                    PUSH string "set_in_top-any";
+                    FAILWITH;
+                  };
+                DUP;
+                CDR;
+                SWAP;
+                CADR;
+                PUSH bool True;
+                PAIR;
+                PAIR;
+                SOME;
+                SWAP;
+                UPDATE;
+                PAIR;
+                SWAP;
+                PAIR;
+                SWAP;
+                PAIR;
+                DUG 3;
+                DIG 2;
+                DROP;
+                DIG 2;
+                DUP;
+                DUG 3;
+                CDDDR;
+                AMOUNT;
+                SUB;
+                SWAP;
+                DUP;
+                DUG 2;
+                COMPARE;
+                LT;
+                IF
+                  {
+                    NIL operation;
+                    SENDER;
+                    CONTRACT unit;
+                    IF_SOME
+                      {}
+                      {
+                        PUSH unit Unit;
+                        FAILWITH;
+                      };
+                    DIG 2;
+                    DUP;
+                    DUG 3;
+                    AMOUNT;
+                    SUB;
+                    PUSH unit Unit;
+                    TRANSFER_TOKENS;
+                    CONS;
+                  }
+                  {
+                    NIL operation;
+                  };
+                SWAP;
+                DROP;
+                SWAP;
+                DROP;
+              }
+              {
+                SWAP;
+                DUP;
+                DUG 2;
+                CDDAR;
+                SWAP;
+                DUP;
+                DUG 2;
+                CAR;
+                MEM;
+                IF
+                  {}
+                  {
+                    PUSH string "Name not registered";
+                    FAILWITH;
+                  };
+                SWAP;
+                DUP;
+                DUG 2;
+                CDDAR;
+                SWAP;
+                DUP;
+                DUG 2;
+                CAR;
+                GET;
+                IF_SOME
+                  {}
+                  {
+                    PUSH string "Get-item:79";
+                    FAILWITH;
+                  };
+                CDAR;
+                DIG 2;
+                DUP;
+                DUG 3;
+                CDDAR;
+                DIG 2;
+                DUP;
+                DUG 3;
+                CAR;
+                GET;
+                IF_SOME
+                  {}
+                  {
+                    PUSH string "Get-item:79";
+                    FAILWITH;
+                  };
+                CDDAR;
+                ADD;
+                NOW;
+                COMPARE;
+                GT;
+                IF
+                  {
+                    PUSH string "Name registration has expired";
+                    FAILWITH;
+                  }
+                  {};
+                SWAP;
+                DUP;
+                DUG 2;
+                CDDAR;
+                SWAP;
+                DUP;
+                DUG 2;
+                CAR;
+                GET;
+                IF_SOME
+                  {}
+                  {
+                    PUSH string "Get-item:79";
+                    FAILWITH;
+                  };
+                CADDR;
+                SENDER;
+                COMPARE;
+                EQ;
+                IF
+                  {
+                    PUSH bool True;
+                  }
+                  {
+                    SWAP;
+                    DUP;
+                    DUG 2;
+                    CADAR;
+                    SENDER;
+                    COMPARE;
+                    EQ;
+                  };
+                IF
+                  {}
+                  {
+                    PUSH string "Invalid permissions";
+                    FAILWITH;
+                  };
+                SWAP;
+                DUP;
+                DUG 2;
+                DUP;
+                CAR;
+                SWAP;
+                CDR;
+                DUP;
+                CAR;
+                SWAP;
+                CDR;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                DIG 5;
+                DUP;
+                DUG 6;
+                CAR;
+                DUP;
+                DUG 2;
+                GET;
+                IF_SOME
+                  {}
+                  {
+                    PUSH string "set_in_top-any";
+                    FAILWITH;
+                  };
+                DUP;
+                CAR;
+                SWAP;
+                CDR;
+                DUP;
+                CAR;
+                SWAP;
+                CDAR;
+                DIG 8;
+                DUP;
+                DUG 9;
+                CDR;
+                SWAP;
+                PAIR;
+                SWAP;
+                PAIR;
+                SWAP;
+                PAIR;
+                SOME;
+                SWAP;
+                UPDATE;
+                PAIR;
+                SWAP;
+                PAIR;
+                SWAP;
+                PAIR;
+                DUG 2;
+                SWAP;
+                DROP;
+                SWAP;
+                DUP;
+                DUG 2;
+                DUP;
+                CAR;
+                SWAP;
+                CDR;
+                DUP;
+                CAR;
+                SWAP;
+                CDR;
+                DUP;
+                CDR;
+                SWAP;
+                CAR;
+                DUP;
+                DIG 5;
+                DUP;
+                DUG 6;
+                CAR;
+                DUP;
+                DUG 2;
+                GET;
+                IF_SOME
+                  {}
+                  {
+                    PUSH string "set_in_top-any";
+                    FAILWITH;
+                  };
+                DUP;
+                CDR;
+                SWAP;
+                CADR;
+                PUSH bool True;
+                PAIR;
+                PAIR;
+                SOME;
+                SWAP;
+                UPDATE;
+                PAIR;
+                SWAP;
+                PAIR;
+                SWAP;
+                PAIR;
+                DUG 2;
+                DROP;
+                DROP;
+                NIL operation;
+              };
+          };
+      };
+    PAIR;
+  }
