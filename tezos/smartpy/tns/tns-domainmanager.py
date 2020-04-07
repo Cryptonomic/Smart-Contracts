@@ -1,7 +1,8 @@
-# Title:    Tezos Name Service Domain Manager
+# TNS-1
+# Title: Tezos Name Service Domain Manager
 import smartpy as sp
 
-class TNSDomainManager(sp.Contract):
+class TNSNameManager(sp.Contract):
     def __init__(self, manager, interval, price, maxDuration):
         self.init(domainManager = manager,
             interval = sp.int(interval),
@@ -142,17 +143,31 @@ class TNSDomainManager(sp.Contract):
         sp.verify(self.checkNamePermissions(sender, self.data.nameRegistry[name]),
             message = "Invalid permissions")
 
-@sp.add_test("TNSDomainManagerTest")
+class NamedContract(sp.Contract):
+    def __init__(self, admin):
+        self.init(
+            admin = admin)
+
+    @sp.entry_point
+    def registerName(self, params):
+        sp.verify(sp.sender == self.data.admin, message = "Privileged operation")
+        
+        nameParams = sp.record(duration = params.duration, name = params.name, resolver = sp.to_address(sp.self))
+
+        registerCall = sp.contract(sp.TRecord(duration = sp.TInt, name = sp.TString, resolver = sp.TAddress), params.registry, entry_point = "registerName").open_some()
+        sp.transfer(nameParams, sp.amount, registerCall)
+
+
+@sp.add_test("TNSNameManagerTest")
 def test():
     # init test and create html output
     scenario = sp.test_scenario()
-    scenario.h1("Tezos Name Service Domain Manager")
+    scenario.h1("Tezos Name Service Manager")
 
     # init test values
-    managerAddr = sp.address("tz1aoLg7LtcbwJ2a7kfMj9MhUDs3fvehw6aa")
-    ownerAddr = sp.address("tz1-owner")
-    resolverAddr = sp.address("tz1-resolver")
-    testAddr = sp.address("tz1-notOwnerOrManager")
+    managerAddr = sp.test_account("Administrator")
+    ownerAddr = sp.test_account("Alice")
+    resolverAddr = sp.test_account("Robert")
     exactName = "exactName"
     changeName = "changeName"
     interval = 60
@@ -162,7 +177,7 @@ def test():
     regPrice = price*10
 
     # init contract
-    domainManager = TNSDomainManager(managerAddr, interval, price, maxDuration)
+    domainManager = TNSNameManager(managerAddr.address, interval, price, maxDuration)
     scenario += domainManager
 
     # test entry points
@@ -170,24 +185,24 @@ def test():
     scenario.h3("[SUCCESS-registerName] Testing with exact amount")
     scenario += domainManager.registerName(
         name = exactName,
-        resolver = resolverAddr,
+        resolver = resolverAddr.address,
         duration = regPeriod).run(
             sender = ownerAddr, 
             amount = sp.mutez(regPrice),
             now = sp.timestamp(0))
     scenario.verify(domainManager.data.nameRegistry[exactName] ==
             sp.record(name = exactName,
-            owner = ownerAddr,
-            resolver = resolverAddr,
+            owner = ownerAddr.address,
+            resolver = resolverAddr.address,
             registeredAt = sp.timestamp(0),
             registrationPeriod = regPeriod,
             modified = False))
-    scenario.verify(domainManager.data.addressRegistry[resolverAddr] == exactName)
+    scenario.verify(domainManager.data.addressRegistry[resolverAddr.address] == exactName)
 
     scenario.h3("[SUCCESS-registerName] Testing correct change is refunded")
     scenario += domainManager.registerName(
         name = changeName,
-        resolver = resolverAddr,
+        resolver = resolverAddr.address,
         duration = regPeriod).run(
             sender = ownerAddr,
             amount = sp.mutez(regPrice + price*2),
@@ -198,7 +213,7 @@ def test():
     scenario.h3("[FAILED-registerName] Invalid name")
     scenario += domainManager.registerName(
         name = "",
-        resolver = resolverAddr,
+        resolver = resolverAddr.address,
         duration = regPeriod).run(
             sender = ownerAddr,
             amount = sp.mutez(regPrice),
@@ -209,7 +224,7 @@ def test():
     scenario.h3("[FAILED-registerName] Name already exists")
     scenario += domainManager.registerName(
         name = exactName,
-        resolver = resolverAddr,
+        resolver = resolverAddr.address,
         duration = regPeriod).run(
             sender = ownerAddr,
             amount = sp.mutez(regPrice),
@@ -218,8 +233,8 @@ def test():
     # verify storage is unchanged
     scenario.verify(domainManager.data.nameRegistry[exactName] ==
         sp.record(name = exactName,
-            owner = ownerAddr,
-            resolver = resolverAddr,
+            owner = ownerAddr.address,
+            resolver = resolverAddr.address,
             registeredAt = sp.timestamp(0),
             registrationPeriod = regPeriod,
             modified = False))
@@ -227,7 +242,7 @@ def test():
     scenario.h3("[FAILED-registerName] Duration too long")
     scenario += domainManager.registerName(
         name = "toolong",
-        resolver = resolverAddr,
+        resolver = resolverAddr.address,
         duration = maxDuration + 1).run(
             sender = ownerAddr,
             amount = sp.mutez(price * (60*24*365+1)), # cover maxDuration + 1
@@ -238,7 +253,7 @@ def test():
     scenario.h3("[FAILED-registerName] Payment not enough")
     scenario += domainManager.registerName(
         name = "notenough",
-        resolver = resolverAddr,
+        resolver = resolverAddr.address,
         duration = regPeriod).run(
             sender = ownerAddr,
             amount = sp.mutez(regPrice - 1),
@@ -248,13 +263,13 @@ def test():
 
     scenario.h2("[ENTRYPOINT] updateResolver")
     scenario.h3("[SUCCESS-updateResolver]")
-    newResolverAddr = sp.address("tz1-newResolver")
+    newresolverAddr = sp.test_account("Cindy")
     scenario += domainManager.updateResolver(
             name = exactName,
-            resolver = newResolverAddr).run(
+            resolver = newresolverAddr.address).run(
                 sender = ownerAddr,
                 now = sp.timestamp(3))
-    scenario.verify(domainManager.data.nameRegistry[exactName].resolver == newResolverAddr)
+    scenario.verify(domainManager.data.nameRegistry[exactName].resolver == newresolverAddr.address)
     scenario.verify(domainManager.data.nameRegistry[exactName].modified == True)
 
     scenario.h3("[ENTRYPOINT] updateRegistrationPeriod")
@@ -277,33 +292,29 @@ def test():
     scenario.h3("[ENTRYPOINT] transferNameOwnership")
     scenario.h3("[SUCCESS-transferNameOwnership]")
     newownerAddr = sp.address("tz1-newOwner")
-    scenario += domainManager.transferNameOwnership(
-            name = exactName
-    ,
-            newNameOwner = newownerAddr).run(
-                sender = ownerAddr,
-                now = sp.timestamp(3))
-    scenario.verify(domainManager.data.nameRegistry[exactName
-].owner == newownerAddr)
+    scenario += domainManager.transferNameOwnership(name = exactName, newNameOwner = newownerAddr).run(sender = ownerAddr, now = sp.timestamp(3))
+    scenario.verify(domainManager.data.nameRegistry[exactName].owner == newownerAddr)
 
     scenario.h3("[FAILED-transferNameOwnership] Old owner cannot modify subdomain")
-    scenario += domainManager.transferNameOwnership(
-            name = exactName
-    ,
-            newNameOwner = ownerAddr).run(sender = ownerAddr, valid = False)
-    scenario.verify(domainManager.data.nameRegistry[exactName
-].owner == newownerAddr)
+    scenario += domainManager.transferNameOwnership(name = exactName, newNameOwner = ownerAddr.address).run(sender = ownerAddr, valid = False)
+    scenario.verify(domainManager.data.nameRegistry[exactName].owner == newownerAddr)
 
     scenario.h2("[ENTRYPOINT] deleteName")
     scenario.h3("[FAILED-deleteName] Unregistered/deleted domain cannot be deleted.")
     unregisteredName = "unregistered"
     scenario += domainManager.deleteName(name = unregisteredName).run(sender = newownerAddr, valid = False)
     scenario.h3("[FAILED-deleteName] Bad permissions")
-    scenario += domainManager.deleteName(name = exactName
-    ).run(sender = ownerAddr, valid = False)
+    scenario += domainManager.deleteName(name = exactName).run(sender = ownerAddr, valid = False)
 
     scenario.h3("[SUCCESS-deleteName]")
-    scenario += domainManager.deleteName(name = exactName
-    ).run(sender = newownerAddr)
-    scenario.verify(~(domainManager.data.nameRegistry.contains(exactName
-)))
+    scenario += domainManager.deleteName(name = exactName).run(sender = newownerAddr)
+    scenario.verify(~(domainManager.data.nameRegistry.contains(exactName)))
+
+    namedContractManager = sp.test_account("Janice")
+    namedContract = NamedContract(namedContractManager.address)
+    scenario += namedContract
+
+    scenario.h2("Register a contract by proxy")
+    scenario.h3("[SUCCESS-registerName] ")
+    scenario.p("An example of registring a contract with a manager invocation while preserving the source address for trustless contract name registration")
+    scenario += namedContract.registerName(duration = sp.int(5), name = "Named Contract", registry = domainManager.address).run(amount = sp.tez(20), sender = namedContractManager)
