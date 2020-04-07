@@ -37,7 +37,7 @@ class TNSNameManager(sp.Contract):
         # update registry
         self.data.nameRegistry[params.name] = sp.record(
             name = params.name, 
-            owner = sp.source,
+            owner = sp.sender,
             resolver = params.resolver,
             registeredAt = sp.now,
             registrationPeriod = params.duration,
