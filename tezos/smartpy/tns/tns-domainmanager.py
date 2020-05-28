@@ -49,7 +49,7 @@ class TNSDomainManager(sp.Contract):
         self.validateAvailable(params.name)
         self.validateDuration(params.duration)
 
-        commitment = makeCommitment(params.name, params.owner, params.nonce)
+        commitment = makeCommitment(params.name, sp.sender, params.nonce)
         cost = sp.local('cost', sp.mutez(0))
         cost.value = self.consumeCommitment(commitment, sp.amount, params.duration)
 
@@ -214,8 +214,8 @@ class TNSDomainManager(sp.Contract):
 # @param owner
 # @param nonce
 # Recreates the hash which was committed for verification purpose
-def makeCommitment(name, owner, nonce):
-    return sp.blake2b(sp.pack([name, owner, nonce]))
+def makeCommitment(_name, _owner, _nonce):
+    return sp.blake2b(sp.pack(sp.record(name = _name, owner = _owner, nonce = _nonce)))
 
 
 @sp.add_test("TNSDomainManagerTest")
@@ -225,18 +225,26 @@ def test():
     scenario.h1("Tezos Name Service Domain Manager")
 
     # init test values
+    # commitments
     minCommitTime = 5
     maxCommitTime = 100
-    managerAddr = sp.address("tz1aoLg7LtcbwJ2a7kfMj9MhUDs3fvehw6aa")
-    ownerAddr = sp.address("tz1-owner")
-    resolverAddr = sp.address("tz1-resolver")
-    testAddr = sp.address("tz1-notOwnerOrManager")
-    exactName = "exactName"
+    # addresses
+    managerAddr = sp.test_account("manager")
+    ownerAddr = sp.test_account("owner")
+    resolverAddr = sp.test_account("resolver")
+    testAddr = sp.test_account("test")
+    # names
+    exactName = "exact"
     exactNameNonce = 1
-    exactNameCommitment = makeCommitment(exactName, ownerAddr, exactNameNonce)
-    changeName = "changeName"
+    exactNameCommitment = makeCommitment(exactName, ownerAddr.address, exactNameNonce)
+    
+    changeName = "change"
     changeNameNonce = 1
-    changeNameCommitment = makeCommitment(changeName, ownerAddr, changeNameNonce)
+    changeNameCommitment = makeCommitment(changeName, ownerAddr.address, changeNameNonce)
+    
+    uncommittedName = "uncommitted"
+    uncommittedNameNonce = 1
+    # pricing
     interval = 60
     price = 1000
     maxDuration = 60*60*24*365
@@ -244,181 +252,228 @@ def test():
     regPrice = price*10
 
     # init contract
-    domainManager = TNSDomainManager(managerAddr, interval, price, maxDuration, minCommitTime, maxCommitTime)
+    domainManager = TNSDomainManager(managerAddr.address, interval, price, maxDuration, minCommitTime, maxCommitTime)
     scenario += domainManager
 
     # test entry points
     scenario.h2("[ENTRYPOINT] commit")
     scenario.h3("[SUCCESS-commit] Commit to exactName")
     scenario += domainManager.commit(
-        hash = exactNameCommitment).run(
+        commitment = exactNameCommitment).run(
             sender = ownerAddr, 
             amount = sp.mutez(regPrice),
             now = sp.timestamp(0),
             valid = True)
     scenario.verify(domainManager.data.commitments[exactNameCommitment] == sp.timestamp(0))
 
-    scenario.h3("[SUCCESS-commit] Old commitment expired")
-    scenario += domainManager.commit(
-        hash = exactNameCommitment).run(
-            sender = ownerAddr, 
-            amount = sp.mutez(regPrice),
-            now = sp.timestamp(maxCommitTime + 1),
-            valid = True)
-    scenario.verify(domainManager.data.commitments[exactNameCommitment] == sp.timestamp(maxCommitTime + 1))
+    # scenario.h3("[SUCCESS-commit] Old commitment expired")
+    # scenario += domainManager.commit(
+    #     commitment = exactNameCommitment).run(
+    #         sender = ownerAddr, 
+    #         amount = sp.mutez(regPrice),
+    #         now = sp.timestamp(maxCommitTime + 1),
+    #         valid = True)
+    # scenario.verify(domainManager.data.commitments[exactNameCommitment] == sp.timestamp(maxCommitTime + 1))
 
     scenario.h3("[FAILED-commit] Commitment already exists and has not expired (or hash collision)")
     scenario += domainManager.commit(
-        hash = exactNameCommitment).run(
+        commitment = exactNameCommitment).run(
             sender = ownerAddr, 
             amount = sp.mutez(regPrice),
             now = sp.timestamp(1),
             valid = False)
 
-#     scenario.h2("[ENTRYPOINT] registerName")
-#     scenario.h3("[SUCCESS-registerName] Testing with exact amount, commitment already made")
-#     scenario += domainManager.registerName(
-#         name = exactName,
-#         resolver = resolverAddr,
-#         duration = regPeriod).run(
-#             sender = ownerAddr, 
-#             amount = sp.mutez(regPrice),
-#             now = sp.timestamp(0),
-#             valid = True)
-#     scenario.verify(domainManager.data.nameRegistry[exactName] ==
-#             sp.record(name = exactName,
-#             owner = ownerAddr,
-#             resolver = resolverAddr,
-#             registeredAt = sp.timestamp(0),
-#             registrationPeriod = regPeriod,
-#             modified = False))
-#     scenario.verify(domainManager.data.addressRegistry[resolverAddr] == exactName)
+    # scenario.h2("[ENTRYPOINT] registerName")
+    # scenario.h3("[SUCCESS-registerName] Testing with exact amount, commitment already made, exactly minCommitTime elapsed")
+    # scenario += domainManager.registerName(
+    #     name = exactName,
+    #     resolver = resolverAddr.address,
+    #     duration = regPeriod,
+    #     nonce = exactNameNonce).run(
+    #         sender = ownerAddr, 
+    #         amount = sp.mutez(regPrice),
+    #         now = sp.timestamp(minCommitTime),
+    #         valid = True)
+    # scenario.verify(domainManager.data.nameRegistry[exactName] ==
+    #         sp.record(name = exactName,
+    #         owner = ownerAddr.address,
+    #         resolver = resolverAddr.address,
+    #         registeredAt = sp.timestamp(minCommitTime),
+    #         registrationPeriod = regPeriod,
+    #         modified = False))
+    # scenario.verify(domainManager.data.addressRegistry[resolverAddr.address] == exactName)
+    
+    scenario.h2("[ENTRYPOINT] registerName")
+    scenario.h3("[SUCCESS-registerName] Testing with exact amount, commitment already made, >minCommitTime elapsed")
+    scenario += domainManager.registerName(
+        name = exactName,
+        resolver = resolverAddr.address,
+        duration = regPeriod,
+        nonce = exactNameNonce).run(
+            sender = ownerAddr, 
+            amount = sp.mutez(regPrice),
+            now = sp.timestamp(minCommitTime+1),
+            valid = True)
+    scenario.verify(domainManager.data.nameRegistry[exactName] ==
+            sp.record(name = exactName,
+            owner = ownerAddr.address,
+            resolver = resolverAddr.address,
+            registeredAt = sp.timestamp(minCommitTime+1),
+            registrationPeriod = regPeriod,
+            modified = False))
+    scenario.verify(domainManager.data.addressRegistry[resolverAddr.address] == exactName)
 
-#     scenario.h3("[SUCCESS-registerName] Testing correct change is refunded")
-#     scenario += domainManager.registerName(
-#         name = changeName,
-#         resolver = resolverAddr,
-#         duration = regPeriod).run(
-#             sender = ownerAddr,
-#             amount = sp.mutez(regPrice + price*2),
-#             now = sp.timestamp(0),
-#             valid = True)
-#     scenario.verify(domainManager.balance == sp.mutez(regPrice))
+    scenario.h3("[SUCCESS-registerName] Testing correct change is refunded")
+    # commit to changeName
+    scenario += domainManager.commit(
+        commitment = changeNameCommitment).run(
+            sender = ownerAddr, 
+            amount = sp.mutez(regPrice),
+            now = sp.timestamp(0),
+            valid = True)
+    scenario.verify(domainManager.data.commitments[changeNameCommitment] == sp.timestamp(0))
+    scenario += domainManager.registerName(
+        name = changeName,
+        resolver = resolverAddr.address,
+        duration = regPeriod,
+        nonce = exactNameNonce).run(
+            sender = ownerAddr,
+            amount = sp.mutez(regPrice + price*2),
+            now = sp.timestamp(minCommitTime),
+            valid = True)
+    # scenario.verify(domainManager.balance == sp.mutez(regPrice))
 
-#     scenario.h3("[FAILED-registerName] No commitment made")
-#     scenario += domainManager.registerName(
-#         name = )
-#     # use name that wasn't used yet
+    scenario.h3("[FAILED-registerName] No commitment made")
+    scenario += domainManager.registerName(
+        name = uncommittedName,
+        resolver = resolverAddr.address,
+        duration = regPeriod,
+        nonce = uncommittedNameNonce).run(
+            sender = ownerAddr,
+            amount = sp.mutez(regPrice),
+            now = sp.timestamp(0),
+            valid = False)
+    scenario.verify(~domainManager.data.nameRegistry.contains(uncommittedName))
+    # use name that hasn't been used yet
 
+    # scenario.h3("[FAILED-registerName] minCommitTime not elapsed from commitment")
+    # scenario += domainManager.registerName(
+    #     name = "no-commitment")
+    # # use name that hasn't been used yet
 
-#     scenario.h3("[FAILED-registerName] Invalid name")
-#     # need to commit to bad name ahead of time 
-#     scenario += domainManager.registerName(
-#         name = "",
-#         resolver = resolverAddr,
-#         duration = regPeriod).run(
-#             sender = ownerAddr,
-#             amount = sp.mutez(regPrice),
-#             now = sp.timestamp(0),
-#             valid = False)
-#     scenario.verify(~(domainManager.data.nameRegistry.contains("")))
+    # scenario.h3("[FAILED-registerName] Invalid name")
+    # # need to commit to bad name ahead of time 
+    # scenario += domainManager.registerName(
+    #     name = "",
+    #     resolver = resolverAddr.address,
+    #     duration = regPeriod).run(
+    #         sender = ownerAddr,
+    #         amount = sp.mutez(regPrice),
+    #         now = sp.timestamp(0),
+    #         valid = False)
+    # scenario.verify(~(domainManager.data.nameRegistry.contains("")))
 
-#     scenario.h3("[FAILED-registerName] Name already exists")
-#     # need to commit to name again (use different nonce)
-#     scenario += domainManager.registerName(
-#         name = exactName,
-#         resolver = resolverAddr,
-#         duration = regPeriod).run(
-#             sender = ownerAddr,
-#             amount = sp.mutez(regPrice),
-#             now = sp.timestamp(1),
-#             valid = False)
-#     # verify storage is unchanged
-#     scenario.verify(domainManager.data.nameRegistry[exactName] ==
-#         sp.record(name = exactName,
-#             owner = ownerAddr,
-#             resolver = resolverAddr,
-#             registeredAt = sp.timestamp(0),
-#             registrationPeriod = regPeriod,
-#             modified = False))
+    # scenario.h3("[FAILED-registerName] Name already exists")
+    # # need to commit to name again (use different nonce)
+    # scenario += domainManager.registerName(
+    #     name = exactName,
+    #     resolver = resolverAddr.address,
+    #     duration = regPeriod).run(
+    #         sender = ownerAddr,
+    #         amount = sp.mutez(regPrice),
+    #         now = sp.timestamp(1),
+    #         valid = False)
+    # # verify storage is unchanged
+    # scenario.verify(domainManager.data.nameRegistry[exactName] ==
+    #     sp.record(name = exactName,
+    #         owner = ownerAddr.address,
+    #         resolver = resolverAddr.address,
+    #         registeredAt = sp.timestamp(0),
+    #         registrationPeriod = regPeriod,
+    #         modified = False))
 
-#     scenario.h3("[FAILED-registerName] Duration too long")
-#     # commit to name!
-#     scenario += domainManager.registerName(
-#         name = "toolong",
-#         resolver = resolverAddr,
-#         duration = maxDuration + 1).run(
-#             sender = ownerAddr,
-#             amount = sp.mutez(price * (60*24*365+1)), # cover maxDuration + 1
-#             now = sp.timestamp(0),
-#             valid = False)
-#     scenario.verify(~(domainManager.data.nameRegistry.contains("toolong")))
+    # scenario.h3("[FAILED-registerName] Duration too long")
+    # # commit to name!
+    # scenario += domainManager.registerName(
+    #     name = "toolong",
+    #     resolver = resolverAddr.address,
+    #     duration = maxDuration + 1).run(
+    #         sender = ownerAddr,
+    #         amount = sp.mutez(price * (60*24*365+1)), # cover maxDuration + 1
+    #         now = sp.timestamp(0),
+    #         valid = False)
+    # scenario.verify(~(domainManager.data.nameRegistry.contains("toolong")))
 
-#     scenario.h3("[FAILED-registerName] Payment not enough")
-#     # name needs to be committed
-#     scenario += domainManager.registerName(
-#         name = "notenough",
-#         resolver = resolverAddr,
-#         duration = regPeriod).run(
-#             sender = ownerAddr,
-#             amount = sp.mutez(regPrice - 1),
-#             now = sp.timestamp(0),
-#             valid = False)
-#     scenario.verify(~domainManager.data.nameRegistry.contains("notenough"))
+    # scenario.h3("[FAILED-registerName] Payment not enough")
+    # # name needs to be committed
+    # scenario += domainManager.registerName(
+    #     name = "notenough",
+    #     resolver = resolverAddr.address,
+    #     duration = regPeriod).run(
+    #         sender = ownerAddr,
+    #         amount = sp.mutez(regPrice - 1),
+    #         now = sp.timestamp(0),
+    #         valid = False)
+    # scenario.verify(~domainManager.data.nameRegistry.contains("notenough"))
 
-#     scenario.h2("[ENTRYPOINT] updateResolver")
-#     scenario.h3("[SUCCESS-updateResolver]")
-#     newResolverAddr = sp.address("tz1-newResolver")
-#     scenario += domainManager.updateResolver(
-#             name = exactName,
-#             resolver = newResolverAddr).run(
-#                 sender = ownerAddr,
-#                 now = sp.timestamp(3))
-#     scenario.verify(domainManager.data.nameRegistry[exactName].resolver == newResolverAddr)
-#     scenario.verify(domainManager.data.nameRegistry[exactName].modified == True)
+    # scenario.h2("[ENTRYPOINT] updateResolver")
+    # scenario.h3("[SUCCESS-updateResolver]")
+    # newResolverAddr = sp.address("tz1-newResolver")
+    # scenario += domainManager.updateResolver(
+    #         name = exactName,
+    #         resolver = newResolverAddr.address).run(
+    #             sender = ownerAddr,
+    #             now = sp.timestamp(3))
+    # scenario.verify(domainManager.data.nameRegistry[exactName].resolver == newResolverAddr)
+    # scenario.verify(domainManager.data.nameRegistry[exactName].modified == True)
 
-#     scenario.h3("[ENTRYPOINT] updateRegistrationPeriod")
-#     scenario.h3("[SUCCESS-updateRegistrationPeriod]")
-#     newRegPeriod = interval * 5
-#     newRegPrice = price * 5
-#     scenario += domainManager.updateRegistrationPeriod(
-#             name = exactName,
-#             duration = newRegPeriod).run(
-#                 sender = ownerAddr,
-#                 amount = sp.mutez(newRegPrice),
-#                 now = sp.timestamp(3))
-#     scenario.verify(domainManager.data.nameRegistry[exactName].registrationPeriod == newRegPeriod)
-#     scenario.verify(domainManager.data.nameRegistry[exactName].modified == True)
+    # scenario.h3("[ENTRYPOINT] updateRegistrationPeriod")
+    # scenario.h3("[SUCCESS-updateRegistrationPeriod]")
+    # newRegPeriod = interval * 5
+    # newRegPrice = price * 5
+    # scenario += domainManager.updateRegistrationPeriod(
+    #         name = exactName,
+    #         duration = newRegPeriod).run(
+    #             sender = ownerAddr,
+    #             amount = sp.mutez(newRegPrice),
+    #             now = sp.timestamp(3))
+    # scenario.verify(domainManager.data.nameRegistry[exactName].registrationPeriod == newRegPeriod)
+    # scenario.verify(domainManager.data.nameRegistry[exactName].modified == True)
 
-#     scenario.h3("[FAILED-updateRegistrationPeriod] New period too long")
+    # scenario.h3("[FAILED-updateRegistrationPeriod] New period too long")
 
-#     scenario.h3("[FAILED-updateRegistrationPeriod] Payment not enough")
+    # scenario.h3("[FAILED-updateRegistrationPeriod] Payment not enough")
 
-#     scenario.h3("[ENTRYPOINT] transferNameOwnership")
-#     scenario.h3("[SUCCESS-transferNameOwnership]")
-#     newownerAddr = sp.address("tz1-newOwner")
-#     scenario += domainManager.transferNameOwnership(
-#             name = exactName,
-#             newNameOwner = newownerAddr).run(
-#                 sender = ownerAddr,
-#                 now = sp.timestamp(3))
-#     scenario.verify(domainManager.data.nameRegistry[exactName].owner == newownerAddr)
+    # scenario.h3("[ENTRYPOINT] transferNameOwnership")
+    # scenario.h3("[SUCCESS-transferNameOwnership]")
+    # newownerAddr = sp.test_account("newOwner")
+    # scenario += domainManager.transferNameOwnership(
+    #         name = exactName,
+    #         newNameOwner = newownerAddr).run(
+    #             sender = ownerAddr,
+    #             now = sp.timestamp(3))
+    # scenario.verify(domainManager.data.nameRegistry[exactName].owner == newownerAddr)
 
-#     scenario.h3("[FAILED-transferNameOwnership] Old owner cannot modify subdomain")
-#     scenario += domainManager.transferNameOwnership(
-#         name = exactName, newNameOwner = ownerAddr).run(
-#         sender = ownerAddr, valid = False)
-#     scenario.verify(domainManager.data.nameRegistry[exactName].owner == newownerAddr)
+    # scenario.h3("[FAILED-transferNameOwnership] Old owner cannot modify subdomain")
+    # scenario += domainManager.transferNameOwnership(
+    #     name = exactName, 
+    #     newNameOwner = ownerAddr.address).run(
+    #         sender = ownerAddr, 
+    #         valid = False)
+    # scenario.verify(domainManager.data.nameRegistry[exactName].owner == newownerAddr)
 
-#     scenario.h2("[ENTRYPOINT] deleteName")
-#     scenario.h3("[FAILED-deleteName] Unregistered/deleted domain cannot be deleted.")
-#     unregisteredName = "unregistered"
-#     scenario += domainManager.deleteName(name = unregisteredName).run(sender = newownerAddr, valid = False)
-#     scenario.h3("[FAILED-deleteName] Bad permissions")
-#     scenario += domainManager.deleteName(
-#         name = exactName).run(
-#         sender = ownerAddr, valid = False)
+    # scenario.h2("[ENTRYPOINT] deleteName")
+    # scenario.h3("[FAILED-deleteName] Unregistered/deleted domain cannot be deleted.")
+    # unregisteredName = "unregistered"
+    # scenario += domainManager.deleteName(name = unregisteredName).run(sender = newownerAddr, valid = False)
+    # scenario.h3("[FAILED-deleteName] Bad permissions")
+    # scenario += domainManager.deleteName(
+    #     name = exactName).run(
+    #         sender = ownerAddr, 
+    #         valid = False)
 
-#     scenario.h3("[SUCCESS-deleteName]")
-#     scenario += domainManager.deleteName(name = exactName).run(sender = newownerAddr)
-#     scenario.verify(~(domainManager.data.nameRegistry.contains(exactName)))
+    # scenario.h3("[SUCCESS-deleteName]")
+    # scenario += domainManager.deleteName(
+    #     name = exactName).run(
+    #         sender = newownerAddr)
+    # scenario.verify(~(domainManager.data.nameRegistry.contains(exactName)))
