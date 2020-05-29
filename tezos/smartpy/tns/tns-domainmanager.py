@@ -32,7 +32,6 @@ class TNSDomainManager(sp.Contract):
     # User must call this entrypoint to commit to a name before registering it to avoid front-running.
     @sp.entry_point
     def commit(self, params):
-        # TEST
         self.validateCommitment(params.commitment)
         self.data.commitments[params.commitment] = sp.now
 
@@ -49,6 +48,7 @@ class TNSDomainManager(sp.Contract):
         self.validateAvailable(params.name)
         self.validateDuration(params.duration)
 
+        # consume commitment to get cost
         commitment = makeCommitment(params.name, sp.sender, params.nonce)
         cost = sp.local('cost', sp.mutez(0))
         cost.value = self.consumeCommitment(commitment, sp.amount, params.duration)
@@ -116,9 +116,7 @@ class TNSDomainManager(sp.Contract):
     # @param _maxCommitTime New maxCommitTime value
     @sp.entry_point
     def setCommitmentAges(self, params):
-        # TEST this fails
         sp.verify(sp.sender == self.data.domainManager, message = "Invalid permissions")
-        # TEST this works
         self.data.minCommitTime = params._minCommitTime
         self.data.maxCommitTime = params._maxCommitTime
 
@@ -135,7 +133,6 @@ class TNSDomainManager(sp.Contract):
     # @param amount The amount of mutez sent with the transaction
     # @param duration The duration for which the name will be registered
     def consumeCommitment(self, commitment, amount, duration):
-        # TEST both positive and negative
         sp.verify(self.data.commitments[commitment].add_seconds(self.data.minCommitTime) <= sp.now, 
             message = "Min commitment time not elapsed")
         sp.verify(self.data.commitments[commitment].add_seconds(self.data.maxCommitTime) > sp.now,
@@ -254,6 +251,8 @@ def test():
     changeNameCommitment = makeCommitment(changeName, ownerAddr.address, nonce1)
     
     uncommittedName = "uncommitted"
+    expiredName = "expired"
+    expiredNameCommitment = makeCommitment(expiredName, ownerAddr.address, nonce1)
 
     invalidName = ""
     invalidNameCommitment = makeCommitment(invalidName, ownerAddr.address, nonce1)
@@ -381,6 +380,23 @@ def test():
             now = sp.timestamp(minCommitTime-1),
             valid = False)
     
+    scenario.h3("[FAILED-registerName] Commitment expired")
+    scenario += domainManager.commit(
+        commitment = expiredNameCommitment).run(
+            sender = ownerAddr,
+            now = sp.timestamp(0),
+            valid = True)
+    scenario += domainManager.registerName(
+        name = expiredName,
+        resolver = resolverAddr.address,
+        duration = regPeriod,
+        nonce = nonce1).run(
+            sender = ownerAddr, 
+            amount = sp.mutez(regPrice),
+            now = sp.timestamp(maxCommitTime+1),
+            valid = False)
+    
+
     scenario.h3("[FAILED-registerName] Invalid name")
     scenario += domainManager.commit(
         commitment = invalidNameCommitment).run(
@@ -526,3 +542,24 @@ def test():
         name = exactName).run(
             sender = newOwnerAddr)
     scenario.verify(~(domainManager.data.nameRegistry.contains(exactName)))
+
+    scenario.h2("[ENTRYPOINT] setCommitmentAges")
+    scenario.h3("[SUCCESS-setCommitmentAges]")
+    newMinCommitTime = 2 * minCommitTime
+    newMaxCommitTime = 2 * maxCommitTime
+    scenario += domainManager.setCommitmentAges(
+        _minCommitTime = newMinCommitTime,
+        _maxCommitTime = newMaxCommitTime).run(
+            sender = managerAddr,
+            valid = True)
+    scenario.verify(domainManager.data.minCommitTime == newMinCommitTime)
+    scenario.verify(domainManager.data.maxCommitTime == newMaxCommitTime)
+
+    scenario.h3("[FAILED-setCommitmentAges] Invalid permissions")
+    scenario += domainManager.setCommitmentAges(
+        _minCommitTime = newMinCommitTime,
+        _maxCommitTime = newMaxCommitTime).run(
+            sender = ownerAddr,
+            valid = False)
+      
+
