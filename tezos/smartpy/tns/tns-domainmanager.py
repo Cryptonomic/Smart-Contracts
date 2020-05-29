@@ -122,6 +122,14 @@ class TNSDomainManager(sp.Contract):
         self.data.minCommitTime = params._minCommitTime
         self.data.maxCommitTime = params._maxCommitTime
 
+    @sp.entry_point
+    def getNameInfo(self, params):
+        pass
+
+    @sp.entry_point
+    def getNameInfoList(self, params):
+        pass
+
 
     # @param commitment Commitment to consume
     # @param amount The amount of mutez sent with the transaction
@@ -234,7 +242,7 @@ def test():
     resolverAddr = sp.test_account("resolver")
     newResolverAddr = sp.test_account("newResolver")
     newOwnerAddr = sp.test_account("newOwner")
-    # names
+    # names & commitments
     nonce1 = 1
     nonce2 = 2
 
@@ -348,7 +356,7 @@ def test():
             amount = sp.mutez(regPrice + price*2),
             now = sp.timestamp(minCommitTime),
             valid = True)
-    # scenario.verify(domainManager.balance == sp.mutez(regPrice))
+    scenario.verify(domainManager.balance == sp.mutez(2*regPrice))
 
     scenario.h3("[FAILED-registerName] No commitment made")
     scenario += domainManager.registerName(
@@ -444,10 +452,11 @@ def test():
     scenario.h2("[ENTRYPOINT] updateResolver")
     scenario.h3("[SUCCESS-updateResolver]")
     scenario += domainManager.updateResolver(
-            name = exactName,
-            resolver = newResolverAddr.address).run(
-                sender = ownerAddr,
-                now = sp.timestamp(3))
+        name = exactName,
+        resolver = newResolverAddr.address).run(
+            sender = ownerAddr,
+            now = sp.timestamp(3),
+            valid = True)
     scenario.verify(domainManager.data.nameRegistry[exactName].resolver == newResolverAddr.address)
     scenario.verify(domainManager.data.nameRegistry[exactName].modified == True)
 
@@ -456,17 +465,34 @@ def test():
     newRegPeriod = interval * 5
     newRegPrice = price * 5
     scenario += domainManager.updateRegistrationPeriod(
-            name = exactName,
-            duration = newRegPeriod).run(
-                sender = ownerAddr,
-                amount = sp.mutez(newRegPrice),
-                now = sp.timestamp(3))
+        name = exactName,
+        duration = newRegPeriod).run(
+            sender = ownerAddr,
+            amount = sp.mutez(newRegPrice),
+            now = sp.timestamp(3),
+            valid = True)
     scenario.verify(domainManager.data.nameRegistry[exactName].registrationPeriod == newRegPeriod)
     scenario.verify(domainManager.data.nameRegistry[exactName].modified == True)
 
     scenario.h3("[FAILED-updateRegistrationPeriod] New period too long")
+    maxRegPrice = price * maxDuration
+    scenario += domainManager.updateRegistrationPeriod(
+        name = exactName,
+        duration = maxDuration+1).run(
+            sender = ownerAddr,
+            amount = sp.mutez(maxDuration),
+            now = sp.timestamp(3),
+            valid = False)
 
     scenario.h3("[FAILED-updateRegistrationPeriod] Payment not enough")
+    scenario += domainManager.updateRegistrationPeriod(
+        name = exactName,
+        duration = newRegPeriod).run(
+            sender = ownerAddr,
+            amount = sp.mutez(newRegPrice - 1),
+            now = sp.timestamp(3),
+            valid = False)
+
 
     scenario.h3("[ENTRYPOINT] transferNameOwnership")
     scenario.h3("[SUCCESS-transferNameOwnership]")
