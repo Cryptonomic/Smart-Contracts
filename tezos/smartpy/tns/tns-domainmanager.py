@@ -120,13 +120,96 @@ class TNSDomainManager(sp.Contract):
         self.data.minCommitTime = params._minCommitTime
         self.data.maxCommitTime = params._maxCommitTime
 
-    @sp.entry_point
-    def getNameInfo(self, params):
-        pass
 
+    # @param name The name to query from the registry
+    # Returns the info associated with a name to the calling contract
     @sp.entry_point
-    def getNameInfoList(self, params):
-        pass
+    def sendNameInfo(self, params):
+        # type of callback (i.e. type of name record)
+        tk = sp.TRecord(
+            name = sp.TString,
+            info = sp.TRecord(
+                name = sp.TString, 
+                owner = sp.TAddress,
+                resolver = sp.TAddress, 
+                registeredAt = sp.TTimestamp,
+                registrationPeriod = sp.TInt,
+                modified = sp.TBool))
+        # callback handle for the receiver entrypoint
+        k = sp.contract(tk, sp.sender, entry_point = "recvNameInfo").open_some()
+        # query registry
+        ret = sp.record(name = params.name, info = self.data.nameRegistry[params.name])
+        # send
+        sp.transfer(ret, sp.mutez(0), k)
+
+
+    # @param addr The address to query from the registry
+    # Returns the info associated with an address to the calling contract
+    @sp.entry_point
+    def sendAddressInfo(self, params):
+        # type of callback (i.e. type of name record)
+        tk = sp.TRecord(
+            name = sp.TString, 
+            owner = sp.TAddress,
+            resolver = sp.TAddress, 
+            registeredAt = sp.TTimestamp,
+            registrationPeriod = sp.TInt,
+            modified = sp.TBool)
+        # callback handle for the receiver entrypoint
+        k = sp.contract(tk, sp.sender, entry_point = "recvAddressInfo").open_some()
+        # query registry
+        _name = self.data.addressRegistry[params.addr]
+        ret = sp.record(name = _name, info = self.data.nameRegistry[name])
+        # send
+        sp.transfer(ret, sp.mutez(0), k)
+
+
+    # # @param names List of names to query
+    # # Returns the info associated with the provided list of names to the calling contract
+    # @sp.entry_point
+    # def sendNameInfoList(self, params):
+    #     # type of name record
+    #     tNameInfo = sp.TRecord(
+    #         name = sp.TString, 
+    #         owner = sp.TAddress,
+    #         resolver = sp.TAddress, 
+    #         registeredAt = sp.TTimestamp,
+    #         registrationPeriod = sp.TInt,
+    #         modified = sp.TBool)
+    #     tk = sp.TList(tNameInfo)
+    #     # callback handle for the receiver entrypoint
+    #     k = sp.contract(tk, sp.sender, entry_point = "recvNameInfoList").open_some()
+    #     # query registry
+    #     ret = sp.list(l = 0, t = tNameInfo)
+    #     sp.for name in params.names:
+    #         ret.push(self.data.nameRegistry[name])
+    #     # send
+    #     sp.transfer(ret, sp.mutez(0), k)
+
+
+    # # @param addresses List of addresses to query
+    # # Returns the info associated with the provided list of addresses to the calling contract
+    # @sp.entry_point
+    # def sendAddressInfoList(self, params):
+    #     # type of name record
+    #     tNameInfo = sp.TRecord(
+    #         name = sp.TString, 
+    #         owner = sp.TAddress,
+    #         resolver = sp.TAddress, 
+    #         registeredAt = sp.TTimestamp,
+    #         registrationPeriod = sp.TInt,
+    #         modified = sp.TBool)
+    #     # type of callback
+    #     tk = sp.TList(tNameInfo)
+    #     # callback handle for the receiver entrypoint
+    #     k = sp.contract(tk, sp.sender, entry_point = "recvNameInfoList").open_some()
+    #     # query registry
+    #     ret = sp.list(l = 0, t = tNameInfo)
+    #     sp.for address in params.addresses:
+    #         name = self.data.addressRegistry[address]
+    #         ret.push(self.data.nameRegistry[name])
+    #     # send
+    #     sp.transfer(ret, sp.mutez(0), k)
 
 
     # @param commitment Commitment to consume
@@ -213,6 +296,61 @@ class TNSDomainManager(sp.Contract):
         sp.verify((~self.data.commitments.contains(hash)) 
             | (sp.now > self.data.commitments[hash].add_seconds(self.data.maxCommitTime)),
             message = "Commitment does not exist, or is expired")
+
+
+class MockResolver(sp.Contract):
+    def __init__(self, _registry):
+        self.init(
+            receivedNames = sp.big_map(
+                tkey = sp.TString,
+                tvalue = sp.TRecord(
+                    name = sp.TString, 
+                    owner = sp.TAddress,
+                    resolver = sp.TAddress, 
+                    registeredAt = sp.TTimestamp,
+                    registrationPeriod = sp.TInt,
+                    modified = sp.TBool)),
+            registry = _registry)
+
+    # @param name 
+    # Invokes the sendNameInfo entrypoint in the registry to retreive the info for name.
+    @sp.entry_point
+    def getNameInfoFromRegistry(self, params):
+        tk = sp.TRecord(name = sp.TString)
+        k = sp.contract(tk, self.data.registry, entry_point = "sendNameInfo").open_some()
+        sp.transfer(sp.record(name = params.name), sp.mutez(0), k)
+
+
+    # @param address 
+    # Invokes the sendNameInfo entrypoint in the registry to retreive the info for name.
+    @sp.entry_point
+    def getAddressInfoFromRegistry(self, params):
+        tk = sp.TRecord(address = sp.TAddress)
+        k = sp.contract(tk, self.data.registry, entry_point = "sendAddressInfo").open_some()
+        sp.transfer(sp.record(address = params.address), sp.mutez(0), k)
+
+
+    # @param name 
+    # Invokes the sendNameInfo entrypoint in the registry to retreive the info for name.
+    @sp.entry_point
+    def getNameInfoFromRegistry(self, params):
+        tk = sp.TRecord(name = sp.TString)
+        k = sp.contract(tk, self.data.registry, entry_point = "sendNameInfo").open_some()
+        sp.transfer(sp.record(name = params.name), sp.mutez(0), k)
+
+
+    # @param nameInfo Record containing the returned name
+    # This is the receiving endpoint for a call against the registry's sendNameInfo entrypoint
+    @sp.entry_point
+    def recvNameInfo(self, params):
+        self.data.receivedNames[params.name] = params.info
+
+    # @param nameInfo Record containing the returned name
+    # This is the receiving endpoint for a call against the registry's sendNameInfo entrypoint
+    @sp.entry_point
+    def recvAddressInfo(self, params):
+        self.data.receivedNames[params.name] = params.info
+
 
 
 # @param name
@@ -561,5 +699,14 @@ def test():
         _maxCommitTime = newMaxCommitTime).run(
             sender = ownerAddr,
             valid = False)
-      
+
+    scenario.h2("[ENTRYPOINT] sendNameInfo")
+    scenario.h3("[SUCCESS-sendNameInfo] Invoking MockResolver to check proper return value")
+    mockResolver = MockResolver(domainManager.address)
+    scenario += mockResolver
+    scenario += mockResolver.getNameInfoFromRegistry(
+        name = changeName).run(
+            sender = ownerAddr,
+            valid = True)
+    scenario.verify(mockResolver.data.receivedNames[changeName] == domainManager.data.nameRegistry[changeName])
 
