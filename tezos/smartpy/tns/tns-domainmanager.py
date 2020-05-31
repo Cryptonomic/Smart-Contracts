@@ -125,47 +125,23 @@ class TNSDomainManager(sp.Contract):
     # Returns the info associated with a name to the calling contract
     @sp.entry_point
     def sendNameInfo(self, params):
-        # type of callback (i.e. type of name record)
-        tk = sp.TRecord(
-            name = sp.TString,
-            info = sp.TRecord(
-                name = sp.TString, 
-                owner = sp.TAddress,
-                resolver = sp.TAddress, 
-                registeredAt = sp.TTimestamp,
-                registrationPeriod = sp.TInt,
-                modified = sp.TBool))
-        # callback handle for the receiver entrypoint
-        k = sp.contract(tk, sp.sender, entry_point = "recvNameInfo").open_some()
         # query registry
         sp.verify(self.data.nameRegistry.contains(params.name), message = "Name is not in registry")
-        ret = sp.record(name = params.name, info = self.data.nameRegistry[params.name])
+        response = sp.record(name = params.name, info = self.data.nameRegistry[params.name])
         # send
-        sp.transfer(ret, sp.mutez(0), k)
+        sp.transfer(response, sp.mutez(0), params.k)
 
 
     # @param addr The address to query from the registry
     # Returns the info associated with an address to the calling contract
     @sp.entry_point
     def sendAddressInfo(self, params):
-        # type of callback (i.e. type of name record)
-        tk = sp.TRecord(
-            name = sp.TString,
-            info = sp.TRecord(
-                name = sp.TString, 
-                owner = sp.TAddress,
-                resolver = sp.TAddress, 
-                registeredAt = sp.TTimestamp,
-                registrationPeriod = sp.TInt,
-                modified = sp.TBool))
-        # callback handle for the receiver entrypoint
-        k = sp.contract(tk, sp.sender, entry_point = "recvAddressInfo").open_some()
         # query registry
         sp.verify(self.data.addressRegistry.contains(params.addr), message = "Address is not in registry")
         _name = self.data.addressRegistry[params.addr]
-        ret = sp.record(name = _name, info = self.data.nameRegistry[_name])
+        response = sp.record(name = _name, info = self.data.nameRegistry[_name])
         # send
-        sp.transfer(ret, sp.mutez(0), k)
+        sp.transfer(response, sp.mutez(0), params.k)
 
 
     # # @param names List of names to query
@@ -321,27 +297,48 @@ class MockResolver(sp.Contract):
     # Invokes the sendNameInfo entrypoint in the registry to retreive the info for name.
     @sp.entry_point
     def getNameInfoFromRegistry(self, params):
-        tk = sp.TRecord(name = sp.TString)
-        k = sp.contract(tk, self.data.registry, entry_point = "sendNameInfo").open_some()
-        sp.transfer(sp.record(name = params.name), sp.mutez(0), k)
+        # type of callback (i.e. type of name record)
+        tkResponse = sp.TRecord(
+            name = sp.TString,
+            info = sp.TRecord(
+                name = sp.TString, 
+                owner = sp.TAddress,
+                resolver = sp.TAddress, 
+                registeredAt = sp.TTimestamp,
+                registrationPeriod = sp.TInt,
+                modified = sp.TBool))
+        # callback handle for the receiver entrypoint
+        kResponse = sp.contract(tkResponse, sp.to_address(sp.self), entry_point = "recvNameInfo").open_some()
+        
+        # type of request
+        tkRequest = sp.TRecord(name = sp.TString, k = sp.TContract(tkResponse))
+        kRequest = sp.contract(tkRequest, self.data.registry, entry_point = "sendNameInfo").open_some()
+        
+        sp.transfer(sp.record(name = params.name, k = kResponse), sp.mutez(0), kRequest)
 
 
     # @param addr 
     # Invokes the sendNameInfo entrypoint in the registry to retreive the info for name.
     @sp.entry_point
     def getAddressInfoFromRegistry(self, params):
-        tk = sp.TRecord(addr = sp.TAddress)
-        k = sp.contract(tk, self.data.registry, entry_point = "sendAddressInfo").open_some()
-        sp.transfer(sp.record(addr = params.addr), sp.mutez(0), k)
+        # type of response
+        tkResponse = sp.TRecord(
+            name = sp.TString,
+            info = sp.TRecord(
+                name = sp.TString, 
+                owner = sp.TAddress,
+                resolver = sp.TAddress, 
+                registeredAt = sp.TTimestamp,
+                registrationPeriod = sp.TInt,
+                modified = sp.TBool))
+        # callback handle for the receiver entrypoint
+        kResponse = sp.contract(tkResponse, sp.to_address(sp.self), entry_point = "recvAddressInfo").open_some()
+        
+        # type of request
+        tkRequest = sp.TRecord(addr = sp.TAddress, k = sp.TContract(tkResponse))
+        kRequest = sp.contract(tkRequest, self.data.registry, entry_point = "sendAddressInfo").open_some()
 
-
-    # @param name 
-    # Invokes the sendNameInfo entrypoint in the registry to retreive the info for name.
-    @sp.entry_point
-    def getNameInfoFromRegistry(self, params):
-        tk = sp.TRecord(name = sp.TString)
-        k = sp.contract(tk, self.data.registry, entry_point = "sendNameInfo").open_some()
-        sp.transfer(sp.record(name = params.name), sp.mutez(0), k)
+        sp.transfer(sp.record(addr = params.addr, k = kResponse), sp.mutez(0), kRequest)
 
 
     # @param name 
@@ -744,4 +741,6 @@ def test():
     #     addr = ownerAddr.address).run(
     #         sender = ownerAddr,
     #         valid = True)
+
+    
 
