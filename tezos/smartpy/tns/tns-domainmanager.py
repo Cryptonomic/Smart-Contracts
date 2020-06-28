@@ -149,14 +149,17 @@ class NamedContract(sp.Contract):
             admin = admin)
 
     @sp.entry_point
-    def registerName(self, params):
+    def default(self, params):
+        pass
+
+    @sp.entry_point
+    def recordName(self, params):
         sp.verify(sp.sender == self.data.admin, message = "Privileged operation")
         
         nameParams = sp.record(duration = params.duration, name = params.name, resolver = sp.to_address(sp.self))
 
         registerCall = sp.contract(sp.TRecord(duration = sp.TInt, name = sp.TString, resolver = sp.TAddress), params.registry, entry_point = "registerName").open_some()
         sp.transfer(nameParams, sp.amount, registerCall)
-
 
 @sp.add_test("TNSNameManagerTest")
 def test():
@@ -316,5 +319,5 @@ def test():
 
     scenario.h2("Register a contract by proxy")
     scenario.h3("[SUCCESS-registerName] ")
-    scenario.p("An example of registring a contract with a manager invocation while preserving the source address for trustless contract name registration")
-    scenario += namedContract.registerName(duration = sp.int(5), name = "Named Contract", registry = domainManager.address).run(amount = sp.tez(20), sender = namedContractManager)
+    scenario.p("An example of registering a contract with a manager invocation while preserving the source address for trustless contract name registration")
+    scenario += namedContract.recordName(duration = sp.int(5), name = "Named Contract", registry = domainManager.address).run(amount = sp.tez(20), sender = namedContractManager)
