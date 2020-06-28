@@ -5,12 +5,11 @@ import { JSONPath } from 'jsonpath';
 import * as fs from 'fs';
 import * as glob from 'glob';
 
-const tezosNode = 'https://tezos-dev.cryptonomic-infra.tech/';
-const conseilServer = { url: 'https://conseil-dev.cryptonomic-infra.tech:443', apiKey: 'galleon', network: 'babylonnet' };
-// const contractAddress = 'KT1LTkvHQiBvo7gMcA6qZAqb2ztwnAR8G4pc';
-const contractAddress = 'KT1QoRuESD7T2PrcXrvT6xeYGe7b9tQWKJgd';
+const tezosNode = '...';
+const conseilServer = { url: '...', apiKey: '...', network: '...' };
+const contractAddress = '...';
 const networkBlockTime = 30 + 1;
-const faucets = '/Users/itama/Google Drive/Programming/cryptonomic/faucets';
+const faucets = '...';
 
 let entryPoints = [];
 const registerNameIndex = 1;
@@ -30,7 +29,6 @@ let faucetAccount = {};
 
 async function initAccount(keyAddress: string): Promise<KeyStore> {
     console.log('~~~~~~~ initAccount');
-    // let faucetFiles: string[] = glob.sync(`../../../../faucets/${keyAddress}.json`);
     let faucetFiles: string[] = glob.sync(`${faucets}/${keyAddress}.json`);
 
     if (faucetFiles.length === 0) {
