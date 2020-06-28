@@ -33,9 +33,10 @@ code
             DUG 2;
             GET;
             IF_SOME
-              {}
               {
-                PUSH string "Get-item:86";
+              }
+              {
+                PUSH string "Get-item:87";
                 FAILWITH;
               };
             CDAR;
@@ -48,9 +49,10 @@ code
             DUG 3;
             GET;
             IF_SOME
-              {}
               {
-                PUSH string "Get-item:86";
+              }
+              {
+                PUSH string "Get-item:87";
                 FAILWITH;
               };
             CDDAR;
@@ -73,9 +75,10 @@ code
             DUG 2;
             GET;
             IF_SOME
-              {}
               {
-                PUSH string "Get-item:86";
+              }
+              {
+                PUSH string "Get-item:87";
                 FAILWITH;
               };
             CADDR;
@@ -114,29 +117,24 @@ code
             CAR;
             NONE string;
             DIG 5;
-            DUP;
-            DUG 6;
             CDDAR;
             DIG 5;
             DUP;
             DUG 6;
             GET;
             IF_SOME
-              {}
               {
-                PUSH string "Get-item:86";
+              }
+              {
+                PUSH string "Get-item:87";
                 FAILWITH;
               };
             CDDDR;
             UPDATE;
             PAIR;
             PAIR;
-            DUG 2;
             SWAP;
-            DROP;
             SWAP;
-            DUP;
-            DUG 2;
             DUP;
             CAR;
             SWAP;
@@ -151,17 +149,12 @@ code
             CAR;
             NONE (pair (pair (bool %modified) (pair (string %name) (address %owner))) (pair (timestamp %registeredAt) (pair (int %registrationPeriod) (address %resolver))));
             DIG 5;
-            DUP;
-            DUG 6;
             UPDATE;
             PAIR;
             SWAP;
             PAIR;
             SWAP;
             PAIR;
-            DUG 2;
-            DROP;
-            DROP;
             NIL operation;
           }
           {
@@ -173,7 +166,7 @@ code
             IF
               {}
               {
-                PUSH string "WrongCondition: params.name != ''";
+                PUSH string "Invalid name";
                 FAILWITH;
               };
             SWAP;
@@ -197,9 +190,10 @@ code
                 CDAR;
                 GET;
                 IF_SOME
-                  {}
                   {
-                    PUSH string "Get-item:29";
+                  }
+                  {
+                    PUSH string "Get-item:30";
                     FAILWITH;
                   };
                 CDAR;
@@ -213,9 +207,10 @@ code
                 CDAR;
                 GET;
                 IF_SOME
-                  {}
                   {
-                    PUSH string "Get-item:29";
+                  }
+                  {
+                    PUSH string "Get-item:30";
                     FAILWITH;
                   };
                 CDDAR;
@@ -331,12 +326,10 @@ code
                 PUSH string "division by zero";
                 FAILWITH;
               };
-            MUL;
-            SWAP;
-            DROP;
             DIG 2;
-            DUP;
-            DUG 3;
+            DROP;
+            MUL;
+            DIG 2;
             DUP;
             CAR;
             SWAP;
@@ -380,12 +373,8 @@ code
             PAIR;
             SWAP;
             PAIR;
-            DUG 3;
+            DUG 2;
             DIG 2;
-            DROP;
-            DIG 2;
-            DUP;
-            DUG 3;
             DUP;
             CDR;
             SWAP;
@@ -406,9 +395,7 @@ code
             UPDATE;
             PAIR;
             PAIR;
-            DUG 3;
-            DIG 2;
-            DROP;
+            DUG 2;
             DUP;
             AMOUNT;
             COMPARE;
@@ -470,9 +457,10 @@ code
             CAR;
             GET;
             IF_SOME
-              {}
               {
-                PUSH string "Get-item:72";
+              }
+              {
+                PUSH string "Get-item:73";
                 FAILWITH;
               };
             CDAR;
@@ -486,9 +474,10 @@ code
             CAR;
             GET;
             IF_SOME
-              {}
               {
-                PUSH string "Get-item:72";
+              }
+              {
+                PUSH string "Get-item:73";
                 FAILWITH;
               };
             CDDAR;
@@ -512,9 +501,10 @@ code
             CAR;
             GET;
             IF_SOME
-              {}
               {
-                PUSH string "Get-item:72";
+              }
+              {
+                PUSH string "Get-item:73";
                 FAILWITH;
               };
             CADDR;
@@ -542,8 +532,6 @@ code
               };
             SWAP;
             DUP;
-            DUG 2;
-            DUP;
             CAR;
             SWAP;
             CDR;
@@ -564,7 +552,8 @@ code
             DUG 2;
             GET;
             IF_SOME
-              {}
+              {
+              }
               {
                 PUSH string "set_in_top-any";
                 FAILWITH;
@@ -594,12 +583,8 @@ code
             PAIR;
             SWAP;
             PAIR;
-            DUG 2;
             SWAP;
-            DROP;
             SWAP;
-            DUP;
-            DUG 2;
             DUP;
             CAR;
             SWAP;
@@ -614,14 +599,13 @@ code
             CAR;
             DUP;
             DIG 5;
-            DUP;
-            DUG 6;
             CAR;
             DUP;
             DUG 2;
             GET;
             IF_SOME
-              {}
+              {
+              }
               {
                 PUSH string "set_in_top-any";
                 FAILWITH;
@@ -641,9 +625,6 @@ code
             PAIR;
             SWAP;
             PAIR;
-            DUG 2;
-            DROP;
-            DROP;
             NIL operation;
           }
           {
@@ -674,9 +655,10 @@ code
                 CDR;
                 GET;
                 IF_SOME
-                  {}
                   {
-                    PUSH string "Get-item:54";
+                  }
+                  {
+                    PUSH string "Get-item:55";
                     FAILWITH;
                   };
                 CDAR;
@@ -690,9 +672,10 @@ code
                 CDR;
                 GET;
                 IF_SOME
-                  {}
                   {
-                    PUSH string "Get-item:54";
+                  }
+                  {
+                    PUSH string "Get-item:55";
                     FAILWITH;
                   };
                 CDDAR;
@@ -716,9 +699,10 @@ code
                 CDR;
                 GET;
                 IF_SOME
-                  {}
                   {
-                    PUSH string "Get-item:54";
+                  }
+                  {
+                    PUSH string "Get-item:55";
                     FAILWITH;
                   };
                 CADDR;
@@ -762,9 +746,10 @@ code
                 CDR;
                 GET;
                 IF_SOME
-                  {}
                   {
-                    PUSH string "Get-item:54";
+                  }
+                  {
+                    PUSH string "Get-item:55";
                     FAILWITH;
                   };
                 CDDAR;
@@ -858,12 +843,10 @@ code
                     PUSH string "division by zero";
                     FAILWITH;
                   };
-                MUL;
-                SWAP;
-                DROP;
                 DIG 2;
-                DUP;
-                DUG 3;
+                DROP;
+                MUL;
+                DIG 2;
                 DUP;
                 CAR;
                 SWAP;
@@ -885,7 +868,8 @@ code
                 DUG 2;
                 GET;
                 IF_SOME
-                  {}
+                  {
+                  }
                   {
                     PUSH string "set_in_top-any";
                     FAILWITH;
@@ -915,12 +899,8 @@ code
                 PAIR;
                 SWAP;
                 PAIR;
-                DUG 3;
+                DUG 2;
                 DIG 2;
-                DROP;
-                DIG 2;
-                DUP;
-                DUG 3;
                 DUP;
                 CAR;
                 SWAP;
@@ -942,7 +922,8 @@ code
                 DUG 2;
                 GET;
                 IF_SOME
-                  {}
+                  {
+                  }
                   {
                     PUSH string "set_in_top-any";
                     FAILWITH;
@@ -962,9 +943,7 @@ code
                 PAIR;
                 SWAP;
                 PAIR;
-                DUG 3;
-                DIG 2;
-                DROP;
+                DUG 2;
                 DIG 2;
                 DUP;
                 DUG 3;
@@ -1030,9 +1009,10 @@ code
                 CAR;
                 GET;
                 IF_SOME
-                  {}
                   {
-                    PUSH string "Get-item:79";
+                  }
+                  {
+                    PUSH string "Get-item:80";
                     FAILWITH;
                   };
                 CDAR;
@@ -1046,9 +1026,10 @@ code
                 CAR;
                 GET;
                 IF_SOME
-                  {}
                   {
-                    PUSH string "Get-item:79";
+                  }
+                  {
+                    PUSH string "Get-item:80";
                     FAILWITH;
                   };
                 CDDAR;
@@ -1072,9 +1053,10 @@ code
                 CAR;
                 GET;
                 IF_SOME
-                  {}
                   {
-                    PUSH string "Get-item:79";
+                  }
+                  {
+                    PUSH string "Get-item:80";
                     FAILWITH;
                   };
                 CADDR;
@@ -1102,8 +1084,6 @@ code
                   };
                 SWAP;
                 DUP;
-                DUG 2;
-                DUP;
                 CAR;
                 SWAP;
                 CDR;
@@ -1124,7 +1104,8 @@ code
                 DUG 2;
                 GET;
                 IF_SOME
-                  {}
+                  {
+                  }
                   {
                     PUSH string "set_in_top-any";
                     FAILWITH;
@@ -1155,12 +1136,8 @@ code
                 PAIR;
                 SWAP;
                 PAIR;
-                DUG 2;
                 SWAP;
-                DROP;
                 SWAP;
-                DUP;
-                DUG 2;
                 DUP;
                 CAR;
                 SWAP;
@@ -1175,14 +1152,13 @@ code
                 CAR;
                 DUP;
                 DIG 5;
-                DUP;
-                DUG 6;
                 CAR;
                 DUP;
                 DUG 2;
                 GET;
                 IF_SOME
-                  {}
+                  {
+                  }
                   {
                     PUSH string "set_in_top-any";
                     FAILWITH;
@@ -1202,9 +1178,6 @@ code
                 PAIR;
                 SWAP;
                 PAIR;
-                DUG 2;
-                DROP;
-                DROP;
                 NIL operation;
               };
           };
