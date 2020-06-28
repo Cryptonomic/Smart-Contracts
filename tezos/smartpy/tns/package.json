@@ -1,7 +1,7 @@
 {
     "name": "tns-wrapper",
-    "version": "0.0.4",
-    "description": "Integrated Tezos Workflow Test",
+    "version": "0.0.5",
+    "description": "Cryptonomic TNS sample",
     "scripts": {
         "postinstall": "npm run build",
         "build": "tsc index.ts",
@@ -10,16 +10,18 @@
     "author": "itamarreif",
     "license": "UNLICENSED",
     "engines": {
-        "node": ">=12.14.x",
-        "npm": ">=6.13.x"
+        "node": ">=12.16.3",
+        "npm": ">=6.14.4"
     },
     "homepage": "https://gist.github.com/itamarreif",
     "dependencies": {
-        "conseiljs": "0.4.0-alpha.1",
-        "glob": "7.1.5",
-        "jsonpath": "1.0.2"
+        "conseiljs": "5.0.2-beta.2",
+        "conseiljs-softsigner": "5.0.2-beta.1",
+        "jsonpath-plus": "4.0.0",
+        "loglevel": "1.6.8",
+        "node-fetch": "2.6.0"
     },
     "devDependencies": {
-        "typescript": "3.7.2"
+        "typescript": "3.8.3"
     }
 }
