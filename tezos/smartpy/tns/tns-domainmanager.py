@@ -275,7 +275,7 @@ class TNSDomainManager(sp.Contract):
     def validateCommitment(self, hash):
         sp.verify((~self.data.commitments.contains(hash)) 
             | (sp.now > self.data.commitments[hash].add_seconds(self.data.maxCommitTime)),
-            message = "Commitment does not exist, or is expired")
+            message = "Commitment already exists, or is not expired")
 
 
 class MockResolver(sp.Contract):

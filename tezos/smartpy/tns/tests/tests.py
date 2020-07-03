@@ -493,7 +493,7 @@ def commit_Failure_CommitmentAlreadyExists():
             sender = owner, 
             now = sp.timestamp(env.time()), 
             valid = True)
-    # execute second commit before the first is commited
+    # execute second commit before the first is consumed
     env.scenario += env.tns.commit(
         commitment = commit2).run(
             sender = owner, 
@@ -512,7 +512,8 @@ def registerName_Success_ExactAmount():
     commit = makeCommitment(name, owner.address, nonce)
     resolver = generateAccounts("resolver")()
     periods = 10
-    
+    cost = env.tnsParams.price * periods
+
     # execute tx
     env.scenario += env.tns.commit(
         commitment = commit).run(
@@ -525,8 +526,8 @@ def registerName_Success_ExactAmount():
         duration = env.tnsParams.interval * periods,
         nonce = nonce).run(
             sender = owner, 
-            amount = sp.mutez(env.tnsParams.price * periods),
-            now = sp.timestamp(env.tnsParams.minCommitTime),
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams.minCommitTime)),
             valid = True)
     # verify registration
     env.scenario.verify(env.tns.data.nameRegistry[name] ==
@@ -565,8 +566,8 @@ def registerName_Success_ChangeRefunded():
         duration = env.tnsParams.interval * periods,
         nonce = nonce).run(
             sender = owner, 
-            amount = sp.mutez(env.tnsParams.price * (periods + 1)),
-            now = sp.timestamp(env.tnsParams.minCommitTime),
+            amount = sp.mutez(cost + change),
+            now = sp.timestamp(env.time(env.tnsParams.minCommitTime)),
             valid = True)
     # verify registration    
     env.scenario.verify(env.tns.data.nameRegistry[name] ==
@@ -578,7 +579,7 @@ def registerName_Success_ChangeRefunded():
             modified = False))
     env.scenario.verify(env.tns.data.addressRegistry[resolver.address] == name)
     # verify balance
-    env.scenario.verify(env.tns.balance == env.tnsParams.price * periods)
+    env.scenario.verify(env.tns.balance == cost)
 
 
 def registerName_Failure_NoCommitment():
@@ -592,7 +593,6 @@ def registerName_Failure_NoCommitment():
     resolver = generateAccounts("resolver")()
     periods = 10
     cost = env.tnsParams.price * periods
-    change = env.tnsParams.price
 
     # execute tx
     env.scenario += env.tns.registerName(
@@ -601,8 +601,8 @@ def registerName_Failure_NoCommitment():
         duration = env.tnsParams.interval * periods,
         nonce = nonce).run(
             sender = owner, 
-            amount = sp.mutez(env.tnsParams.price * periods),
-            now = sp.timestamp(0),
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time()),
             valid = False)
 
 
@@ -618,7 +618,6 @@ def registerName_Failure_MinCommitTimeNotElapsed():
     resolver = generateAccounts("resolver")()
     periods = 10
     cost = env.tnsParams.price * periods
-    change = env.tnsParams.price
 
     # execute tx
     env.scenario += env.tns.commit(
@@ -632,11 +631,177 @@ def registerName_Failure_MinCommitTimeNotElapsed():
         duration = env.tnsParams.interval * periods,
         nonce = nonce).run(
             sender = owner, 
-            amount = sp.mutez(env.tnsParams.price * periods),
-            now = sp.timestamp(env.tnsParams.minCommitTime - 1),
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams.minCommitTime - 1)),
             valid = False)
- 
-   
+
+
+def registerName_Failure_CommitmentExpired():
+    # init env
+    env = Env()
+    env.scenario.h3("[registerName-FAILED] Commitment expired")
+
+    name = env.names()
+    owner = generateAccounts("owner")()
+    nonce = env.nonce()
+    commit = makeCommitment(name, owner.address, nonce)
+    resolver = generateAccounts("resolver")()
+    periods = 10
+    cost = env.tnsParams.price * periods
+
+    # execute tx
+    env.scenario += env.tns.commit(
+        commitment = commit).run(
+            sender = owner, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name, 
+        resolver = resolver.address,
+        duration = env.tnsParams.interval * periods,
+        nonce = nonce).run(
+            sender = owner, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams.maxCommitTime + 1)),
+            valid = False)
+  
+
+def registerName_Failure_InvalidName():
+    # init env
+    env = Env()
+    env.scenario.h3("[registerName-FAILED] Invalid name")
+
+    name = ""
+    owner = generateAccounts("owner")()
+    nonce = env.nonce()
+    commit = makeCommitment(name, owner.address, nonce)
+    resolver = generateAccounts("resolver")()
+    periods = 10
+    cost = env.tnsParams.price * periods
+
+    # execute tx
+    env.scenario += env.tns.commit(
+        commitment = commit).run(
+            sender = owner, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name, 
+        resolver = resolver.address,
+        duration = env.tnsParams.interval * periods,
+        nonce = nonce).run(
+            sender = owner, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams.maxCommitTime)),
+            valid = False)
+
+
+def registerName_Failure_NameAlreadyExists():
+    # init env
+    env = Env()
+    env.scenario.h3("[registerName-FAILED] Name already exists, after a new commitment is made")
+
+    name = env.names()
+    owner = generateAccounts("owner")()
+    nonce1 = env.nonce()
+    commit1 = makeCommitment(name, owner.address, nonce1)
+    nonce2 = env.nonce()
+    commit2 = makeCommitment(name, owner.address, nonce2)
+    resolver = generateAccounts("resolver")()
+    periods = 10
+    cost = env.tnsParams.price * periods
+
+    # execute tx
+    # register original name
+    env.scenario += env.tns.commit(
+        commitment = commit1).run(
+            sender = owner, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name, 
+        resolver = resolver.address,
+        duration = env.tnsParams.interval * periods,
+        nonce = nonce1).run(
+            sender = owner, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams.minCommitTime)),
+            valid = True)
+    # attempt second registration
+    env.scenario += env.tns.commit(
+        commitment = commit2).run(
+            sender = owner,
+            now = sp.timestamp(env.time(1)),
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name,
+        resolver = resolver.address,
+        duration = env.tnsParams.interval * periods,
+        nonce = nonce2).run(
+            sender = owner,
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams.minCommitTime)),
+            valid = False)
+
+
+def registerName_Failure_DurationTooLong():
+    # init env
+    env = Env()
+    env.scenario.h3("[registerName-FAILED] Duration too long")
+
+    name = env.names()
+    owner = generateAccounts("owner")()
+    nonce = env.nonce()
+    commit = makeCommitment(name, owner.address, nonce)
+    resolver = generateAccounts("resolver")()
+    periods = (env.tnsParams.maxDuration / env.tnsParams.interval) + 1
+    cost = env.tnsParams.price * periods
+
+    # execute tx
+    env.scenario += env.tns.commit(
+        commitment = commit).run(
+            sender = owner, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name, 
+        resolver = resolver.address,
+        duration = env.tnsParams.interval * periods,
+        nonce = nonce).run(
+            sender = owner, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams.minCommitTime)),
+            valid = False)
+
+
+def registerName_Failure_InsufficientPayment():
+    # init env
+    env = Env()
+    env.scenario.h3("[registerName-FAILED] Insufficient payment")
+
+    name = env.names()
+    owner = generateAccounts("owner")()
+    nonce = env.nonce()
+    resolver = generateAccounts("resolver")()
+    periods = 10
+    cost = env.tnsParams.price * periods
+
+    # execute tx
+    env.scenario += env.tns.commit(
+        commitment = commit).run(
+            sender = owner, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name, 
+        resolver = resolver.address,
+        duration = env.tnsParams.interval * periods,
+        nonce = nonce).run(
+            sender = owner, 
+            amount = sp.mutez(cost - 1),
+            now = sp.timestamp(env.time(env.tnsParams.minCommitTime)),
+            valid = False)
+
 
 @sp.add_test("TNSDomainManagerTest")
 def test():
@@ -651,91 +816,12 @@ def test():
     registerName_Success_ChangeRefunded()
     registerName_Failure_NoCommitment()
     registerName_Failure_MinCommitTimeNotElapsed()
-    
-    # env.scenario.h3("[registerName-FAILED] Commitment expired")
-    # scenario += domainManager.commit(
-    #     commitment = expiredNameCommitment).run(
-    #         sender = ownerAddr,
-    #         now = sp.timestamp(0),
-    #         valid = True)
-    # scenario += domainManager.registerName(
-    #     name = expiredName,
-    #     resolver = resolverAddr.address,
-    #     duration = regPeriod,
-    #     nonce = nonce1).run(
-    #         sender = ownerAddr, 
-    #         amount = sp.mutez(regPrice),
-    #         now = sp.timestamp(maxCommitTime+1),
-    #         valid = False)
-    
-
-    # scenario.h3("[FAILED-registerName] Invalid name")
-    # scenario += domainManager.commit(
-    #     commitment = invalidNameCommitment).run(
-    #         sender = ownerAddr, 
-    #         amount = sp.mutez(regPrice),
-    #         now = sp.timestamp(0),
-    #         valid = True)
-    # scenario += domainManager.registerName(
-    #     name = invalidName,
-    #     resolver = resolverAddr.address,
-    #     duration = regPeriod,
-    #     nonce = nonce1).run(
-    #         sender = ownerAddr,
-    #         amount = sp.mutez(regPrice),
-    #         now = sp.timestamp(minCommitTime),
-    #         valid = False)
-    # scenario.verify(~(domainManager.data.nameRegistry.contains("")))
-
-    # scenario.h3("[FAILED-registerName] Name already exists, after a new commitment is made")
-    # scenario += domainManager.commit(
-    #     commitment = exactNameCommitment2).run(
-    #         sender = ownerAddr,
-    #         now = sp.timestamp(minCommitTime+1),
-    #         valid = True) 
-    # scenario += domainManager.registerName(
-    #     name = exactName,
-    #     resolver = resolverAddr.address,
-    #     duration = regPeriod,
-    #     nonce = nonce2).run(
-    #         sender = ownerAddr,
-    #         amount = sp.mutez(regPrice),
-    #         now = sp.timestamp(2*minCommitTime + 1),
-    #         valid = False)
-
-    # scenario.h3("[FAILED-registerName] Duration too long")
-    # scenario += domainManager.commit(
-    #     commitment = longDurationNameCommitment).run(
-    #         sender = ownerAddr,
-    #         now = sp.timestamp(0),
-    #         valid = True) 
-    # scenario += domainManager.registerName(
-    #     name = longDurationName,
-    #     resolver = resolverAddr.address,
-    #     duration = maxDuration + 1,
-    #     nonce = nonce1).run(
-    #         sender = ownerAddr,
-    #         amount = sp.mutez(price * (60*24*365+1)), # cover maxDuration + 1
-    #         now = sp.timestamp(minCommitTime),
-    #         valid = False)
-    # scenario.verify(~(domainManager.data.nameRegistry.contains("toolong")))
+    registerName_Failure_CommitmentExpired()
+    registerName_Failure_InvalidName()
+    registerName_Failure_NameAlreadyExists()
+    registerName_Failure_DurationTooLong()
 
     # scenario.h3("[FAILED-registerName] Payment not enough")
-    # scenario += domainManager.commit(
-    #     commitment = notEnoughNameCommitment).run(
-    #         sender = ownerAddr,
-    #         now = sp.timestamp(0),
-    #         valid = True) 
-    # scenario += domainManager.registerName(
-    #     name = notEnoughName,
-    #     resolver = resolverAddr.address,
-    #     duration = regPeriod,
-    #     nonce = nonce1).run(
-    #         sender = ownerAddr,
-    #         amount = sp.mutez(regPrice - 1),
-    #         now = sp.timestamp(minCommitTime),
-    #         valid = False)
-    # scenario.verify(~domainManager.data.nameRegistry.contains("notenough"))
 
     # scenario.h2("[ENTRYPOINT] updateResolver")
     # scenario.h3("[SUCCESS-updateResolver]")
