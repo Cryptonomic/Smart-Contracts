@@ -3,8 +3,7 @@ import smartpy as sp
 
 class TNSDomainManager(sp.Contract):
     def __init__(self, _manager, _price, _interval, _maxDuration, _minCommitTime, _maxCommitTime):
-        self.init(
-            domainManager = _manager,
+        self.init(domainManager = _manager,
             price = sp.mutez(_price),
             interval = sp.int(_interval),
             maxDuration = sp.int(_maxDuration),
@@ -27,6 +26,48 @@ class TNSDomainManager(sp.Contract):
             addressRegistry = sp.big_map(
                 tkey = sp.TAddress,
                 tvalue = sp.TString))
+
+
+    # automatically fail any plain XTZ transfers
+    @sp.entry_point
+    def default(self):
+        sp.failwith("Contract does not accept XTZ transfers")
+
+
+    # @param baker The new baker to delegate to
+    @sp.entry_point
+    def setDelegate(self, params):
+        sp.verify(sp.sender == self.data.domainManager, "Invalid permissions")
+        sp.set_delegate(params.baker)
+
+
+    # @param dest Destination to withdraw funds to
+    # withdraw the funds to the target destination
+    @sp.entry_point
+    def withdrawFunds(self, params):
+        sp.verify(sp.sender == self.data.domainManager, "Invalid permissions")
+        sp.send(params.dest, sp.balance)
+
+    
+    # @param price
+    # @param interval
+    # @param maxDuration
+    # @param minCommitTime
+    # @param maxCommitTime
+    # Optionally provide new config parameters
+    @sp.entry_point
+    def config(self, params):
+        sp.verify(sp.sender == self.data.domainManager, "Invalid permissions")
+        sp.if params.price.is_some():
+            self.data.price = params.price.open_some()
+        sp.if params.interval.is_some():
+            self.data.interval = params.interval.open_some()
+        sp.if params.maxDuration.is_some():
+            self.data.maxDuration = params.maxDuration.open_some()
+        sp.if params.minCommitTime.is_some():
+            self.data.minCommitTime = params.minCommitTime.open_some()
+        sp.if params.maxCommitTime.is_some():
+            self.data.maxCommitTime = params.maxCommitTime.open_some()
 
 
     # @param commitment The commitment of the name that's being committed
@@ -112,15 +153,6 @@ class TNSDomainManager(sp.Contract):
        self.validateUpdate(sp.sender, params.name)
        del self.data.addressRegistry[self.data.nameRegistry[params.name].resolver]
        del self.data.nameRegistry[params.name]
-
-
-    # @param _minCommitTime New minCommitTime value
-    # @param _maxCommitTime New maxCommitTime value
-    @sp.entry_point
-    def setCommitmentAges(self, params):
-        sp.verify(sp.sender == self.data.domainManager, message = "Invalid permissions")
-        self.data.minCommitTime = params._minCommitTime
-        self.data.maxCommitTime = params._maxCommitTime
 
 
     # @param name The name to query from the registry
@@ -277,7 +309,7 @@ class TNSDomainManager(sp.Contract):
     def validateCommitment(self, hash):
         sp.verify((~self.data.commitments.contains(hash)) 
             | (sp.now > self.data.commitments[hash].add_seconds(self.data.maxCommitTime)),
-            message = "Commitment does not exist, or is expired")
+            message = "Commitment already exists, or is not expired")
 
 
 class MockResolver(sp.Contract):
@@ -358,6 +390,7 @@ class MockResolver(sp.Contract):
     def recvAddressInfo(self, params):
         self.data.receivedNames[params.name] = params.info
 
+
 # @param name
 # @param owner
 # @param nonce
@@ -402,15 +435,6 @@ def time():
     return step
 
 
-class TNSParams:
-    def __init__(self, _manager, _interval, _maxDuration, _price, _minCommitTime, _maxCommitTime):
-        self.manager = _manager
-        self.interval = _interval
-        self.price = _price
-        self.maxDuration = _maxDuration
-        self.minCommitTime = _minCommitTime
-        self.maxCommitTime = _maxCommitTime
-
 class Env:
     def __init__(self):
         self.scenario = sp.test_scenario()
@@ -420,20 +444,15 @@ class Env:
         self.nonce = nonce()
         self.time = time() # return curr time or after increment
         
-        self.tnsParams = TNSParams(
-            _manager = self.managers().address,
-            _interval = 60, # 1 minute
-            _maxDuration = 60*60*24*365, # 1 year
-            _price = 1000, # 0.001 tez
-            _minCommitTime = 30, # 0.5 minutes
-            _maxCommitTime = 600) # 10 minutes
-        self.tns = TNSDomainManager(
-            self.tnsParams.manager,
-            self.tnsParams.interval,
-            self.tnsParams.price,
-            self.tnsParams.maxDuration,
-            self.tnsParams.minCommitTime,
-            self.tnsParams.maxCommitTime)
+        self.tnsParams = {
+            "_manager": self.managers().address,
+            "_interval": 60, # 1 minute
+            "_maxDuration": 60*60*24*365, # 1 year
+            "_price": 1000, # 0.001 tez
+            "_minCommitTime": 30, # 0.5 minutes
+            "_maxCommitTime": 600 # 10 minutes
+        }
+        self.tns = TNSDomainManager(**self.tnsParams)
         self.scenario += self.tns
 
 
@@ -464,7 +483,7 @@ def commit_Success_OldCommitExpired():
     name = env.names()
     owner = generateAccounts("owner")()
     commit = makeCommitment(name, owner.address, env.nonce())
-    timestep = env.time(env.tnsParams.maxCommitTime + 1)
+    timestep = env.time(env.tnsParams["_maxCommitTime"] + 1)
     
     # execute tx
     env.scenario += env.tns.commit(
@@ -512,7 +531,7 @@ def registerName_Success_ExactAmount():
     commit = makeCommitment(name, owner.address, nonce)
     resolver = generateAccounts("resolver")()
     periods = 10
-    cost = env.tnsParams.price * periods
+    cost = env.tnsParams["_price"] * periods
 
     # execute tx
     env.scenario += env.tns.commit(
@@ -523,20 +542,21 @@ def registerName_Success_ExactAmount():
     env.scenario += env.tns.registerName(
         name = name, 
         resolver = resolver.address,
-        duration = env.tnsParams.interval * periods,
+        duration = env.tnsParams["_interval"] * periods,
         nonce = nonce).run(
             sender = owner, 
             amount = sp.mutez(cost),
-            now = sp.timestamp(env.time(env.tnsParams.minCommitTime)),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
             valid = True)
     # verify registration
     env.scenario.verify(env.tns.data.nameRegistry[name] ==
             sp.record(name = name,
             owner = owner.address,
             resolver = resolver.address,
-            registeredAt = sp.timestamp(env.tnsParams.minCommitTime),
-            registrationPeriod = env.tnsParams.interval * periods,
+            registeredAt = sp.timestamp(env.tnsParams["_minCommitTime"]),
+            registrationPeriod = env.tnsParams["_interval"] * periods,
             modified = False))
+    # verify changes
     env.scenario.verify(env.tns.data.addressRegistry[resolver.address] == name)
 
  
@@ -551,8 +571,8 @@ def registerName_Success_ChangeRefunded():
     commit = makeCommitment(name, owner.address, nonce)
     resolver = generateAccounts("resolver")()
     periods = 10
-    cost = env.tnsParams.price * periods
-    change = env.tnsParams.price
+    cost = env.tnsParams["_price"] * periods
+    change = env.tnsParams["_price"]
 
     # execute tx
     env.scenario += env.tns.commit(
@@ -563,22 +583,22 @@ def registerName_Success_ChangeRefunded():
     env.scenario += env.tns.registerName(
         name = name, 
         resolver = resolver.address,
-        duration = env.tnsParams.interval * periods,
+        duration = env.tnsParams["_interval"] * periods,
         nonce = nonce).run(
             sender = owner, 
             amount = sp.mutez(cost + change),
-            now = sp.timestamp(env.time(env.tnsParams.minCommitTime)),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
             valid = True)
     # verify registration    
     env.scenario.verify(env.tns.data.nameRegistry[name] ==
             sp.record(name = name,
             owner = owner.address,
             resolver = resolver.address,
-            registeredAt = sp.timestamp(env.tnsParams.minCommitTime),
-            registrationPeriod = env.tnsParams.interval * periods,
+            registeredAt = sp.timestamp(env.tnsParams["_minCommitTime"]),
+            registrationPeriod = env.tnsParams["_interval"] * periods,
             modified = False))
+    # verify changes
     env.scenario.verify(env.tns.data.addressRegistry[resolver.address] == name)
-    # verify balance
     env.scenario.verify(env.tns.balance == cost)
 
 
@@ -592,13 +612,13 @@ def registerName_Failure_NoCommitment():
     nonce = env.nonce()
     resolver = generateAccounts("resolver")()
     periods = 10
-    cost = env.tnsParams.price * periods
+    cost = env.tnsParams["_price"] * periods
 
     # execute tx
     env.scenario += env.tns.registerName(
         name = name, 
         resolver = resolver.address,
-        duration = env.tnsParams.interval * periods,
+        duration = env.tnsParams["_interval"] * periods,
         nonce = nonce).run(
             sender = owner, 
             amount = sp.mutez(cost),
@@ -617,7 +637,7 @@ def registerName_Failure_MinCommitTimeNotElapsed():
     commit = makeCommitment(name, owner.address, nonce)
     resolver = generateAccounts("resolver")()
     periods = 10
-    cost = env.tnsParams.price * periods
+    cost = env.tnsParams["_price"] * periods
 
     # execute tx
     env.scenario += env.tns.commit(
@@ -628,13 +648,12 @@ def registerName_Failure_MinCommitTimeNotElapsed():
     env.scenario += env.tns.registerName(
         name = name, 
         resolver = resolver.address,
-        duration = env.tnsParams.interval * periods,
+        duration = env.tnsParams["_interval"] * periods,
         nonce = nonce).run(
             sender = owner, 
             amount = sp.mutez(cost),
-            now = sp.timestamp(env.time(env.tnsParams.minCommitTime - 1)),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"] - 1)),
             valid = False)
-<<<<<<< Updated upstream
 
 
 def registerName_Failure_CommitmentExpired():
@@ -648,7 +667,7 @@ def registerName_Failure_CommitmentExpired():
     commit = makeCommitment(name, owner.address, nonce)
     resolver = generateAccounts("resolver")()
     periods = 10
-    cost = env.tnsParams.price * periods
+    cost = env.tnsParams["_price"] * periods
 
     # execute tx
     env.scenario += env.tns.commit(
@@ -659,11 +678,11 @@ def registerName_Failure_CommitmentExpired():
     env.scenario += env.tns.registerName(
         name = name, 
         resolver = resolver.address,
-        duration = env.tnsParams.interval * periods,
+        duration = env.tnsParams["_interval"] * periods,
         nonce = nonce).run(
             sender = owner, 
             amount = sp.mutez(cost),
-            now = sp.timestamp(env.time(env.tnsParams.maxCommitTime + 1)),
+            now = sp.timestamp(env.time(env.tnsParams["_maxCommitTime"] + 1)),
             valid = False)
   
 
@@ -678,7 +697,7 @@ def registerName_Failure_InvalidName():
     commit = makeCommitment(name, owner.address, nonce)
     resolver = generateAccounts("resolver")()
     periods = 10
-    cost = env.tnsParams.price * periods
+    cost = env.tnsParams["_price"] * periods
 
     # execute tx
     env.scenario += env.tns.commit(
@@ -689,11 +708,11 @@ def registerName_Failure_InvalidName():
     env.scenario += env.tns.registerName(
         name = name, 
         resolver = resolver.address,
-        duration = env.tnsParams.interval * periods,
+        duration = env.tnsParams["_interval"] * periods,
         nonce = nonce).run(
             sender = owner, 
             amount = sp.mutez(cost),
-            now = sp.timestamp(env.time(env.tnsParams.maxCommitTime)),
+            now = sp.timestamp(env.time(env.tnsParams["_maxCommitTime"])),
             valid = False)
 
 
@@ -704,13 +723,11 @@ def registerName_Failure_NameAlreadyExists():
 
     name = env.names()
     owner = generateAccounts("owner")()
-    nonce1 = env.nonce()
-    commit1 = makeCommitment(name, owner.address, nonce1)
-    nonce2 = env.nonce()
-    commit2 = makeCommitment(name, owner.address, nonce2)
+    nonce1, nonce2 = env.nonce(), env.nonce()
+    commit1, commit2 = makeCommitment(name, owner.address, nonce1), makeCommitment(name, owner.address, nonce2)
     resolver = generateAccounts("resolver")()
     periods = 10
-    cost = env.tnsParams.price * periods
+    cost = env.tnsParams["_price"] * periods
 
     # execute tx
     # register original name
@@ -722,11 +739,11 @@ def registerName_Failure_NameAlreadyExists():
     env.scenario += env.tns.registerName(
         name = name, 
         resolver = resolver.address,
-        duration = env.tnsParams.interval * periods,
+        duration = env.tnsParams["_interval"] * periods,
         nonce = nonce1).run(
             sender = owner, 
             amount = sp.mutez(cost),
-            now = sp.timestamp(env.time(env.tnsParams.minCommitTime)),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
             valid = True)
     # attempt second registration
     env.scenario += env.tns.commit(
@@ -737,11 +754,11 @@ def registerName_Failure_NameAlreadyExists():
     env.scenario += env.tns.registerName(
         name = name,
         resolver = resolver.address,
-        duration = env.tnsParams.interval * periods,
+        duration = env.tnsParams["_interval"] * periods,
         nonce = nonce2).run(
             sender = owner,
             amount = sp.mutez(cost),
-            now = sp.timestamp(env.time(env.tnsParams.minCommitTime)),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
             valid = False)
 
 
@@ -755,8 +772,8 @@ def registerName_Failure_DurationTooLong():
     nonce = env.nonce()
     commit = makeCommitment(name, owner.address, nonce)
     resolver = generateAccounts("resolver")()
-    periods = (env.tnsParams.maxDuration / env.tnsParams.interval) + 1
-    cost = env.tnsParams.price * periods
+    periods = (env.tnsParams["_maxDuration"] / env.tnsParams["_interval"]) + 1
+    cost = env.tnsParams["_price"] * periods
 
     # execute tx
     env.scenario += env.tns.commit(
@@ -767,11 +784,11 @@ def registerName_Failure_DurationTooLong():
     env.scenario += env.tns.registerName(
         name = name, 
         resolver = resolver.address,
-        duration = env.tnsParams.interval * periods,
+        duration = env.tnsParams["_interval"] * periods,
         nonce = nonce).run(
             sender = owner, 
             amount = sp.mutez(cost),
-            now = sp.timestamp(env.time(env.tnsParams.minCommitTime)),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
             valid = False)
 
 
@@ -786,7 +803,7 @@ def registerName_Failure_InsufficientPayment():
     commit = makeCommitment(name, owner.address, nonce)
     resolver = generateAccounts("resolver")()
     periods = 10
-    cost = env.tnsParams.price * periods
+    cost = env.tnsParams["_price"] * periods
 
     # execute tx
     env.scenario += env.tns.commit(
@@ -797,11 +814,11 @@ def registerName_Failure_InsufficientPayment():
     env.scenario += env.tns.registerName(
         name = name, 
         resolver = resolver.address,
-        duration = env.tnsParams.interval * periods,
+        duration = env.tnsParams["_interval"] * periods,
         nonce = nonce).run(
             sender = owner, 
             amount = sp.mutez(cost - 1),
-            now = sp.timestamp(env.time(env.tnsParams.minCommitTime)),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
             valid = False)
 
 
@@ -815,10 +832,9 @@ def updateResolver_Success():
     nonce = env.nonce()
     commit = makeCommitment(name, owner.address, nonce)
     resolvers = generateAccounts("resolver")
-    resolver1 = resolvers()
-    resolver2 = resolvers()
+    resolver1, resolver2 = resolvers(), resolvers()
     periods = 10
-    cost = env.tnsParams.price * periods
+    cost = env.tnsParams["_price"] * periods
 
     # execute tx
     # register name with original resolver
@@ -830,11 +846,11 @@ def updateResolver_Success():
     env.scenario += env.tns.registerName(
         name = name, 
         resolver = resolver1.address,
-        duration = env.tnsParams.interval * periods,
+        duration = env.tnsParams["_interval"] * periods,
         nonce = nonce).run(
             sender = owner, 
             amount = sp.mutez(cost),
-            now = sp.timestamp(env.time(env.tnsParams.minCommitTime)),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
             valid = True)
     # update to new resolver
     env.scenario += env.tns.updateResolver(
@@ -858,10 +874,8 @@ def updateRegistrationPeriod_Success():
     nonce = env.nonce()
     commit = makeCommitment(name, owner.address, nonce)
     resolver = generateAccounts("resolver")()
-    periods1 = 10
-    cost1 = env.tnsParams.price * periods1
-    periods2 = 5
-    cost2 = env.tnsParams.price * periods2
+    periods1, periods2 = 10, 5
+    cost1, cost2 = env.tnsParams["_price"] * periods1, env.tnsParams["_price"] * periods2
 
     # execute tx
     # register name with original resolver
@@ -873,22 +887,22 @@ def updateRegistrationPeriod_Success():
     env.scenario += env.tns.registerName(
         name = name, 
         resolver = resolver.address,
-        duration = env.tnsParams.interval * periods1,
+        duration = env.tnsParams["_interval"] * periods1,
         nonce = nonce).run(
             sender = owner, 
             amount = sp.mutez(cost1),
-            now = sp.timestamp(env.time(env.tnsParams.minCommitTime)),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
             valid = True)
     # update registration period
     env.scenario += env.tns.updateRegistrationPeriod(
         name = name,
-        duration = env.tnsParams.interval * periods2).run(
+        duration = env.tnsParams["_interval"] * periods2).run(
             sender = owner,
             amount = sp.mutez(cost2),
             now = sp.timestamp(env.time(1)),
             valid = True)
     # verify effects
-    env.scenario.verify(env.tns.data.nameRegistry[name].registrationPeriod == env.tnsParams.interval * periods2)
+    env.scenario.verify(env.tns.data.nameRegistry[name].registrationPeriod == env.tnsParams["_interval"] * periods2)
     env.scenario.verify(env.tns.data.nameRegistry[name].modified == True)
 
 
@@ -902,10 +916,8 @@ def updateRegistrationPeriod_Failure_NewPeriodTooLong():
     nonce = env.nonce()
     commit = makeCommitment(name, owner.address, nonce)
     resolver = generateAccounts("resolver")()
-    periods1 = 10
-    cost1 = env.tnsParams.price * periods1
-    periods2 = (env.tnsParams.maxDuration / env.tnsParams.interval) + 1
-    cost2 = env.tnsParams.price * periods2
+    periods1, periods2 = 10, (env.tnsParams["_maxDuration"] / env.tnsParams["_interval"]) + 1
+    cost1, cost2 = env.tnsParams["_price"] * periods1, env.tnsParams["_price"] * periods2
 
     # execute tx
     # register name with original resolver
@@ -917,16 +929,16 @@ def updateRegistrationPeriod_Failure_NewPeriodTooLong():
     env.scenario += env.tns.registerName(
         name = name, 
         resolver = resolver.address,
-        duration = env.tnsParams.interval * periods1,
+        duration = env.tnsParams["_interval"] * periods1,
         nonce = nonce).run(
             sender = owner, 
             amount = sp.mutez(cost1),
-            now = sp.timestamp(env.time(env.tnsParams.minCommitTime)),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
             valid = True)
     # try to update registration period
     env.scenario += env.tns.updateRegistrationPeriod(
         name = name,
-        duration = env.tnsParams.interval * periods2).run(
+        duration = env.tnsParams["_interval"] * periods2).run(
             sender = owner,
             amount = sp.mutez(cost2),
             now = sp.timestamp(env.time(1)),
@@ -943,10 +955,8 @@ def updateRegistrationPeriod_Failure_InsufficientPayment():
     nonce = env.nonce()
     commit = makeCommitment(name, owner.address, nonce)
     resolver = generateAccounts("resolver")()
-    periods1 = 10
-    cost1 = env.tnsParams.price * periods1
-    periods2 = 5
-    cost2 = env.tnsParams.price * periods2
+    periods1, periods2 = 10, 5
+    cost1, cost2 = env.tnsParams["_price"] * periods1, env.tnsParams["_price"] * periods2
 
     # execute tx
     # register name with original resolver
@@ -958,20 +968,408 @@ def updateRegistrationPeriod_Failure_InsufficientPayment():
     env.scenario += env.tns.registerName(
         name = name, 
         resolver = resolver.address,
-        duration = env.tnsParams.interval * periods1,
+        duration = env.tnsParams["_interval"] * periods1,
         nonce = nonce).run(
             sender = owner, 
             amount = sp.mutez(cost1),
-            now = sp.timestamp(env.time(env.tnsParams.minCommitTime)),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
             valid = True)
     # try to update registration period
     env.scenario += env.tns.updateRegistrationPeriod(
         name = name,
-        duration = env.tnsParams.interval * periods2).run(
+        duration = env.tnsParams["_interval"] * periods2).run(
             sender = owner,
             amount = sp.mutez(cost2 - 1),
             now = sp.timestamp(env.time(1)),
             valid = False)
+
+
+def transferNameOwnership_Success():
+    # init env
+    env = Env()
+    env.scenario.h3("[transferNameOwnership-SUCCESS]")
+    
+    name = env.names()
+    owners = generateAccounts("owner")
+    owner1, owner2 = owners(), owners()
+    nonce = env.nonce()
+    commit = makeCommitment(name, owner1.address, nonce)
+    resolver = generateAccounts("resolver")()
+    periods = 10
+    cost = env.tnsParams["_price"] * periods
+
+    # execute tx
+    # register name with original resolver
+    env.scenario += env.tns.commit(
+        commitment = commit).run(
+            sender = owner1, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name, 
+        resolver = resolver.address,
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce).run(
+            sender = owner1, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # update owner
+    env.scenario += env.tns.transferNameOwnership(
+        name = name,
+        newNameOwner = owner2.address).run(
+            sender = owner1,
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(1)),
+            valid = True)
+    # verify changes
+    env.scenario.verify(env.tns.data.nameRegistry[name].owner == owner2.address)
+
+
+def transferNameOwnership_Failure_InvalidPermissions():
+    # init env
+    env = Env()
+    env.scenario.h3("[transferNameOwnership-FAILED] Invalid permissions")
+    
+    name = env.names()
+    owners = generateAccounts("owner")
+    owner1, owner2 = owners(), owners()
+    nonce = env.nonce()
+    commit = makeCommitment(name, owner1.address, nonce)
+    resolver = generateAccounts("resolver")()
+    periods = 10
+    cost = env.tnsParams["_price"] * periods
+
+    # execute tx
+    # register name with original resolver
+    env.scenario += env.tns.commit(
+        commitment = commit).run(
+            sender = owner1, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name, 
+        resolver = resolver.address,
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce).run(
+            sender = owner1, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # update owner
+    env.scenario += env.tns.transferNameOwnership(
+        name = name,
+        newNameOwner = owner2.address).run(
+            sender = owner2,
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(1)),
+            valid = False)
+
+
+def deleteName_Succcess():
+    # init env
+    env = Env()
+    env.scenario.h3("[deleteName-SUCCESS]")
+    
+    name = env.names()
+    owner = generateAccounts("owner")()
+    nonce = env.nonce()
+    commit = makeCommitment(name, owner.address, nonce)
+    resolver = generateAccounts("resolver")()
+    periods = 10
+    cost = env.tnsParams["_price"] * periods
+
+    # execute tx
+    # register name with original resolver
+    env.scenario += env.tns.commit(
+        commitment = commit).run(
+            sender = owner, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name, 
+        resolver = resolver.address,
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce).run(
+            sender = owner, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # delete name
+    env.scenario += env.tns.deleteName(
+        name = name).run(
+            sender = owner,
+            valid = True)
+    # verify changes
+    env.scenario.verify(~(env.tns.data.nameRegistry.contains(name)))
+
+
+def deleteName_Failure_UnregisteredDomain():
+    # init env
+    env = Env()
+    env.scenario.h3("[deleteName-FAILED] Unregistered domain cannot be deleted")
+    
+    name = env.names()
+    owner = generateAccounts("owner")()
+    
+    # execute tx
+    # try to delete name
+    env.scenario += env.tns.deleteName(
+        name = name).run(
+            sender = owner,
+            valid = False)
+
+
+def deleteName_Failure_InvalidPermissions():
+    # init env
+    env = Env()
+    env.scenario.h3("[deleteName-FAILED] Invalid Permissions")
+    
+    name = env.names()
+    owners = generateAccounts("owner")
+    owner1, owner2 = owners(), owners()
+    nonce = env.nonce()
+    commit = makeCommitment(name, owner1.address, nonce)
+    resolver = generateAccounts("resolver")()
+    periods = 10
+    cost = env.tnsParams["_price"] * periods
+
+    # execute tx
+    # register name with original resolver
+    env.scenario += env.tns.commit(
+        commitment = commit).run(
+            sender = owner1, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name, 
+        resolver = resolver.address,
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce).run(
+            sender = owner1, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # delete name
+    env.scenario += env.tns.deleteName(
+        name = name).run(
+            sender = owner2,
+            valid = False)
+
+
+def sendNameInfo_Success():
+    # init env
+    env = Env()
+    env.scenario.h3("[sendNameInfo-SUCCESS]")
+
+    name = env.names()
+    owner = generateAccounts("owner")()
+    nonce = env.nonce()
+    commit = makeCommitment(name, owner.address, nonce)
+    resolver = generateAccounts("resolver")()
+    periods = 10
+    cost = env.tnsParams["_price"] * periods
+
+    # execute tx
+    # register name
+    env.scenario += env.tns.commit(
+        commitment = commit).run(
+            sender = owner, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name, 
+        resolver = resolver.address,
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce).run(
+            sender = owner, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # add a MockResolver to scenario
+    mockResolver = MockResolver(env.tnsParams["_manager"])
+    env.scenario += mockResolver
+    # invoke mockResolver
+    env.scenario += mockResolver.getNameInfoFromRegistry(
+        name = name).run(
+            sender = owner,
+            valid = True)
+    # verify changes to mockResolver
+    env.scenario.verify(mockResolver.data.receivedNames[name] == env.tns.data.nameRegistry[name])
+
+
+
+def sendNameInfo_Failure_NameDoesNotExist():
+    # init env
+    env = Env()
+    env.scenario.h3("[sendNameInfo-FAILED] Name does not exist")
+
+    name = env.names()
+    invoker = generateAccounts("invoker")()
+
+    # execute tx
+    # add a mockResolver to scenario
+    mockResolver = MockResolver(env.tnsParams["_manager"])
+    env.scenario += mockResolver
+    # This works, just not sure how to mark a failed condition in the sendNameInfo (i.e. secondary) tx
+    # env.scenario += mockResolver.getNameInfoFromRegistry(
+    #     name = name).run(
+    #         sender = invoker,
+    #         valid = True)
+    # scenario.verify(~(mockResolver.data.receivedNames.contains(name)))
+
+
+def sendAddressInfo_Success():
+        # init env
+    env = Env()
+    env.scenario.h3("[sendAddressInfo-SUCCESS]")
+
+    name = env.names()
+    owner = generateAccounts("owner")()
+    nonce = env.nonce()
+    commit = makeCommitment(name, owner.address, nonce)
+    resolver = generateAccounts("resolver")()
+    periods = 10
+    cost = env.tnsParams["_price"] * periods
+
+    # execute tx
+    # register name
+    env.scenario += env.tns.commit(
+        commitment = commit).run(
+            sender = owner, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name, 
+        resolver = resolver.address,
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce).run(
+            sender = owner, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # add a MockResolver to scenario
+    mockResolver = MockResolver(env.tnsParams["_manager"])
+    env.scenario += mockResolver
+    # invoke mockResolver
+    env.scenario += mockResolver.getAddressInfoFromRegistry(
+        name = name).run(
+            sender = owner,
+            valid = True)
+    # verify changes to mockResolver
+    env.scenario.verify(mockResolver.data.receivedNames[name] == env.tns.data.nameRegistry[name])
+
+
+
+def sendAddressInfo_Failure_AddressDoesNotExist():
+    # init env
+    env = Env()
+    env.scenario.h3("[sendAddressInfo-FAILED] Address does not exist")
+
+    invoker = generateAccounts("invoker")()
+
+    # execute tx
+    # add a mockResolver to scenario
+    mockResolver = MockResolver(env.tnsParams["_manager"])
+    env.scenario += mockResolver
+    # This works, just not sure how to mark a failed condition in the sendAddressInfo (i.e. secondary) tx
+    # env.scenario += mockResolver.getAddressInfoFromRegistry(
+    #     addr = invoker.address).run(
+    #         sender = invoker,
+    #         valid = True)
+    # scenario.verify(~(mockResolver.data.receivedNames.contains(invoker.address)))
+
+
+# def setCommitmentAges_Success():
+#     # init env
+#     env = Env()
+#     env.scenario.h3("[setCommitmentAges-SUCCESS]")
+    
+#     newMinCommitTime, newMaxCommitTime = 2 * env.tnsParams["_minCommitTime"], 2 * env.tnsParams["_maxCommitTime"]
+
+#     # execute tx
+#     env.scenario += env.tns.setCommitmentAges(
+#         _minCommitTime = newMinCommitTime,
+#         _maxCommitTime = newMaxCommitTime).run(
+#             sender = env.tnsParams["_manager"],
+#             valid = True)
+#     # verify changes
+#     env.scenario.verify(env.tns.data.minCommitTime == newMinCommitTime)
+#     env.scenario.verify(env.tns.data.maxCommitTime == newMaxCommitTime)
+
+
+# def setCommitmentAges_Failure_InvalidPermissions():
+#     # init env
+#     env = Env()
+#     env.scenario.h3("[setCommitmentAges-FAILED] Invalid permissions")
+
+#     newMinCommitTime, newMaxCommitTime = 2 * env.tnsParams["_minCommitTime"], 2 * env.tnsParams["_maxCommitTime"]
+#     notManager = generateAccounts("notManager")()
+
+#     # execute tx
+#     env.scenario += env.tns.setCommitmentAges(
+#         _minCommitTime = newMinCommitTime,
+#         _maxCommitTime = newMaxCommitTime).run(
+#             sender = notManager,
+#             valid = False)
+
+
+def default_Failure():
+    # init env
+    env = Env()
+    env.scenario.h3("[default-FAILED] Fail any plain XTZ transfer to the contract")
+
+    # execute tx
+
+
+def setDelegate_Success():
+    # init env
+    env = Env()
+    env.scenario.h3("[] ")
+
+    # execute tx
+
+
+def setDelegate_Failure_InvalidPermissions():
+    # init env
+    env = Env()
+    env.scenario.h3("[] ")
+
+    # execute tx
+
+
+def withdrawFunds_Success():
+    # init env
+    env = Env()
+    env.scenario.h3("[] ")
+
+    # execute tx
+
+
+def withdrawFunds_Failure_InvalidPermissions():
+    # init env
+    env = Env()
+    env.scenario.h3("[] ")
+
+    # execute tx
+
+
+def config_Success():
+    # init env
+    env = Env()
+    env.scenario.h3("[] ")
+
+    # execute tx
+
+
+def config_Failure_InvalidPermissions():
+    # init env
+    env = Env()
+    env.scenario.h3("[] ")
+
+    # execute tx
+
+
 
 
 @sp.add_test("TNSDomainManagerTest")
@@ -1002,91 +1400,38 @@ def test():
     updateRegistrationPeriod_Failure_InsufficientPayment()
 
     # scenario.h3("[ENTRYPOINT] transferNameOwnership")
-    # scenario.h3("[SUCCESS-transferNameOwnership]")
-    # scenario += domainManager.transferNameOwnership(
-    #         name = exactName,
-    #         newNameOwner = newOwnerAddr.address).run(
-    #             sender = ownerAddr,
-    #             now = sp.timestamp(3))
-    # scenario.verify(domainManager.data.nameRegistry[exactName].owner == newOwnerAddr.address)
-
-    # scenario.h3("[FAILED-transferNameOwnership] Old owner cannot modify subdomain")
-    # scenario += domainManager.transferNameOwnership(
-    #     name = exactName, 
-    #     newNameOwner = ownerAddr.address).run(
-    #         sender = ownerAddr, 
-    #         valid = False)
-    # scenario.verify(domainManager.data.nameRegistry[exactName].owner == newOwnerAddr.address)
+    transferNameOwnership_Success()
+    transferNameOwnership_Failure_InvalidPermissions()
 
     # scenario.h2("[ENTRYPOINT] deleteName")
-    # scenario.h3("[FAILED-deleteName] Unregistered/deleted domain cannot be deleted.")
-    # unregisteredName = "unregistered"
-    # scenario += domainManager.deleteName(name = unregisteredName).run(sender = newOwnerAddr, valid = False)
-    # scenario.h3("[FAILED-deleteName] Bad permissions")
-    # scenario += domainManager.deleteName(
-    #     name = exactName).run(
-    #         sender = ownerAddr, 
-    #         valid = False)
-
-    # scenario.h3("[SUCCESS-deleteName]")
-    # scenario += domainManager.deleteName(
-    #     name = exactName).run(
-    #         sender = newOwnerAddr)
-    # scenario.verify(~(domainManager.data.nameRegistry.contains(exactName)))
-
-    # scenario.h2("[ENTRYPOINT] setCommitmentAges")
-    # scenario.h3("[SUCCESS-setCommitmentAges]")
-    # newMinCommitTime = 2 * minCommitTime
-    # newMaxCommitTime = 2 * maxCommitTime
-    # scenario += domainManager.setCommitmentAges(
-    #     _minCommitTime = newMinCommitTime,
-    #     _maxCommitTime = newMaxCommitTime).run(
-    #         sender = managerAddr,
-    #         valid = True)
-    # scenario.verify(domainManager.data.minCommitTime == newMinCommitTime)
-    # scenario.verify(domainManager.data.maxCommitTime == newMaxCommitTime)
-
-    # scenario.h3("[FAILED-setCommitmentAges] Invalid permissions")
-    # scenario += domainManager.setCommitmentAges(
-    #     _minCommitTime = newMinCommitTime,
-    #     _maxCommitTime = newMaxCommitTime).run(
-    #         sender = ownerAddr,
-    #         valid = False)
+    deleteName_Succcess()
+    deleteName_Failure_UnregisteredDomain()
+    deleteName_Failure_InvalidPermissions()
 
     # scenario.h2("[ENTRYPOINT] sendNameInfo")
-    # scenario.h3("[SUCCESS-sendNameInfo] Invoking MockResolver to check proper return value")
-    # mockResolver = MockResolver(domainManager.address)
-    # scenario += mockResolver
-    # scenario += mockResolver.getNameInfoFromRegistry(
-    #     name = changeName).run(
-    #         sender = ownerAddr,
-    #         valid = True)
-    # scenario.verify(mockResolver.data.receivedNames[changeName] == domainManager.data.nameRegistry[changeName])
+    sendNameInfo_Success()
+    sendNameInfo_Failure_NameDoesNotExist()
 
-    # # This works, just not sure how to mark a failed condition in the sendNameInfo (i.e. secondary) tx
-    # # scenario.h3("[FAILED-sendNameInfo] Name does not exist")
-    # # mockResolver = MockResolver(domainManager.address)
-    # # scenario += mockResolver
-    # # scenario += mockResolver.getNameInfoFromRegistry(
-    # #     name = exactName).run(
-    # #         sender = ownerAddr,
-    # #         valid = True)
-    # # scenario.verify(~(mockResolver.data.receivedNames.contains(exactName)))
+    # scenario.h2("[ENTRYPOINT] sendAddressInfo")
+    sendAddressInfo_Success()
+    sendAddressInfo_Failure_AddressDoesNotExist()
 
-    # scenario.h3("[SUCCESS-sendAddressInfo] Invoking MockResolver to check proper return value")
-    # mockResolver = MockResolver(domainManager.address)
-    # scenario += mockResolver
-    # scenario += mockResolver.getAddressInfoFromRegistry(
-    #     addr = resolverAddr.address).run(
-    #         sender = ownerAddr,
-    #         valid = True)
-    # scenario.verify(mockResolver.data.receivedNames[changeName] == domainManager.data.nameRegistry[changeName])
+    # # scenario.h2("[ENTRYPOINT] setCommitmentAges")
+    # setCommitmentAges_Success()
+    # setCommitmentAges_Failure_InvalidPermissions()
+    
+    # # scenario.h2("[ENTRYPOINT] default")
+    # default_Failure()
 
-    # # This works, just not sure how to mark a failed condition in the sendNameInfo (i.e. secondary) tx
-    # # scenario.h3("[FAILED-sendAddressInfo] Address does not exist")
-    # # mockResolver = MockResolver(domainManager.address)
-    # # scenario += mockResolver
-    # # scenario += mockResolver.getAddressInfoFromRegistry(
-    # #     addr = ownerAddr.address).run(
-    # #         sender = ownerAddr,
-    # #         valid = True)
+    # # scenario.h2("[ENTRYPOINT] setDelegate")
+    # setDelegate_Success()
+    # setDelegate_Failure_InvalidPermissions()
+    
+    # # scenario.h2("[ENTRYPOINT] withdrawFunds")
+    # withdrawFunds_Success()
+    # withdrawFunds_Failure_InvalidPermissions()
+
+    # # scenario.h2("[ENTRYPOINT] config")
+    # config_Success()
+    # config_Failure_InvalidPermissions()
+
