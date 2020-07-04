@@ -2,10 +2,10 @@
 import smartpy as sp
 
 class TNSDomainManager(sp.Contract):
-    def __init__(self, _manager, _interval, _price, _maxDuration, _minCommitTime, _maxCommitTime):
+    def __init__(self, _manager, _price, _interval, _maxDuration, _minCommitTime, _maxCommitTime):
         self.init(domainManager = _manager,
-            interval = sp.int(_interval),
             price = sp.mutez(_price),
+            interval = sp.int(_interval),
             maxDuration = sp.int(_maxDuration),
             
             commitments = sp.big_map(
@@ -28,6 +28,34 @@ class TNSDomainManager(sp.Contract):
                 tvalue = sp.TString))
 
 
+    @sp.entry_point
+    def default(self):
+        sp.failwith("Contract does not accept XTZ transfers")
+
+
+    @sp.entry_point
+    def setDelegate(self, params):
+        sp.verify(sp.sender == self.data.domainManager, "Invalid permissions")
+        sp.set_delegate(params.baker)
+
+
+    @sp.entry_point
+    def withdrawFunds(self, params):
+        sp.verify(sp.sender == self.data.domainManager, "Invalid permissions")
+        sp.send(self.data.domainManager, sp.balance)
+
+
+    @sp.entry_point
+    def config(self, params):
+        sp.verify(sp.sender == self.data.domainManager, "Invalid permissions")
+        sp.if params.price.is_some():
+            self.data.price = params.price
+        sp.if params.interval.is_some():
+            self.data.interval = params.interval
+        sp.if params.maxDuration.is_some():
+            self.data.maxDuration = params.maxDuration
+
+
     # @param commitment The commitment of the name that's being committed
     # User must call this entrypoint to commit to a name before registering it to avoid front-running.
     @sp.entry_point
@@ -44,6 +72,7 @@ class TNSDomainManager(sp.Contract):
     # Registers the name for duration with the provided resolver, consuming the previously made commitment
     @sp.entry_point
     def registerName(self, params):
+        sp.set_type(params.nonce, sp.TInt)
         self.validateName(params.name)
         self.validateAvailable(params.name)
         self.validateDuration(params.duration)
@@ -412,7 +441,7 @@ def test():
     regPrice = price*10 # pay for 10 intervals
 
     # init contract
-    domainManager = TNSDomainManager(managerAddr.address, interval, price, maxDuration, minCommitTime, maxCommitTime)
+    domainManager = TNSDomainManager(managerAddr.address, price, interval, maxDuration, minCommitTime, maxCommitTime)
     scenario += domainManager
 
     # test entry points
@@ -741,6 +770,3 @@ def test():
     #     addr = ownerAddr.address).run(
     #         sender = ownerAddr,
     #         valid = True)
-
-    
-

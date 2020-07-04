@@ -634,6 +634,7 @@ def registerName_Failure_MinCommitTimeNotElapsed():
             amount = sp.mutez(cost),
             now = sp.timestamp(env.time(env.tnsParams.minCommitTime - 1)),
             valid = False)
+<<<<<<< Updated upstream
 
 
 def registerName_Failure_CommitmentExpired():
@@ -971,7 +972,6 @@ def updateRegistrationPeriod_Failure_InsufficientPayment():
             amount = sp.mutez(cost2 - 1),
             now = sp.timestamp(env.time(1)),
             valid = False)
-
 
 
 @sp.add_test("TNSDomainManagerTest")
