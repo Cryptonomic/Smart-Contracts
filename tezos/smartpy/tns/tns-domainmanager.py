@@ -28,23 +28,33 @@ class TNSDomainManager(sp.Contract):
                 tvalue = sp.TString))
 
 
+    # automatically fail any plain XTZ transfers
     @sp.entry_point
     def default(self):
         sp.failwith("Contract does not accept XTZ transfers")
 
 
+    # @param baker The new baker to delegate to
     @sp.entry_point
     def setDelegate(self, params):
         sp.verify(sp.sender == self.data.domainManager, "Invalid permissions")
         sp.set_delegate(params.baker)
 
 
+    # @param dest Destination to withdraw funds to
+    # withdraw the funds to the target destination
     @sp.entry_point
     def withdrawFunds(self, params):
         sp.verify(sp.sender == self.data.domainManager, "Invalid permissions")
-        sp.send(self.data.domainManager, sp.balance)
+        sp.send(params.dest, sp.balance)
 
-
+    
+    # @param price
+    # @param interval
+    # @param maxDuration
+    # @param minCommitTime
+    # @param maxCommitTime
+    # Optionally provide new config parameters
     @sp.entry_point
     def config(self, params):
         sp.verify(sp.sender == self.data.domainManager, "Invalid permissions")
@@ -54,6 +64,10 @@ class TNSDomainManager(sp.Contract):
             self.data.interval = params.interval
         sp.if params.maxDuration.is_some():
             self.data.maxDuration = params.maxDuration
+        sp.if params.minCommitTime.is_some():
+            self.data.minCommitTime = params.minCommitTime
+        sp.if params.maxCommitTime.is_some():
+            self.data.maxCommitTime = params.maxCommitTime
 
 
     # @param commitment The commitment of the name that's being committed
@@ -139,15 +153,6 @@ class TNSDomainManager(sp.Contract):
        self.validateUpdate(sp.sender, params.name)
        del self.data.addressRegistry[self.data.nameRegistry[params.name].resolver]
        del self.data.nameRegistry[params.name]
-
-
-    # @param _minCommitTime New minCommitTime value
-    # @param _maxCommitTime New maxCommitTime value
-    @sp.entry_point
-    def setCommitmentAges(self, params):
-        sp.verify(sp.sender == self.data.domainManager, message = "Invalid permissions")
-        self.data.minCommitTime = params._minCommitTime
-        self.data.maxCommitTime = params._maxCommitTime
 
 
     # @param name The name to query from the registry
