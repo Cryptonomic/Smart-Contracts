@@ -21,7 +21,7 @@ class ServiceRegistry(sp.Contract):
         sp.set_type(params.subscriber, sp.TOption(sp.TAddress))
         sp.set_type(params.recovery, sp.TOption(sp.TAddress))
 
-        sp.verify(self.data.isActive, message = "Registry is not active")
+        sp.verify(self.data.isActive, message = "Registry inactive")
         sp.verify(self.data.serviceMap.contains(params.service), message = "Invalid service")
 
         sp.verify(sp.amount >= self.data.serviceMap[params.service].fee, message = "Payment fee too low")
@@ -39,8 +39,19 @@ class ServiceRegistry(sp.Contract):
                                                              recovery = params.recovery)
 
     @sp.entry_point
+    def registerRecovery(self, params):
+        sp.set_type(params.recovery, sp.TOption(sp.TAddress))
+
+        sp.verify(self.data.isActive, message = "Registry inactive")
+        sp.verify(self.data.registry.contains(sp.sender), message = "Subscriber not found")
+
+        self.data.registry[sp.sender] = sp.record(service = self.data.registry[sp.sender].service,
+                                                  expiration = self.data.registry[sp.sender].expiration,
+                                                  recovery = params.recovery)
+
+    @sp.entry_point
     def assumeSubscription(self, params):
-        sp.verify(self.data.isActive, message = "Registry is not active")
+        sp.verify(self.data.isActive, message = "Registry inactive")
         sp.verify(self.data.registry.contains(params.subscriber), message = "Subscriber not found")
         sp.verify(sp.sender != params.subscriber, message = "Invalid recovery")
 
@@ -48,7 +59,7 @@ class ServiceRegistry(sp.Contract):
         sp.if (self.data.registry[params.subscriber].recovery.is_some()):
             recovery.value = self.data.registry[params.subscriber].recovery.open_some()
         sp.else:
-            sp.failwith("Recovery impossible")
+            sp.failwith("Recovery not set")
 
         sp.verify(sp.sender == recovery.value, message = "Recovery failed")
 
