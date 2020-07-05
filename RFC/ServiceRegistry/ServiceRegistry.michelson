@@ -1,0 +1,604 @@
+# ServiceRegistry generated at smartpy.io/dev on 2020/Jul/04
+# Post-processed with s/\s+#[\s\S]+$// and s/\n{2,}/\n
+
+parameter (or (or (pair %assumeSubscription (option %recovery address) (address %subscriber)) (or (pair %configure (bool %isActive) (map %serviceMap nat (pair (pair (mutez %fee) (nat %interval)) (pair (nat %maxDuration) (string %name))))) (pair %registerName (int %duration) (pair (string %name) (address %registry))))) (or (or (option %setDelegate key_hash) (address %setManager)) (or (pair %subscribe (option %recovery address) (pair (nat %service) (option %subscriber address))) (unit %withdraw))));
+storage   (pair (pair (address %admin) (bool %isActive)) (pair (big_map %registry address (pair (timestamp %expiration) (pair (option %recovery address) (nat %service)))) (map %serviceMap nat (pair (pair (mutez %fee) (nat %interval)) (pair (nat %maxDuration) (string %name))))));
+code
+  {
+    DUP;
+    CDR;
+    SWAP;
+    CAR;
+    IF_LEFT
+      {
+        IF_LEFT
+          {
+            SWAP;
+            DUP;
+            DUG 2;
+            CADR;
+            IF
+              {}
+              {
+                PUSH string "Registry is not active";
+                FAILWITH;
+              };
+            SWAP;
+            DUP;
+            DUG 2;
+            CDAR;
+            SWAP;
+            DUP;
+            DUG 2;
+            CDR;
+            MEM;
+            IF
+              {}
+              {
+                PUSH string "Subscriber not found";
+                FAILWITH;
+              };
+            DUP;
+            CDR;
+            SENDER;
+            COMPARE;
+            NEQ;
+            IF
+              {}
+              {
+                PUSH string "Invalid recovery";
+                FAILWITH;
+              };
+            DUP;
+            CDR;
+            DIG 2;
+            DUP;
+            DUG 3;
+            CDAR;
+            DIG 2;
+            DUP;
+            DUG 3;
+            CDR;
+            GET;
+            IF_SOME
+              {
+              }
+              {
+                PUSH string "Get-item:37";
+                FAILWITH;
+              };
+            CDAR;
+            IF_SOME
+              {
+                DROP;
+                PUSH bool True;
+              }
+              {
+                PUSH bool False;
+              };
+            IF
+              {
+                DROP;
+                SWAP;
+                DUP;
+                DUG 2;
+                CDAR;
+                SWAP;
+                DUP;
+                DUG 2;
+                CDR;
+                GET;
+                IF_SOME
+                  {
+                  }
+                  {
+                    PUSH string "Get-item:37";
+                    FAILWITH;
+                  };
+                CDAR;
+                IF_SOME
+                  {}
+                  {
+                    PUSH unit Unit;
+                    FAILWITH;
+                  };
+              }
+              {
+                PUSH string "Recovery impossible";
+                FAILWITH;
+              };
+            DUP;
+            SENDER;
+            COMPARE;
+            EQ;
+            IF
+              {}
+              {
+                PUSH string "Recovery failed";
+                FAILWITH;
+              };
+            DIG 2;
+            DUP;
+            DUG 3;
+            DUP;
+            CAR;
+            SWAP;
+            CDR;
+            DUP;
+            CDR;
+            SWAP;
+            CAR;
+            DIG 5;
+            DUP;
+            DUG 6;
+            CDAR;
+            DIG 5;
+            DUP;
+            DUG 6;
+            CDR;
+            GET;
+            IF_SOME
+              {
+              }
+              {
+                PUSH string "Get-item:37";
+                FAILWITH;
+              };
+            CDDR;
+            DIG 5;
+            DUP;
+            DUG 6;
+            CAR;
+            PAIR %recovery %service;
+            DIG 6;
+            CDAR;
+            DIG 6;
+            DUP;
+            DUG 7;
+            CDR;
+            GET;
+            IF_SOME
+              {
+              }
+              {
+                PUSH string "Get-item:37";
+                FAILWITH;
+              };
+            CAR;
+            PAIR %expiration;
+            SOME;
+            DIG 4;
+            UPDATE;
+            PAIR;
+            SWAP;
+            PAIR;
+            SWAP;
+            SWAP;
+            DUP;
+            CAR;
+            SWAP;
+            CDR;
+            DUP;
+            CDR;
+            SWAP;
+            CAR;
+            NONE (pair (timestamp %expiration) (pair (option %recovery address) (nat %service)));
+            DIG 4;
+            CDR;
+            UPDATE;
+            PAIR;
+            SWAP;
+            PAIR;
+            NIL operation;
+          }
+          {
+            IF_LEFT
+              {
+                SWAP;
+                DUP;
+                DUG 2;
+                CAAR;
+                SENDER;
+                COMPARE;
+                EQ;
+                IF
+                  {}
+                  {
+                    PUSH string "Privileged operation";
+                    FAILWITH;
+                  };
+                SWAP;
+                DUP;
+                CDR;
+                SWAP;
+                CAAR;
+                DIG 2;
+                DUP;
+                DUG 3;
+                CAR;
+                SWAP;
+                PAIR;
+                PAIR;
+                SWAP;
+                SWAP;
+                DUP;
+                CAR;
+                SWAP;
+                CDAR;
+                DIG 2;
+                CDR;
+                SWAP;
+                PAIR;
+                SWAP;
+                PAIR;
+                NIL operation;
+              }
+              {
+                SWAP;
+                DUP;
+                DUG 2;
+                CAAR;
+                SENDER;
+                COMPARE;
+                EQ;
+                IF
+                  {}
+                  {
+                    PUSH string "Privileged operation";
+                    FAILWITH;
+                  };
+                DUP;
+                CDDR;
+                CONTRACT %registerName (pair (int %duration) (pair (string %name) (address %resolver)));
+                NIL operation;
+                SWAP;
+                IF_SOME
+                  {}
+                  {
+                    PUSH unit Unit;
+                    FAILWITH;
+                  };
+                AMOUNT;
+                SELF;
+                ADDRESS;
+                DIG 4;
+                DUP;
+                DUG 5;
+                CDAR;
+                PAIR %name %resolver;
+                DIG 4;
+                CAR;
+                PAIR %duration;
+                TRANSFER_TOKENS;
+                CONS;
+              };
+          };
+      }
+      {
+        IF_LEFT
+          {
+            IF_LEFT
+              {
+                SWAP;
+                DUP;
+                DUG 2;
+                CAAR;
+                SENDER;
+                COMPARE;
+                EQ;
+                IF
+                  {}
+                  {
+                    PUSH string "Privileged operation";
+                    FAILWITH;
+                  };
+                SET_DELEGATE;
+                NIL operation;
+                SWAP;
+                CONS;
+              }
+              {
+                SWAP;
+                DUP;
+                DUG 2;
+                CAAR;
+                SENDER;
+                COMPARE;
+                EQ;
+                IF
+                  {}
+                  {
+                    PUSH string "Privileged operation";
+                    FAILWITH;
+                  };
+                SWAP;
+                DUP;
+                CDR;
+                SWAP;
+                CADR;
+                DIG 2;
+                PAIR;
+                PAIR;
+                NIL operation;
+              };
+          }
+          {
+            IF_LEFT
+              {
+                SWAP;
+                DUP;
+                DUG 2;
+                CADR;
+                IF
+                  {}
+                  {
+                    PUSH string "Registry is not active";
+                    FAILWITH;
+                  };
+                SWAP;
+                DUP;
+                DUG 2;
+                CDDR;
+                SWAP;
+                DUP;
+                DUG 2;
+                CDAR;
+                MEM;
+                IF
+                  {}
+                  {
+                    PUSH string "Invalid service";
+                    FAILWITH;
+                  };
+                SWAP;
+                DUP;
+                DUG 2;
+                CDDR;
+                SWAP;
+                DUP;
+                DUG 2;
+                CDAR;
+                GET;
+                IF_SOME
+                  {
+                  }
+                  {
+                    PUSH string "Get-item:20";
+                    FAILWITH;
+                  };
+                CAAR;
+                AMOUNT;
+                COMPARE;
+                GE;
+                IF
+                  {}
+                  {
+                    PUSH string "Payment fee too low";
+                    FAILWITH;
+                  };
+                SENDER;
+                SWAP;
+                DUP;
+                DUG 2;
+                CDDR;
+                IF_SOME
+                  {
+                    DROP;
+                    PUSH bool True;
+                  }
+                  {
+                    PUSH bool False;
+                  };
+                IF
+                  {
+                    DROP;
+                    DUP;
+                    CDDR;
+                    IF_SOME
+                      {}
+                      {
+                        PUSH unit Unit;
+                        FAILWITH;
+                      };
+                  }
+                  {};
+                DIG 2;
+                DUP;
+                DUG 3;
+                CDDR;
+                DIG 2;
+                DUP;
+                DUG 3;
+                CDAR;
+                GET;
+                IF_SOME
+                  {
+                  }
+                  {
+                    PUSH string "Get-item:20";
+                    FAILWITH;
+                  };
+                CAAR;
+                AMOUNT;
+                EDIV;
+                IF_SOME
+                  {
+                    DROP;
+                    PUSH bool True;
+                  }
+                  {
+                    PUSH bool False;
+                  };
+                IF
+                  {
+                    DIG 2;
+                    DUP;
+                    DUG 3;
+                    CDDR;
+                    DIG 2;
+                    DUP;
+                    DUG 3;
+                    CDAR;
+                    GET;
+                    IF_SOME
+                      {
+                      }
+                      {
+                        PUSH string "Get-item:20";
+                        FAILWITH;
+                      };
+                    CDAR;
+                    DIG 3;
+                    DUP;
+                    DUG 4;
+                    CDDR;
+                    DIG 3;
+                    DUP;
+                    DUG 4;
+                    CDAR;
+                    GET;
+                    IF_SOME
+                      {
+                      }
+                      {
+                        PUSH string "Get-item:20";
+                        FAILWITH;
+                      };
+                    CAAR;
+                    AMOUNT;
+                    EDIV;
+                    IF_SOME
+                      {}
+                      {
+                        PUSH unit Unit;
+                        FAILWITH;
+                      };
+                    CAR;
+                    COMPARE;
+                    LE;
+                    IF
+                      {}
+                      {
+                        PUSH string "Invalid total duration";
+                        FAILWITH;
+                      };
+                    DIG 2;
+                    DUP;
+                    DUG 3;
+                    DUP;
+                    CAR;
+                    SWAP;
+                    CDR;
+                    DUP;
+                    CDR;
+                    SWAP;
+                    CAR;
+                    DIG 4;
+                    DUP;
+                    DUG 5;
+                    CDAR;
+                    DIG 5;
+                    DUP;
+                    DUG 6;
+                    CAR;
+                    PAIR %recovery %service;
+                    NOW;
+                    PUSH int 60;
+                    DUP;
+                    PUSH int 24;
+                    DIG 10;
+                    DUP;
+                    DUG 11;
+                    CDDR;
+                    DIG 10;
+                    DUP;
+                    DUG 11;
+                    CDAR;
+                    GET;
+                    IF_SOME
+                      {
+                      }
+                      {
+                        PUSH string "Get-item:20";
+                        FAILWITH;
+                      };
+                    CADR;
+                    DIG 11;
+                    CDDR;
+                    DIG 11;
+                    DUP;
+                    DUG 12;
+                    CDAR;
+                    GET;
+                    IF_SOME
+                      {
+                      }
+                      {
+                        PUSH string "Get-item:20";
+                        FAILWITH;
+                      };
+                    CAAR;
+                    AMOUNT;
+                    EDIV;
+                    IF_SOME
+                      {}
+                      {
+                        PUSH unit Unit;
+                        FAILWITH;
+                      };
+                    CAR;
+                    MUL;
+                    INT;
+                    MUL;
+                    MUL;
+                    MUL;
+                    ADD;
+                    PAIR %expiration;
+                    SOME;
+                    DIG 4;
+                    DUP;
+                    DUG 5;
+                    UPDATE;
+                    PAIR;
+                    SWAP;
+                    PAIR;
+                    DUG 2;
+                  }
+                  {};
+                DROP 2;
+                NIL operation;
+              }
+              {
+                SWAP;
+                DUP;
+                DUG 2;
+                CAAR;
+                SENDER;
+                COMPARE;
+                EQ;
+                IF
+                  {}
+                  {
+                    PUSH string "Privileged operation";
+                    FAILWITH;
+                  };
+                NIL operation;
+                SENDER;
+                CONTRACT unit;
+                IF_SOME
+                  {}
+                  {
+                    PUSH unit Unit;
+                    FAILWITH;
+                  };
+                BALANCE;
+                DIG 3;
+                DROP;
+                PUSH unit Unit;
+                TRANSFER_TOKENS;
+                CONS;
+              };
+          };
+      };
+    PAIR;
+  }
