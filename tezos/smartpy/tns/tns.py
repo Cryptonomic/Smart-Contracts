@@ -750,7 +750,6 @@ def updateRegistrationPeriod_Success():
     cost1, cost2 = env.tnsParams["_price"] * periods1, env.tnsParams["_price"] * periods2
 
     # execute tx
-    # register name with original resolver
     env.scenario += env.tns.commit(
         commitment = commit).run(
             sender = owner, 
@@ -790,7 +789,6 @@ def updateRegistrationPeriod_Failure_NewPeriodTooLong():
     cost1, cost2 = env.tnsParams["_price"] * periods1, env.tnsParams["_price"] * periods2
 
     # execute tx
-    # register name with original resolver
     env.scenario += env.tns.commit(
         commitment = commit).run(
             sender = owner, 
@@ -827,7 +825,6 @@ def updateRegistrationPeriod_Failure_InsufficientPayment():
     cost1, cost2 = env.tnsParams["_price"] * periods1, env.tnsParams["_price"] * periods2
 
     # execute tx
-    # register name with original resolver
     env.scenario += env.tns.commit(
         commitment = commit).run(
             sender = owner, 
@@ -866,7 +863,7 @@ def updateRegistrationPeriod_Failure_InsufficientPayment():
 #     cost = env.tnsParams["_price"] * periods
 
 #     # execute tx
-#     # register name with original resolver
+
 #     env.scenario += env.tns.commit(
 #         commitment = commit).run(
 #             sender = owner1, 
@@ -943,7 +940,6 @@ def deleteName_Succcess():
     cost = env.tnsParams["_price"] * periods
 
     # execute tx
-    # register name with original resolver
     env.scenario += env.tns.commit(
         commitment = commit).run(
             sender = owner, 
@@ -996,7 +992,6 @@ def deleteName_Failure_InvalidPermissions():
     cost = env.tnsParams["_price"] * periods
 
     # execute tx
-    # register name with original resolver
     env.scenario += env.tns.commit(
         commitment = commit).run(
             sender = owner1, 
@@ -1109,7 +1104,7 @@ def sendAddressInfo_Success():
     env.scenario += mockResolver
     # invoke mockResolver
     env.scenario += mockResolver.getAddressInfoFromRegistry(
-        addr = resolver.address).run(
+        addr = owner.address).run(
             sender = owner,
             valid = True)
     # verify changes to mockResolver
