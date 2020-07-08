@@ -851,7 +851,259 @@ def updateRegistrationPeriod_Failure_InsufficientPayment():
             valid = False)
 
 
-@sp.add_test(name = )
+@sp.add_test(name = "updateOwnerInit_Success")
+def updateOwnerInit_Success():
+    # init env
+    env = Env("[updateOwnerInit-SUCCESS]")
+
+    name = env.names()
+    owners = generateAccounts("owner")
+    owner1, owner2 = owners(), owners()
+    nonce1, nonce2 = env.nonce(), env.nonce()
+    nameCommit = makeCommitment(name, owner1.address, nonce1)
+    updateCommit = makeCommitment(name, owner2.address, nonce2)
+    periods = 10
+    cost = env.tnsParams["_price"] * periods
+
+    # execute tx
+    # commit and register name
+    env.scenario += env.tns.commit(
+        commitment = nameCommit).run(
+            sender = owner1, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name, 
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce1).run(
+            sender = owner1, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # commit to new owner
+    env.scenario += env.tns.updateOwnerInit(
+        name = name,
+        commitment = updateCommit).run(
+            sender = owner1,
+            now = sp.timestamp(env.time(1)),
+            valid = True)
+    # verify commitment exists
+    env.scenario.verify(env.tns.data.commitments[updateCommit] == sp.timestamp(env.time()))
+
+
+@sp.add_test(name = "updateOwnerInit_Failure_InvalidPermissions")
+def updateOwnerInit_Success():
+        # init env
+    env = Env("[updateOwnerInit-FAILED] Invalid permissions")
+
+    name = env.names()
+    owners = generateAccounts("owner")
+    owner1, owner2 = owners(), owners()
+    nonce1, nonce2 = env.nonce(), env.nonce()
+    nameCommit = makeCommitment(name, owner1.address, nonce1)
+    updateCommit = makeCommitment(name, owner2.address, nonce2)
+    periods = 10
+    cost = env.tnsParams["_price"] * periods
+
+    # execute tx
+    # commit and register name
+    env.scenario += env.tns.commit(
+        commitment = nameCommit).run(
+            sender = owner1, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name, 
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce1).run(
+            sender = owner1, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # commit to new owner
+    env.scenario += env.tns.updateOwnerInit(
+        name = name,
+        commitment = updateCommit).run(
+            sender = owner2,
+            now = sp.timestamp(env.time(1)),
+            valid = False)
+
+
+@sp.add_test(name = "updateOwnerComplete_Success")
+def updateOwnerComplete_Success():
+    # init env
+    env = Env("[updateOwnerComplete-SUCCESS]")
+
+    name = env.names()
+    owners = generateAccounts("owner")
+    owner1, owner2 = owners(), owners()
+    nonce1, nonce2 = env.nonce(), env.nonce()
+    nameCommit = makeCommitment(name, owner1.address, nonce1)
+    updateCommit = makeCommitment(name, owner2.address, nonce2)
+    periods = 10
+    cost = env.tnsParams["_price"] * periods
+
+    # execute tx
+    # commit and register name
+    env.scenario += env.tns.commit(
+        commitment = nameCommit).run(
+            sender = owner1, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name, 
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce1).run(
+            sender = owner1, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # commit to new owner
+    env.scenario += env.tns.updateOwnerInit(
+        name = name,
+        commitment = updateCommit).run(
+            sender = owner1,
+            now = sp.timestamp(env.time(1)),
+            valid = True)
+    # consume commitment
+    env.scenario += env.tns.updateOwnerComplete(
+        name = name,
+        nonce = nonce2).run(
+            sender = owner2,
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # verify name update
+    env.scenario.verify(env.tns.data.nameRegistry[name].owner == owner2.address)
+    env.scenario.verify(env.tns.data.addressRegistry[owner2.address] == name)
+
+
+@sp.add_test(name = "updateOwnerComplete_Failure_CommitmentDoesNotExist")
+def updateOwnerComplete_Failure_CommitmentDoesNotExist():
+    # init env
+    env = Env("[updateOwnerComplete-FAILED] Commitment does not exist")
+
+    name = env.names()
+    owners = generateAccounts("owner")
+    owner1, owner2 = owners(), owners()
+    nonce1, nonce2 = env.nonce(), env.nonce()
+    nameCommit = makeCommitment(name, owner1.address, nonce1)
+    updateCommit = makeCommitment(name, owner2.address, nonce2)
+    periods = 10
+    cost = env.tnsParams["_price"] * periods
+
+    # execute tx
+    # commit and register name
+    env.scenario += env.tns.commit(
+        commitment = nameCommit).run(
+            sender = owner1, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name, 
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce1).run(
+            sender = owner1, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # try to consume commitment
+    env.scenario += env.tns.updateOwnerComplete(
+        name = name,
+        nonce = nonce2).run(
+            sender = owner2,
+            now = sp.timestamp(env.time(1)),
+            valid = False)
+
+
+@sp.add_test(name = "updateOwnerComplete_Failure_InvalidPermissions")
+def updateOwnerComplete_Failure_InvalidPermissions():
+    # init env
+    env = Env("[updateOwnerComplete-FAILED] Invalid permissions")
+
+    name = env.names()
+    owners = generateAccounts("owner")
+    owner1, owner2, owner3 = owners(), owners(), owners()
+    nonce1, nonce2 = env.nonce(), env.nonce()
+    nameCommit = makeCommitment(name, owner1.address, nonce1)
+    updateCommit = makeCommitment(name, owner2.address, nonce2)
+    periods = 10
+    cost = env.tnsParams["_price"] * periods
+
+    # execute tx
+    # commit and register name
+    env.scenario += env.tns.commit(
+        commitment = nameCommit).run(
+            sender = owner1, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name, 
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce1).run(
+            sender = owner1, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # commit to new owner
+    env.scenario += env.tns.updateOwnerInit(
+        name = name,
+        commitment = updateCommit).run(
+            sender = owner1,
+            now = sp.timestamp(env.time(1)),
+            valid = True)
+    # try to consume commitment
+    env.scenario += env.tns.updateOwnerComplete(
+        name = name,
+        nonce = nonce2).run(
+            sender = owner3,
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = False)
+
+
+@sp.add_test(name = "updateOwnerComplete_Failure_CommitmentExpired")
+def updateOwnerComplete_Failure_CommitmentExpired():
+    # init env
+    env = Env("[updateOwnerComplete-FAILED] Commitment expired")
+
+    name = env.names()
+    owners = generateAccounts("owner")
+    owner1, owner2 = owners(), owners()
+    nonce1, nonce2 = env.nonce(), env.nonce()
+    nameCommit = makeCommitment(name, owner1.address, nonce1)
+    updateCommit = makeCommitment(name, owner2.address, nonce2)
+    periods = 10
+    cost = env.tnsParams["_price"] * periods
+
+    # execute tx
+    # commit and register name
+    env.scenario += env.tns.commit(
+        commitment = nameCommit).run(
+            sender = owner1, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name, 
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce1).run(
+            sender = owner1, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # commit to new owner
+    env.scenario += env.tns.updateOwnerInit(
+        name = name,
+        commitment = updateCommit).run(
+            sender = owner1,
+            now = sp.timestamp(env.time(1)),
+            valid = True)
+    # consume commitment
+    env.scenario += env.tns.updateOwnerComplete(
+        name = name,
+        nonce = nonce2).run(
+            sender = owner2,
+            now = sp.timestamp(env.time(env.tnsParams["_maxCommitTime"] + 1)),
+            valid = False)
+
 
 @sp.add_test(name = "deleteName_Succcess")
 def deleteName_Succcess():
