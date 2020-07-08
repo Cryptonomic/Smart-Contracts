@@ -97,9 +97,12 @@ class TNSDomainManager(sp.Contract):
             registeredAt = sp.now,
             registrationPeriod = params.duration,
             modified = False)
-        self.data.addressRegistry[sp.sender] = params.name
+        # only update reverse regitry if no other name is associated with sender (i.e. only for
+        # the first name)
+        sp.if ~self.data.addressRegistry.contains(sp.sender):
+            self.data.addressRegistry[sp.sender] = params.name
 
-        # refund change
+        # refund change 
         sp.if cost.value < sp.amount:
             sp.send(sp.sender, sp.amount - cost.value)
 
@@ -156,6 +159,15 @@ class TNSDomainManager(sp.Contract):
        self.validateUpdate(sp.sender, params.name)
        del self.data.addressRegistry[self.data.nameRegistry[params.name].owner]
        del self.data.nameRegistry[params.name]
+
+
+    # @param name
+    # One address may be the owner of multiple registered names, but the address mapping
+    # (reverse lookup map) is automatically 
+    @sp.entry_point
+    def setPrimaryName(self, params):
+        self.validateUpdate(sp.sender, params.name)
+        self.data.addressRegistry[sp.sender] = params.name
 
 
     # @param name The name to query from the registry
@@ -491,6 +503,67 @@ def registerName_Success_ChangeRefunded():
     # verify changes
     env.scenario.verify(env.tns.data.addressRegistry[owner.address] == name)
     env.scenario.verify(env.tns.balance == sp.mutez(cost))
+
+
+@sp.add_test(name = "registerName_Success_MultipleNames")
+def registerName_Success_MultipleNames():
+    # init env
+    env = Env("[registerName-SUCCESS] Registering multiple names to one owner, and making sure reverse registry is set only for the first")
+
+    name1, name2 = env.names(), env.names()
+    owner = generateAccounts("owner")()
+    nonce1, nonce2 = env.nonce(), env.nonce()
+    commit1, commit2 = makeCommitment(name1, owner.address, nonce1), makeCommitment(name2, owner.address, nonce2)
+    periods = 10
+    cost = env.tnsParams["_price"] * periods
+
+    # execute tx
+    # register first name
+    env.scenario += env.tns.commit(
+        commitment = commit1).run(
+            sender = owner, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name1, 
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce1).run(
+            sender = owner, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # verify registration    
+    env.scenario.verify(env.tns.data.nameRegistry[name1] ==
+            sp.record(name = name1,
+            owner = owner.address,
+            registeredAt = sp.timestamp(env.time()),
+            registrationPeriod = env.tnsParams["_interval"] * periods,
+            modified = False))
+    env.scenario.verify(env.tns.data.addressRegistry[owner.address] == name1)
+    env.scenario.verify(env.tns.balance == sp.mutez(cost))
+    # register second name
+    env.scenario += env.tns.commit(
+        commitment = commit2).run(
+            sender = owner, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name2, 
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce2).run(
+            sender = owner, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+            # verify registration    
+    env.scenario.verify(env.tns.data.nameRegistry[name2] ==
+            sp.record(name = name2,
+            owner = owner.address,
+            registeredAt = sp.timestamp(env.time()),
+            registrationPeriod = env.tnsParams["_interval"] * periods,
+            modified = False))
+    env.scenario.verify(env.tns.data.addressRegistry[owner.address] == name1)
+    env.scenario.verify(env.tns.balance == sp.mutez(2 * cost))
 
 
 @sp.add_test(name = "registerName_Failure_NoCommitment")
@@ -1187,6 +1260,191 @@ def deleteName_Failure_InvalidPermissions():
     env.scenario += env.tns.deleteName(
         name = name).run(
             sender = owner2,
+            valid = False)
+
+
+@sp.add_test(name = "setPrimaryName_Success")
+def setPrimaryName_Success():
+    # init env
+    env = Env("[setPrimaryName-SUCCESS]")
+
+    name1, name2 = env.names(), env.names()
+    owner = generateAccounts("owner")()
+    nonce1, nonce2 = env.nonce(), env.nonce()
+    commit1, commit2 = makeCommitment(name1, owner.address, nonce1), makeCommitment(name2, owner.address, nonce2)
+    periods = 10
+    cost = env.tnsParams["_price"] * periods
+
+    # execute tx
+    # register first name
+    env.scenario += env.tns.commit(
+        commitment = commit1).run(
+            sender = owner, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name1, 
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce1).run(
+            sender = owner, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # register second name
+    env.scenario += env.tns.commit(
+        commitment = commit2).run(
+            sender = owner, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name2, 
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce2).run(
+            sender = owner, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # set name2 to be primary name
+    env.scenario += env.tns.setPrimaryName(
+        name = name2).run(
+            sender = owner,
+            now = sp.timestamp(env.time(1)),
+            valid = True)
+    # verify changes
+    env.scenario.verify(env.tns.data.addressRegistry[owner.address] == name2)
+
+
+@sp.add_test(name = "setPrimaryName_Failure_InvalidPermissions")
+def setPrimaryName_Failure_InvalidPermissions():
+    # init env
+    env = Env("[setPrimaryName-Failed] Invalid permissions")
+
+    name1, name2 = env.names(), env.names()
+    owners = generateAccounts("owner")
+    owner1, owner2 = owners(), owners()
+    nonce1, nonce2 = env.nonce(), env.nonce()
+    commit1, commit2 = makeCommitment(name1, owner1.address, nonce1), makeCommitment(name2, owner1.address, nonce2)
+    periods = 10
+    cost = env.tnsParams["_price"] * periods
+
+    # execute tx
+    # register first name
+    env.scenario += env.tns.commit(
+        commitment = commit1).run(
+            sender = owner1, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name1, 
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce1).run(
+            sender = owner1, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # register second name
+    env.scenario += env.tns.commit(
+        commitment = commit2).run(
+            sender = owner1, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name2, 
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce2).run(
+            sender = owner1, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # owner2 tries to set name2 to be primary name
+    env.scenario += env.tns.setPrimaryName(
+        name = name2).run(
+            sender = owner2,
+            now = sp.timestamp(env.time(1)),
+            valid = False)
+
+
+@sp.add_test(name = "setPrimaryName_Failure_NameExpired")
+def setPrimaryName_Failure_NameExpired():
+    # init env
+    env = Env("[setPrimaryName-Failed] Invalid permissions")
+
+    name1, name2 = env.names(), env.names()
+    owner = generateAccounts("owner")()
+    nonce1, nonce2 = env.nonce(), env.nonce()
+    commit1, commit2 = makeCommitment(name1, owner.address, nonce1), makeCommitment(name2, owner.address, nonce2)
+    periods = 10
+    cost = env.tnsParams["_price"] * periods
+
+    # execute tx
+    # register first name
+    env.scenario += env.tns.commit(
+        commitment = commit1).run(
+            sender = owner, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name1, 
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce1).run(
+            sender = owner, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # register second name
+    env.scenario += env.tns.commit(
+        commitment = commit2).run(
+            sender = owner, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name2, 
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce2).run(
+            sender = owner, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # try to set name2 to be primary name after it expires
+    env.scenario += env.tns.setPrimaryName(
+        name = name2).run(
+            sender = owner,
+            now = sp.timestamp(env.time(env.tnsParams["_interval"] * periods + 1)),
+            valid = False)
+
+
+@sp.add_test(name = "setPrimaryName_Failure_NameDoesNotExist")
+def setPrimaryName_Failure_NameDoesNotExist():
+    # init env
+    env = Env("[setPrimaryName-Failed] Invalid permissions")
+
+    name1, name2 = env.names(), env.names()
+    owner = generateAccounts("owner")()
+    nonce = env.nonce()
+    commit = makeCommitment(name1, owner.address, nonce)
+    periods = 10
+    cost = env.tnsParams["_price"] * periods
+
+    # execute tx
+    # register first name
+    env.scenario += env.tns.commit(
+        commitment = commit).run(
+            sender = owner, 
+            now = sp.timestamp(env.time()), 
+            valid = True)
+    env.scenario += env.tns.registerName(
+        name = name1, 
+        duration = env.tnsParams["_interval"] * periods,
+        nonce = nonce).run(
+            sender = owner, 
+            amount = sp.mutez(cost),
+            now = sp.timestamp(env.time(env.tnsParams["_minCommitTime"])),
+            valid = True)
+    # try to set name2 to be primary name wihtout registering it
+    env.scenario += env.tns.setPrimaryName(
+        name = name2).run(
+            sender = owner,
+            now = sp.timestamp(env.time(1)),
             valid = False)
 
 
