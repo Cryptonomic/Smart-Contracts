@@ -1,5 +1,8 @@
 import smartpy as sp
 
+## Need to add config data struct and funcs here
+
+
 ## Helper classes for types
 class Signer:
     def __init__(self, config):
@@ -21,6 +24,7 @@ class Group:
 
 
     def get_type(self):
+        # need to establish layout
         return sp.TRecord(
                 threshold = sp.TNat,
                 okWeight = sp.TNat,
@@ -48,10 +52,9 @@ class Payload:
 
 
     def get_type(self):
-        # | Amount (To, Amount) :: (sp.address, sp.mutez)
-        # | Lambda (Parameter, Result) :: sp.TLambda(tin, tout)
-        # for now just use tuple
-        return sp.TRecord(
+        # use (dest, amount, nonce) but need to change to just (lambda, nonce)
+        # need to establish layout
+        return sp.TRec(
                 destination = sp.TAddress,
                 amount = sp.TMutez,
                 nonce = sp.TBytes)
@@ -71,6 +74,7 @@ class Session:
 
 
     def get_type(self):
+        # need to establish layout
         return sp.TRecord(
                 payload = self.config.payload.get_type(),
                 group = self.config.group.get_type())
@@ -87,6 +91,7 @@ class Session:
 class Multisig(sp.Contract):
     def __init__(self, config):
         # metaprogramming utils
+        # how to thread config to types?
         self.config = config
         self.signer = Signer(config)
         self.group = Group(config)
@@ -97,12 +102,22 @@ class Multisig(sp.Contract):
                 sessions = sp.TBigMap(
                     key = sp.TBytes,
                     value = self.session.get_type())))
+        # init entrypoints
+        # layout
+        # types: here or in entrypoint?
 
 
+    # how to assert type? maybe use a decorator
+    # @param    Payload.get_type()  payload The payload for the new session
+    # @param    Group.get_type()    group   The group for the new session
+    #
+    # Create new multisig session. Sender must be a group member.
     @sp.entrypoint
     def setup(self, payload, group):
         payloadHash = sp.local('payloadHash', makePayloadHash(payload))
+        # check if session exists
         self.validateFreeSession(payloadHash.value)
+        # validate paramaters
         self.validateGroup(group)
         self.validatePayload(payload)
         self.validateSigner(self.signer.make(sp.sender), group)
@@ -110,18 +125,25 @@ class Multisig(sp.Contract):
         self.data.sessions[payloadHash.value] = self.data.sessions.make(payload, group)
 
 
+    # how to assert type? maybe use a decorator
+    # @param    sp.TBytes   payloadHash The session to execute
+    #
+    # Provide a signature for a pending session. Sender must be a group member.
     @sp.entrypoint
-    def sign(self, payload, signature):
-        payloadHash = sp.local('payloadHash', makePayloadHash(payload))
+    def sign(self, payloadHash, signature):
         # check if session exists
-        self.validateExistingSession(payloadHash.value)
+        self.validateExistingSession(payloadHash)
         # check if owner is part of group
         signer = self.signers.make(sp.sender)
         self.validateSigner(signer)
         # add signature
-        self.data.sessions[payloadHash.value].group.signers[signer] = signature
+        self.data.sessions[payloadHash].group.signers[signer] = signature
 
 
+    # how to assert type? maybe use a decorator
+    # @param    sp.TBytes   payloadHash The session to execute
+    #
+    # Executes a session and removes it. Sender must be a group member.
     @sp.entrypoint
     def execute(self, payloadHash):
         # check if session exists
@@ -131,9 +153,14 @@ class Multisig(sp.Contract):
         # check group consensus
         self.validateExecution(payloadHash)
         # execute
-        
+        self.executeTransaction(payloadHash)
         # delete session
         del self.data.sessions[payloadHash]
+
+
+    def executeTransaction(self, payloadHash):
+        # simple send, then change to executing lambda
+        pass
 
 
     def validateFreeSession(self, payloadHash):
@@ -169,10 +196,18 @@ class Multisig(sp.Contract):
         sp.verify(payload.amount <= payment, "Insufficient funds")
 
 
+    def validateExecution(self, payloadHash):
+        # validate signatures
+        pass
+
+
 def makePayloadHash(payload):
     return sp.blake2b(sp.pack(payload))
 
+## Need to add test env class
 
+## Tests
 @sp.add_test(name = "setup_Success")
 def setup_Success():
     pass
+
