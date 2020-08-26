@@ -4,9 +4,9 @@ import smartpy as sp
 
 
 ## Helper classes for types
-class Signer:
-    def __init__(self, config):
-        self.config = config
+class TSigner:
+    def __init__(self):
+        pass
 
 
     def get_type(self):
@@ -18,9 +18,13 @@ class Signer:
         return sp.set_type_expr(r, self.get_type())
 
 
-class Group:
-    def __init__(self, config):
-        self.config = config
+class TGroup:
+    def __init__(self, signer):
+        self.signer = signer
+        self.tkey = self.signer.get_type()
+        self.tvalue = sp.TRecord(
+            weight = sp.TNat,
+            signature = sp.TSignature)
 
 
     def get_type(self):
@@ -29,11 +33,8 @@ class Group:
                 threshold = sp.TNat,
                 okWeight = sp.TNat,
                 signers = sp.TMap(
-                    key = self.config.signer.get_type(),
-                    value = sp.TRecord(
-                        weight = sp.TNat,
-                        signature = sp.TSignature)), #,
-                        #ok = sp.TBool)),
+                    key = self.tkey,
+                    value = self.tvalue),
                 executed = sp.TBool)
 
 
@@ -41,16 +42,14 @@ class Group:
         r = sp.record(
                 threshold = threshold,
                 okWeight = 0,
-                signers = sp.map(), # how to init this?
+                signers = sp.map(
+                    tkey = self.tkey,
+                    tvalue = self.tvalue),
                 executed = False)
         return sp.set_type_expr(r, self.get_type())
 
 
-class Payload:
-    def __init__(self, config):
-        self.config = config
-
-
+class TPayload:
     def get_type(self):
         # use (dest, amount, nonce) but need to change to just (lambda, nonce)
         # need to establish layout
@@ -62,22 +61,23 @@ class Payload:
 
     def make(self, destination, amount, nonce):
         r = sp.record(
-                destination = destinatiodestination,
+                destination = destination,
                 amount = amount,
                 nonce = nonce)
         return sp.set_type_expr(r, self.get_type())
 
 
-class Session:
-    def __init__(self, config):
-        self.config = config
+class TSession:
+    def __init__(self, payload, group):
+        self.payload = payload
+        self.group = group
 
 
     def get_type(self):
         # need to establish layout
         return sp.TRecord(
-                payload = self.config.payload.get_type(),
-                group = self.config.group.get_type())
+                payload = self.payload.get_type(),
+                group = self.group.get_type())
 
 
     def make(self, payload, group):
@@ -89,14 +89,12 @@ class Session:
 
 ## Contract implementation
 class Multisig(sp.Contract):
-    def __init__(self, config):
+    def __init__(self):
         # metaprogramming utils
-        # how to thread config to types?
-        self.config = config
-        self.signer = Signer(config)
-        self.group = Group(config)
-        self.payload = Payload(config)
-        self.session = Session(config)
+        self.signer = TSigner
+        self.group = TGroup(self.signer)
+        self.payload = TPayload()
+        self.session = TSession(self.payload, self.group)
         # init storage
         self.init_type(sp.TRecord(
                 sessions = sp.TBigMap(
@@ -107,13 +105,16 @@ class Multisig(sp.Contract):
         # types: here or in entrypoint?
 
 
-    # how to assert type? maybe use a decorator
     # @param    Payload.get_type()  payload The payload for the new session
     # @param    Group.get_type()    group   The group for the new session
     #
     # Create new multisig session. Sender must be a group member.
     @sp.entrypoint
     def setup(self, payload, group):
+        # set types
+        sp.set_type(payload, self.payload.get_type())
+        sp.set_type(group, self.group.get_type())
+        # compute hash
         payloadHash = sp.local('payloadHash', makePayloadHash(payload))
         # check if session exists
         self.validateFreeSession(payloadHash.value)
@@ -125,12 +126,14 @@ class Multisig(sp.Contract):
         self.data.sessions[payloadHash.value] = self.data.sessions.make(payload, group)
 
 
-    # how to assert type? maybe use a decorator
     # @param    sp.TBytes   payloadHash The session to execute
     #
     # Provide a signature for a pending session. Sender must be a group member.
     @sp.entrypoint
     def sign(self, payloadHash, signature):
+        # set types
+        sp.set_type(payloadHash, sp.TBytes)
+        sp.set_type(signature, sp.TSignature)
         # check if session exists
         self.validateExistingSession(payloadHash)
         # check if owner is part of group
@@ -140,12 +143,13 @@ class Multisig(sp.Contract):
         self.data.sessions[payloadHash].group.signers[signer] = signature
 
 
-    # how to assert type? maybe use a decorator
     # @param    sp.TBytes   payloadHash The session to execute
     #
     # Executes a session and removes it. Sender must be a group member.
     @sp.entrypoint
     def execute(self, payloadHash):
+        # set types
+        sp.set_type(payloadHash, sp.TBytes)
         # check if session exists
         self.validateExistingSession(payloadHash)
         # check if owner is part of group
