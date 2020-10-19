@@ -1,0 +1,36 @@
+{
+  "name": "admin",
+  "version": "1.0.0",
+  "description": "A watcher to convert pending eth to xtz and vice-versa ",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gdsoumya/atomicswap.git"
+  },
+  "keywords": [
+    "crypto",
+    "exchange"
+  ],
+  "author": "Soumya Ghosh Dastidar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gdsoumya/atomicswap/issues"
+  },
+  "homepage": "https://github.com/gdsoumya/atomicswap#readme",
+  "dependencies": {
+    "conseiljs": "^5.0.4",
+    "conseiljs-softsigner": "^5.0.3",
+    "ethereumjs-tx": "^2.1.2",
+    "jsonpath-plus": "^4.0.0",
+    "loglevel": "^1.6.8",
+    "node-fetch": "^2.6.0",
+    "web3": "^1.2.11"
+  },
+  "devDependencies": {
+    "eslint": "^7.5.0"
+  }
+}

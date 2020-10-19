@@ -1,0 +1,11 @@
+{
+  "tezos": {
+    "private_key": "",
+    "swap_amount": "5000000"
+  },
+  "ethereum": {
+    "RPC": "https://goerli.infura.io/v3/3f764c2122644024825ab09e9e4d39d2",
+    "private_key": "",
+    "swap_amount": "0.04"
+  }
+}

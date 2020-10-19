@@ -1,0 +1,9 @@
+{
+  "tezos": {
+    "private_key": ""
+  },
+  "ethereum": {
+    "RPC": "https://goerli.infura.io/v3/3f764c2122644024825ab09e9e4d39d2",
+    "private_key": ""
+  }
+}
