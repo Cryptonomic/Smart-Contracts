@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Tezos Contract Introspector Demonstration</title>
+
+        <link rel="icon" href="./images/token.png">
+        <link href='http://fonts.googleapis.com/css?family=Lato:400,700' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" type="text/css" href="styles.css">
+        <script src="main.js"></script>
+    </head>
+    <body onload="viewStorage()">
+        <div class="container">
+            <div class="jumbotron">
+                <a href="https://cryptonomic.tech/">
+                    <img src="./images/cryptonomic.png" class="cryptonomicLogo">
+                </a>
+                <h1>Tezos Contract Introspector Demonstration</h1>
+            </div>
+
+            <div class="controller">
+
+                <!-- Deploy Contract -->
+
+                <div class="entrypoint">
+                    <button type="button" class="entrypointButton floatLeft" onclick="viewEntryPoints()">View Entry Points</button>
+                    <span style="padding-left: 10px">For Contract Address:</span>
+                    <input type="text" class="entrypointInput" id="contractAddress" value="KT1NpCh6tNQDmbmAVbGLxwRBx8jJD4rEFnmC"></input>
+                </div>
+
+                <div id="entryPoints"></div>
+
+                <!-- Stamp -->
+
+                <div class="stamp">
+                    <span>Author: Teckhua Chiang | Artist: Angela Chiang | Company: Cryptonomic Inc.</span>
+                </div>
+            </div>
+
+            <!-- Output -->
+
+            <div class="contractStorage">
+                <span>CONTRACT STORAGE:</span><br><br>
+                <div id="contractStorage"></div>
+            </div>
+            
+            <div class="console">
+                <span>CONSOLE LOG:</span><br><br>
+                <div id="console"></div>
+                <div id="processing"></div>
+            </div>
+        </div>
+    </body>
+</html>
