@@ -16,29 +16,33 @@ class MemoProxy(sp.Contract):
 
     @sp.entry_point
     def sendMemo(self, destination, memo):
-        sp.set_type(destination, sp.TAddress)
         sp.set_type(memo, MemoType)
 
         sp.send(destination, sp.amount)
 
     @sp.entry_point
     def sendIndexedToken(self, token, index, destination, amount, memo):
+        sp.set_type(memo, MemoType)
         sp.verify(sp.amount == sp.tez(0), message = "coin amount must be 0")
 
         FA2TransferReference = sp.contract(FA2TransferBatchType, token, entry_point="transfer").open_some()
+
         transfer = sp.record(to_ = destination, token_id = index, amount = amount)
-        sp.set_type(transfer, FA2TransferType)
+        transfer = sp.set_type_expr(transfer, FA2TransferType)
+
         batch = sp.record(from_ = sp.sender, txs = [transfer])
-        sp.set_type(batch, FA2TransferBatchType)
+        batch = sp.set_type_expr(batch, FA2TransferBatchType)
+
         sp.transfer(batch, sp.tez(0), FA2TransferReference)
 
     @sp.entry_point
     def sendSimpleToken(self, token, destination, amount, memo):
+        sp.set_type(memo, MemoType)
         sp.verify(sp.amount == sp.tez(0), message = "coin amount must be 0")
 
         FA12TransferReference = sp.contract(FA12TransferType, token, entry_point="transfer").open_some()
         transfer = sp.record(from_ = sp.sender, to_ = destination, value = amount)
-        sp.set_type(transfer, FA12TransferType)
+        transfer = sp.set_type_expr(transfer, FA12TransferType)
         sp.transfer(transfer, sp.tez(0), FA12TransferReference)
 
 @sp.add_test("MemoProxy Tests")
@@ -62,4 +66,3 @@ def test():
 
     scenario.h2("Send with byte memo")
     scenario += proxy.sendMemo(destination = alice.address, memo = sp.variant("bytes_memo", sp.bytes("0x000000"))).run(sender = robert, amount = sp.tez(2))
-
