@@ -15,7 +15,7 @@ class MemoProxy(sp.Contract):
         sp.failwith("not supported")
 
     @sp.entry_point
-    def sendMemo(self, destination, memo):
+    def sendCoins(self, destination, memo):
         sp.set_type(memo, MemoType)
 
         sp.send(destination, sp.amount)
@@ -62,7 +62,7 @@ def test():
     scenario.h1("Workflows")
 
     scenario.h2("Send with string memo")
-    scenario += proxy.sendMemo(destination = robert.address, memo = sp.variant("string_memo", "blah")).run(sender = alice, amount = sp.tez(1))
+    scenario += proxy.sendCoins(destination = robert.address, memo = sp.variant("string_memo", "blah")).run(sender = alice, amount = sp.tez(1))
 
     scenario.h2("Send with byte memo")
-    scenario += proxy.sendMemo(destination = alice.address, memo = sp.variant("bytes_memo", sp.bytes("0x000000"))).run(sender = robert, amount = sp.tez(2))
+    scenario += proxy.sendCoins(destination = alice.address, memo = sp.variant("bytes_memo", sp.bytes("0x000000"))).run(sender = robert, amount = sp.tez(2))
