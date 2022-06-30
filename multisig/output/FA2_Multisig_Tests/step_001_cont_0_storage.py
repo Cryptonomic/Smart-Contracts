@@ -1,1 +1,0 @@
-sp.record(last_token_id = 0, ledger = {}, metadata = {'' : sp.bytes('0x68747470733a2f2f6578616d706c652e636f6d')}, operators = {}, token_metadata = {})
