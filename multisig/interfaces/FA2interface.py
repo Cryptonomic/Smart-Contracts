@@ -2,11 +2,12 @@ import smartpy as sp
 
 SIGNATURES_TYPE = sp.TMap(sp.TKeyHash, sp.TSignature)
 
-TRANFER_TYPE = sp.TRecord(sender = sp.TAddress, receiver = sp.TAddress, amount = sp.TNat, signatures = sp.TSet(sp.TKey), notSignatures = sp.TSet(sp.TKey))
-INIT_TRANSFER_TYPE = sp.TRecord(receiver = sp.TAddress, amount = sp.TNat)
+TRANFER_TYPE = sp.TRecord(sender = sp.TAddress, receiver = sp.TAddress, amount = sp.TNat, tokenId = sp.TNat, tokenAddress = sp.TAddress, signatures = sp.TSet(sp.TKey), notSignatures = sp.TSet(sp.TKey))
+INIT_TRANSFER_TYPE = sp.TRecord(receiver = sp.TAddress, amount = sp.TNat, tokenId = sp.TNat, tokenAddress = sp.TAddress)
 
 SIGNER_TYPE = sp.TRecord(isSigner = sp.TBool, signatures = sp.TSet(sp.TKey), notSignatures = sp.TSet(sp.TKey))
 THRESHOLD_TYPE = sp.TRecord(signatures = sp.TSet(sp.TKey), notSignatures = sp.TSet(sp.TKey))
+
 
 
 
@@ -48,4 +49,7 @@ class MultiSigWalletInterface(sp.Contract):
     def removeThresholdProp(self, params):
         pass
     
+    @sp.entry_point
+    def recoverToken(self, params):
+        pass
     

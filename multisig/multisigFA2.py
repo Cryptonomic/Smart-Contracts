@@ -39,6 +39,8 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
         self.data.tranferMap[self.data.operationId] = sp.record(sender = sp.sender, 
                                                                 receiver = params.receiver,
                                                                 amount = params.amount, 
+                                                                tokenId = params.tokenId,
+                                                                tokenAddress = params.tokenAddress,
                                                                 signatures = sp.set(l = [sp.sender], t = sp.TKey),
                                                                 notSignatures = sp.set(l = [], t = sp.TKey))
         
@@ -78,6 +80,8 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
         self.data.transferMap[params].notSignatures.remove(sp.sender)
         sp.verify(not(self.data.transferMap[params].signatures.contains(sp.sender)), "ALREADY SIGNED THIS TRANSACTION")
         self.data.transferMap[params].signatures.add(sp.sender)
+        nbSig = sp.len(self.data.transferMap[id].signatures.elements())
+        sp.verify(nbSig >= self.data.threshold, "NOT ENOUGH SIGNATURES")
         self.execute(self, params)
         
         
@@ -85,10 +89,7 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
         
     def execute(self, id): #executes a valid transfer
         sp.set_type(id, sp.TNat)
-        nbSig = sp.len(self.data.transferMap[id].signatures.elements())
         
-        
-        sp.verify(nbSig >= self.data.threshold, "NOT ENOUGH SIGNATURES")
         
         
         tx_type = sp.TRecord(to_ = sp.TAddress,
@@ -99,10 +100,10 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
                                    txs = sp.TList(tx_type)).layout(
                                        ("from_", "txs"))
         list_type = sp.TList(transfer_type)
-        make_transfer = sp.contract(list_type, self.data.fa2_TokenAddress, "transfer").open_some()
+        make_transfer = sp.contract(list_type, self.data.transferMap[id].tokenAddress, "transfer").open_some()
         
         message = sp.list(l = [sp.Record(from_ = self.data.transferMap[id].sender,
-                                         txs = sp.list(l = [sp.record(to_ = self.data.transferMap[id].receiver, token_id = self.data.tokenId, amount = self.data.transferMap[id].amount)], t = tx_type))], t = transfer_type)
+                                         txs = sp.list(l = [sp.record(to_ = self.data.transferMap[id].receiver, token_id = self.data.transferMap[id].tokenId, amount = self.data.transferMap[id].amount)], t = tx_type))], t = transfer_type)
         
         sp.transfer(message, sp.tez(0), make_transfer)
             
@@ -198,4 +199,23 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
         sp.if (sp.len(self.data.thresholdMap.get(params).notSignatures.elements()) >= self.data.threshold):
             del self.data.thresholdMap[params]
         
-    
+    @sp.entry_point
+    def recoverToken(self, params):
+        sp.set_type(params, FA2Interface.INIT_TRANSFER_TYPE)
+        
+        sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
+        sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
+        
+        self.data.tranferMap[self.data.operationId] = sp.record(sender = sp.self_address, 
+                                                                receiver = params.receiver,
+                                                                amount = params.amount, 
+                                                                tokenId = params.tokenId,
+                                                                tokenAddress = params.tokenAddress,
+                                                                signatures = sp.set(l = [sp.sender], t = sp.TKey),
+                                                                notSignatures = sp.set(l = [], t = sp.TKey))
+        
+        
+        # no signature for recovery??
+        self.execute(self.data.operationId)
+        self.data.operationId += 1
+        
