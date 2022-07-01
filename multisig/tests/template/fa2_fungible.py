@@ -5,13 +5,7 @@ import smartpy as sp
 
 
 class Fa2FungibleMinimal(sp.Contract):
-    """Minimal FA2 contract for fungible tokens.
-
-    This is a minimal self contained implementation example showing how to
-    implement an NFT following the FA2 standard in SmartPy. It is for
-    illustrative purposes only. For a more flexible toolbox aimed at real world
-    applications please refer to FA2_lib.
-    """
+   
 
     def __init__(self, administrator, metadata_base, metadata_url):
         self.init(
@@ -132,6 +126,7 @@ class Fa2FungibleMinimal(sp.Contract):
 
     @sp.entry_point
     def mint(self, to_, amount, token):
+        
         """(Admin only) Create new tokens from scratch and assign
         them to `to_`.
 

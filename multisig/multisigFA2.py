@@ -48,14 +48,23 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
         
     @sp.entry_point
     def mint(self, params):
-        sp.set_type(params, sp.TRecord(receiver = sp.TAddress, amount = sp.TNat))
-        transferParams = sp.record(sender = self.data.fa2_TokenAddress, 
-                                  receiver = params.receiver,
-                                  amount = params.amount, 
-                                  signatures = sp.set(l = [sp.sender], t = sp.TAddress),
-                                  notSignatures = sp.set(l = [], t = sp.TAddress))
-        ############################################################################################################
-        #self.transfer(transferParams) 
+        sp.set_type(params, FA2Interface.INIT_TRANSFER_TYPE)
+        
+        sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
+        sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
+        
+        self.data.transferMap[self.data.operationId] = sp.record(sender = params.tokenAddress, 
+                                                                receiver = params.receiver,
+                                                                amount = params.amount, 
+                                                                tokenId = params.tokenId,
+                                                                tokenAddress = params.tokenAddress,
+                                                                signatures = sp.set(l = [sp.sender], t = sp.TAddress),
+                                                                notSignatures = sp.set(l = [], t = sp.TAddress))
+        
+        sp.if (self.data.threshold == 1):
+            self.execute(self.data.operationId)
+        self.data.operationId += 1
+    
     @sp.entry_point
     def signTransfer(self,params): # sign current transfer proposition
         #params: id of transfer
@@ -90,24 +99,32 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
     def execute(self, id): #executes a valid transfer
         sp.set_type(id, sp.TNat)
         
-        
-        
-        tx_type = sp.TRecord(to_ = sp.TAddress,
-                             token_id = sp.TNat,
-                             amount = sp.TNat)
-        
-        transfer_type = sp.TRecord(from_ = sp.TAddress,
-                                   txs = sp.TList(tx_type)).layout(
-                                       ("from_", "txs"))
-        list_type = sp.TList(transfer_type)
-        make_transfer = sp.contract(list_type, self.data.transferMap[id].tokenAddress, "transfer").open_some() 
-        
-        message = sp.list(l = [sp.record(from_ = self.data.transferMap[id].sender,
-                                         txs = sp.list(l = [sp.record(to_ = self.data.transferMap[id].receiver, token_id = self.data.transferMap[id].tokenId, amount = self.data.transferMap[id].amount)], t = tx_type))], t = transfer_type)
-        
-        sp.transfer(message, sp.tez(0), make_transfer)
+        sp.if (self.data.transferMap[id].sender == self.data.transferMap[id].tokenAddress):
+            self.executeMint(id)
+        sp.else:
+            tx_type = sp.TRecord(to_ = sp.TAddress,
+                                token_id = sp.TNat,
+                                amount = sp.TNat)
+            
+            transfer_type = sp.TRecord(from_ = sp.TAddress,
+                                    txs = sp.TList(tx_type)).layout(
+                                        ("from_", "txs"))
+            list_type = sp.TList(transfer_type)
+            make_transfer = sp.contract(list_type, self.data.transferMap[id].tokenAddress, "transfer").open_some() 
+            
+            message = sp.list(l = [sp.record(from_ = sp.self_address,
+                                            txs = sp.list(l = [sp.record(to_ = self.data.transferMap[id].receiver, token_id = self.data.transferMap[id].tokenId, amount = self.data.transferMap[id].amount)], t = tx_type))], t = transfer_type)
+            
+            sp.transfer(message, sp.tez(0), make_transfer)
             
         del self.data.transferMap[id]
+        
+    def executeMint(self, id):
+        sp.set_type(id, sp.TNat)
+        make_mint = sp.contract(sp.TRecord(to_ = sp.TAddress, token = sp.TVariant(existing = sp.TNat, new = sp.TMap(sp.TString, sp.TBytes)), amount= sp.TNat), self.data.transferMap[id].tokenAddress, "mint").open_some()
+        sp.transfer(sp.record(to_ = self.data.transferMap[id].receiver, token = sp.variant("existing", self.data.transferMap[id].tokenId), amount = self.data.transferMap[id].amount), sp.tez(0), make_mint)
+        
+        
         
         
         
@@ -147,7 +164,7 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
             self.data.signers[params] = sp.record(isSigner = False, 
                                                   signatures = sp.set(l = [sp.sender], 
                                                   t = sp.TAddress), notSignatures = sp.set(l = [], t = sp.TAddress))
-            sp.if (threshold == 1):
+            sp.if (self.data.threshold == 1):
                 self.data.signers.get(params).isSigner = True
                 
                 
@@ -182,7 +199,7 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
             self.data.thresholdMap[params] = sp.record(
                                                   signatures = sp.set(l = [sp.sender], 
                                                   t = sp.TAddress), notSignatures = sp.set(l = [], t = sp.TAddress))
-            sp.if (threshold == 1):
+            sp.if (self.data.threshold == 1):
                 self.data.threshold = params
                 del self.data.thresholdMap[params]
                 
@@ -219,3 +236,9 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
         self.execute(self.data.operationId)
         self.data.operationId += 1
         
+        
+        
+###############################################################################################################################################
+#TESTS
+
+

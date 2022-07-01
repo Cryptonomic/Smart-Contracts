@@ -2,6 +2,7 @@
 
 
 
+from typing import MutableMapping
 import smartpy as sp
 #SOURCE = sp.io.import_script_from_url("https://smartpy.io/templates/fa2_lib.py")
 
@@ -32,23 +33,47 @@ def test():
     tok2_md = make_metadata(name="Token Two", decimals=1, symbol="Tok2")
     
     scenario = sp.test_scenario()
-    c1 = FA2_FUNGIBLE.Fa2FungibleMinimal(admin.address, FA2_FUNGIBLE.metadata_base, "https//example.com")
+    multisig_wallet = MULTI.MultiSigWallet(signer = alice.address)
+    scenario += multisig_wallet
+    c1 = FA2_FUNGIBLE.Fa2FungibleMinimal(multisig_wallet.address, FA2_FUNGIBLE.metadata_base, "https//example.com")
     scenario += c1
     
     
-    c1.mint(sp.record(to_ = alice.address, amount = 50, token = sp.variant(0, tok0_md))).run(sender=admin)
+    c1.mint(sp.record(to_ = alice.address, amount = 50, token = sp.variant("new", tok0_md))).run(sender=multisig_wallet.address)
+    scenario.verify(c1.data.next_token_id == sp.nat(1))
     
 
     
     
     
     
-    multisig_wallet = MULTI.MultiSigWallet(signer = alice.address)
-    scenario += multisig_wallet
     
-    sp.verify(multisig_wallet.data.signers.contains(alice.address), "FAILED TO ADD SIGNER")
+    
+    c1.mint(sp.record(to_ = multisig_wallet.address, amount = 50, token = sp.variant("existing", 0))).run(sender=multisig_wallet.address)
+    
+    scenario.verify(multisig_wallet.data.threshold == 1)
     multisig_wallet.addSigner(bob.address).run(sender = alice.address)
-    #sp.verify(multisig_wallet.data.signers.contains(bob.address), "FAILED TO ADD SIGNER")
+    multisig_wallet.addSigner(admin.address).run(sender = bob.address)
+    scenario.verify(multisig_wallet.data.signers.contains(bob.address)) ## add bob as signer
+    multisig_wallet.updateThreshold(2).run(sender = bob.address)
+    scenario.verify(multisig_wallet.data.threshold == 2)
+    multisig_wallet.updateThreshold(3).run(sender = bob.address)
+    scenario.verify(multisig_wallet.data.threshold == 2)
+    # multisig_wallet.updateThreshold(3).run(sender = admin.address)
+    # scenario.verify(multisig_wallet.data.threshold == 3)
+    # multisig_wallet.removeSigner(bob.address).run(sender = admin.address)
+    # multisig_wallet.removeSigner(bob.address).run(sender = alice.address)
+    # scenario.verify(multisig_wallet.data.threshold == 1)
+    
+    # multisig_wallet.transfer(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
+    # multisig_wallet.signAndExecute(0).run(sender = alice.address)
+    # multisig_wallet.recoverToken(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
+    multisig_wallet.mint(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
+    multisig_wallet.signAndExecute(0).run(sender = alice.address)
+    
+    
+    
+    
     
     
     

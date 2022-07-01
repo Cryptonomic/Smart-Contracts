@@ -13,19 +13,19 @@ THRESHOLD_TYPE = sp.TRecord(signatures = sp.TSet(sp.TAddress), notSignatures = s
 
 class MultiSigWalletInterface(sp.Contract):
     
-    @sp.entry_point
+    @sp.entry_point # initiate a tranfer proposition
     def transfer(self, params):
         pass
     
-    @sp.entry_point
+    @sp.entry_point # sign a tranfer/mint proposition
     def signTransfer(self, params):
         pass
     
-    @sp.entry_point
+    @sp.entry_point # sign and try to execute a transfer/mint proposition
     def signAndExecute(self, params):
         pass
     
-    @sp.entry_point
+    @sp.entry_point # unsign a tranfer/mint proposition
     def unsign(self, params):
         pass
     
@@ -37,7 +37,7 @@ class MultiSigWalletInterface(sp.Contract):
     def removeSigner(self, params):
         pass
     
-    @sp.entry_point #not implemented yet
+    @sp.entry_point #initiate mint proposition
     def mint(self, params):
         pass
     
@@ -45,11 +45,11 @@ class MultiSigWalletInterface(sp.Contract):
     def updateThreshold(self, params):
         pass
     
-    @sp.entry_point
+    @sp.entry_point #unsign and try to remove a threshold proposition
     def removeThresholdProp(self, params):
         pass
     
-    @sp.entry_point
+    @sp.entry_point #do a recovery token proposition
     def recoverToken(self, params):
         pass
     
