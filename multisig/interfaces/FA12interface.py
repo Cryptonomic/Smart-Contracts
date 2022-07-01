@@ -10,7 +10,7 @@ INIT_TRANSFER_TYPE = sp.TRecord(receiver = sp.TAddress, amount = sp.TNat, tokenA
 SIGNER_TYPE = sp.TRecord(isSigner = sp.TBool, signatures = sp.TSet(sp.TAddress), notSignatures = sp.TSet(sp.TAddress))
 THRESHOLD_TYPE = sp.TRecord(signatures = sp.TSet(sp.TAddress), notSignatures = sp.TSet(sp.TAddress))
 
-APPROVE_TYPE = sp.TRecord(spender = sp.TAddress, amount = sp.TNat)
+APPROVE_TYPE = sp.TRecord(spender = sp.TAddress, amount = sp.TNat, tokenAddress = sp.TAddress)
 
 
 

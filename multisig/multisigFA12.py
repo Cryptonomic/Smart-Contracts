@@ -101,9 +101,9 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
         
         sp.if (self.data.transferMap[id].type == 1):
             self.executeMint(id)
-        sp.elif (self.data.transferMap[id].type == 2):
+        sp.if (self.data.transferMap[id].type == 2):
             self.executeApprove(id)    
-        sp.else:
+        sp.if (self.data.transferMap[id].type == 0):
         
             make_transfer = sp.contract(sp.TRecord(from_ = sp.TAddress, to_ = sp.TAddress, value = sp.TNat), self.data.transferMap[id].tokenAddress, "transfer").open_some() 
             
@@ -113,12 +113,12 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
             
         del self.data.transferMap[id]
         
-    def executeMint(self, id):
+    def executeMint(self, id): # type 1
         sp.set_type(id, sp.TNat)
         make_mint = sp.contract(sp.TRecord(address = sp.TAddress, value= sp.TNat), self.data.transferMap[id].tokenAddress, "mint").open_some()
         sp.transfer(sp.record(address = self.data.transferMap[id].receiver, value = self.data.transferMap[id].amount), sp.tez(0), make_mint)
     
-    def executeApprove(self, id):
+    def executeApprove(self, id): # type 2
         sp.set_type(id, sp.TNat)
         make_mint = sp.contract(sp.TRecord(spender = sp.TAddress, value= sp.TNat), self.data.transferMap[id].tokenAddress, "approve").open_some()
         sp.transfer(sp.record(spender = self.data.transferMap[id].receiver, value = self.data.transferMap[id].amount), sp.tez(0), make_mint)
