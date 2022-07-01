@@ -2,7 +2,9 @@ import smartpy as sp
 
 SIGNATURES_TYPE = sp.TMap(sp.TKeyHash, sp.TSignature)
 
-TRANSFER_TYPE = sp.TRecord(sender = sp.TAddress, receiver = sp.TAddress, amount = sp.TNat, tokenAddress = sp.TAddress, signatures = sp.TSet(sp.TAddress), notSignatures = sp.TSet(sp.TAddress))
+TRANSFER_TYPE = sp.TRecord(type = sp.TNat, sender = sp.TAddress, receiver = sp.TAddress, amount = sp.TNat, tokenAddress = sp.TAddress, signatures = sp.TSet(sp.TAddress), notSignatures = sp.TSet(sp.TAddress))
+#Types: 0 transfer/recovery, 1 mint, 2 approve
+
 INIT_TRANSFER_TYPE = sp.TRecord(receiver = sp.TAddress, amount = sp.TNat, tokenAddress = sp.TAddress)
 
 SIGNER_TYPE = sp.TRecord(isSigner = sp.TBool, signatures = sp.TSet(sp.TAddress), notSignatures = sp.TSet(sp.TAddress))
@@ -58,8 +60,3 @@ class MultiSigWalletInterface(sp.Contract):
     @sp.entry_point #add new approve
     def addApprove(self, params):
         pass
-    
-    @sp.entry_point 
-    def removeApprove(self, params):
-        pass
-    

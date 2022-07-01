@@ -34,7 +34,8 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
         sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
         sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
       
-        self.data.transferMap[self.data.operationId] = sp.record(sender = sp.sender, 
+        self.data.transferMap[self.data.operationId] = sp.record(type = 0,
+                                                                sender = sp.sender, 
                                                                 receiver = params.receiver,
                                                                 amount = params.amount, 
                                                                 tokenAddress = params.tokenAddress,
@@ -52,7 +53,8 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
         sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
         sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
         
-        self.data.transferMap[self.data.operationId] = sp.record(sender = params.tokenAddress, 
+        self.data.transferMap[self.data.operationId] = sp.record(type = 1,
+                                                                sender = params.tokenAddress, 
                                                                 receiver = params.receiver,
                                                                 amount = params.amount, 
                                                                 tokenAddress = params.tokenAddress,
@@ -97,8 +99,10 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
     def execute(self, id): #executes a valid transfer
         sp.set_type(id, sp.TNat)
         
-        sp.if (self.data.transferMap[id].sender == self.data.transferMap[id].tokenAddress):
+        sp.if (self.data.transferMap[id].type == 1):
             self.executeMint(id)
+        sp.elif (self.data.transferMap[id].type == 2):
+            self.executeApprove(id)    
         sp.else:
         
             make_transfer = sp.contract(sp.TRecord(from_ = sp.TAddress, to_ = sp.TAddress, value = sp.TNat), self.data.transferMap[id].tokenAddress, "transfer").open_some() 
@@ -113,6 +117,12 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
         sp.set_type(id, sp.TNat)
         make_mint = sp.contract(sp.TRecord(address = sp.TAddress, value= sp.TNat), self.data.transferMap[id].tokenAddress, "mint").open_some()
         sp.transfer(sp.record(address = self.data.transferMap[id].receiver, value = self.data.transferMap[id].amount), sp.tez(0), make_mint)
+    
+    def executeApprove(self, id):
+        sp.set_type(id, sp.TNat)
+        make_mint = sp.contract(sp.TRecord(spender = sp.TAddress, value= sp.TNat), self.data.transferMap[id].tokenAddress, "approve").open_some()
+        sp.transfer(sp.record(spender = self.data.transferMap[id].receiver, value = self.data.transferMap[id].amount), sp.tez(0), make_mint)
+        
         
         
         
@@ -213,7 +223,8 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
         sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
         sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
         
-        self.data.transferMap[self.data.operationId] = sp.record(sender = sp.self_address, 
+        self.data.transferMap[self.data.operationId] = sp.record(type = 0,
+                                                                sender = sp.self_address, 
                                                                 receiver = params.receiver,
                                                                 amount = params.amount, 
                                                                 tokenAddress = params.tokenAddress,
@@ -225,7 +236,26 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
         self.execute(self.data.operationId)
         self.data.operationId += 1
         
-    
+    @sp.entry_point
+    def addApprove(self, params):
+        sp.set_type(params, FA12Interface.APPROVE_TYPE)
+        
+        sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
+        sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
+        
+        self.data.transferMap[self.data.operationId] = sp.record(type = 2,
+                                                                sender = params.tokenAddress, 
+                                                                receiver = params.spender,
+                                                                amount = params.amount, 
+                                                                tokenAddress = params.tokenAddress,
+                                                                signatures = sp.set(l = [sp.sender], t = sp.TAddress),
+                                                                notSignatures = sp.set(l = [], t = sp.TAddress))
+        
+        sp.if (self.data.threshold == 1):
+            self.execute(self.data.operationId)
+        self.data.operationId += 1
+        
+
         
         
         
