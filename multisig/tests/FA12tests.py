@@ -37,12 +37,50 @@ def test():
         "" : "ipfs://QmaiAUj1FFNGYTu8rLBjc3eeN9cSKwaF8EGMBNDmhzPNFd",
     }
     c1 = FA12_TEMPLATE.FA12(
-        admin.address,
+        multisig_wallet.address,
         config              = FA12_TEMPLATE.FA12_config(support_upgradable_metadata = True),
         token_metadata      = token_metadata,
         contract_metadata   = contract_metadata
     )
     scenario += c1
+    
+    
+    c1.mint(sp.record(address = alice.address, value = 50)).run(sender=multisig_wallet.address)
+    c1.mint(sp.record(address = multisig_wallet.address, value = 50)).run(sender=multisig_wallet.address)
+    
+    
+
+    
+    
+    
+    
+    
+    
+   
+    
+    scenario.verify(multisig_wallet.data.threshold == 1)
+    multisig_wallet.addSigner(bob.address).run(sender = alice.address)
+    multisig_wallet.addSigner(admin.address).run(sender = bob.address)
+    scenario.verify(multisig_wallet.data.signers.contains(bob.address)) ## add bob as signer
+    multisig_wallet.updateThreshold(2).run(sender = bob.address)
+    scenario.verify(multisig_wallet.data.threshold == 2)
+    multisig_wallet.updateThreshold(3).run(sender = bob.address)
+    scenario.verify(multisig_wallet.data.threshold == 2)
+    multisig_wallet.removeSigner(bob.address).run(sender = admin.address)
+    multisig_wallet.removeSigner(bob.address).run(sender = alice.address)
+    scenario.verify(multisig_wallet.data.threshold == 1)
+    
+    # multisig_wallet.transfer(sp.record(receiver = alice.address, amount = 10, tokenAddress = c1.address)).run(sender = admin.address)
+    # multisig_wallet.signAndExecute(0).run(sender = alice.address)
+    # multisig_wallet.recoverToken(sp.record(receiver = alice.address, amount = 10, tokenAddress = c1.address)).run(sender = admin.address)
+    # multisig_wallet.mint(sp.record(receiver = alice.address, amount = 10, tokenAddress = c1.address)).run(sender = admin.address)
+    # multisig_wallet.signAndExecute(2).run(sender = alice.address)
+    multisig_wallet.addApprove(sp.record(spender = alice.address, amount = 10, tokenAddress = c1.address)).run(sender = alice.address)
+    
+    
+    
+    
+    
 
     # scenario.h1("Offchain view - token_metadata")
     # # Test token_metadata view

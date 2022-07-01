@@ -105,9 +105,12 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
             self.executeApprove(id)    
         sp.if (self.data.transferMap[id].type == 0):
         
-            make_transfer = sp.contract(sp.TRecord(from_ = sp.TAddress, to_ = sp.TAddress, value = sp.TNat), self.data.transferMap[id].tokenAddress, "transfer").open_some() 
+            make_transfer = sp.contract(sp.TRecord(from_ = sp.TAddress, to_ = sp.TAddress, value = sp.TNat).layout(("from_ as from", ("to_ as to", "value"))), self.data.transferMap[id].tokenAddress, "transfer").open_some() 
             
+            # messageType = sp.TRecord(from_ = sp.TAddress, to_ = sp.TAddress, value = sp.TNat)
+            # realMessage = messageType.layout(("from_ as from", ("to_ as to", "value")))
             message = sp.record(from_ = sp.self_address, to_ = self.data.transferMap[id].receiver, value = self.data.transferMap[id].amount)
+            sp.set_type(message, sp.TRecord(from_ = sp.TAddress, to_ = sp.TAddress, value = sp.TNat).layout(("from_ as from", ("to_ as to", "value"))))
             
             sp.transfer(message, sp.tez(0), make_transfer)
             
