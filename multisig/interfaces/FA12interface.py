@@ -3,7 +3,7 @@ import smartpy as sp
 SIGNATURES_TYPE = sp.TMap(sp.TKeyHash, sp.TSignature)
 
 TRANSFER_TYPE = sp.TRecord(type = sp.TNat, sender = sp.TAddress, receiver = sp.TAddress, amount = sp.TNat, tokenAddress = sp.TAddress, signatures = sp.TSet(sp.TAddress), notSignatures = sp.TSet(sp.TAddress))
-#Types: 0 transfer, 1 mint, 2 approve, 3 burn, 4 recover
+#Types: 0 transfer, 1 mint, 2 approve, 3 burn, 4 recover, 5 switch admin
 
 INIT_TRANSFER_TYPE = sp.TRecord(receiver = sp.TAddress, amount = sp.TNat, tokenAddress = sp.TAddress)
 
@@ -13,6 +13,9 @@ THRESHOLD_TYPE = sp.TRecord(signatures = sp.TSet(sp.TAddress), notSignatures = s
 DELEGATE_TYPE = sp.TRecord(isDelegate = sp.TBool, signatures = sp.TSet(sp.TAddress), notSignatures = sp.TSet(sp.TAddress))
 
 APPROVE_TYPE = sp.TRecord(spender = sp.TAddress, amount = sp.TNat, tokenAddress = sp.TAddress)
+
+ADMIN_TYPE = sp.TRecord(receiver = sp.TAddress, tokenAddress = sp.TAddress)
+
 
 
 
@@ -87,4 +90,9 @@ class MultiSigWalletInterface(sp.Contract):
     @sp.entry_point #to remove delegate proposition
     def removeDelegate(self, params):
         sp.set_type(params, sp.TKeyHash)
+        pass
+    
+    @sp.entry_point #switch admin of FA1.2 contract
+    def addAdminSwitch(self, params):
+        sp.set_type(params, sp.TAddress)
         pass

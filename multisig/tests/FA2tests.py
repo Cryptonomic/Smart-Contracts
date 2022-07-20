@@ -2,6 +2,7 @@
 
 
 
+from audioop import mul
 from typing import MutableMapping
 import smartpy as sp
 #SOURCE = sp.io.import_script_from_url("https://smartpy.io/templates/fa2_lib.py")
@@ -9,6 +10,7 @@ import smartpy as sp
 MULTI = sp.io.import_script_from_url("file:multisigFA2.py")
 
 FA2_FUNGIBLE = sp.io.import_script_from_url("file:tests/template/fa2_fungible.py")
+FA2_NEW = sp.io.import_script_from_url("file:tests/template/fa2.py")
 
 def make_metadata(symbol, name, decimals):
     """Helper function to build metadata JSON bytes values."""
@@ -83,6 +85,17 @@ def test():
     multisig_wallet.recoverToken(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
     multisig_wallet.signAndExecute(2).run(sender = alice.address)
     
+    
+    c2 = FA2_NEW.FA2(config = FA2_NEW.environment_config(),
+                                metadata = sp.utils.metadata_of_url("https://example.com"),
+                                admin = multisig_wallet.address)
+    
+    scenario += c2
+    c2.mint(sp.record(address = alice.address, amount = 50, metadata = tok0_md, token_id = 0)).run(sender=multisig_wallet.address)
+    
+    multisig_wallet.addAdminSwitch(sp.record(receiver = alice.address, tokenAddress = c2.address, tokenId = 0)).run(sender = admin.address)
+    multisig_wallet.signAndExecute(3).run(sender = alice.address)
+    scenario.verify(c2.data.administrator == alice.address)
     
     
     

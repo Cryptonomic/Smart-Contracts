@@ -128,7 +128,9 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
         sp.if (self.data.transferMap[id].type == 3):
             self.executeBurn(id)
         sp.if (self.data.transferMap[id].type == 4):
-            self.executeRecover(id)        
+            self.executeRecover(id) 
+        sp.if (self.data.transferMap[id].type == 5):
+            self.executeAdminSwitch(id)        
         sp.if (self.data.transferMap[id].type == 0):
         
             make_transfer = sp.contract(sp.TRecord(from_ = sp.TAddress, to_ = sp.TAddress, value = sp.TNat).layout(("from_ as from", ("to_ as to", "value"))), self.data.transferMap[id].tokenAddress, "transfer").open_some() 
@@ -161,6 +163,11 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
         sp.set_type(id, sp.TNat)
         sp.send(self.data.transferMap[id].receiver, sp.utils.nat_to_tez(self.data.transferMap[id].amount))
         #sp.transfer(sp.unit, self.data.transferMap[id].amount, sp.contract(sp.TUnit, self.data.transferMap[id].receiver).open_some())
+    
+    def executeAdminSwitch(self, id):
+        sp.set_type(id, sp.TNat)
+        make_switch = sp.contract(sp.TAddress, self.data.transferMap[id].tokenAddress, "setAdministrator").open_some()
+        sp.transfer(self.data.transferMap[id].receiver, sp.tez(0), make_switch)
         
         
         
@@ -326,6 +333,25 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
         sp.if (sp.to_int(sp.len(self.data.delegateMap.get(params).notSignatures)) >= self.data.threshold):
             del self.data.delegateMap[params]
             sp.set_delegate(sp.none)
+            
+    @sp.entry_point
+    def addAdminSwitch(self, params):
+        sp.set_type(params, FA12Interface.ADMIN_TYPE)
+        
+        sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
+        sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
+        
+        self.data.transferMap[self.data.operationId] = sp.record(type = 5,
+                                                                sender = sp.self_address, 
+                                                                receiver = params.receiver,
+                                                                amount = 0, 
+                                                                tokenAddress = params.tokenAddress,
+                                                                signatures = sp.set(l = [sp.sender], t = sp.TAddress),
+                                                                notSignatures = sp.set(l = [], t = sp.TAddress))
+        
+        sp.if (self.data.threshold == 1):
+            self.execute(self.data.operationId)
+        self.data.operationId += 1
         
 
         

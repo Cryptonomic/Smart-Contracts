@@ -104,3 +104,15 @@ def test():
     # sp.verify(c1.data.delegate == sp.none(alice.public_key_hash))
     
     
+    multisig_wallet2 = MULTI.MultiSigWallet(signer = admin.address)
+    multisig_wallet2.set_initial_balance(sp.tez(100))
+    scenario += multisig_wallet2
+    
+    
+    multisig_wallet.addAdminSwitch(sp.record(receiver = multisig_wallet2.address, tokenAddress = c1.address)).run(sender = admin.address)
+    multisig_wallet.signAndExecute(5).run(sender = alice.address)
+    scenario.verify(c1.data.administrator == multisig_wallet2.address)
+    
+
+    
+    
