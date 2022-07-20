@@ -1,3 +1,4 @@
+from audioop import mul
 import smartpy as sp
 #SOURCE = sp.io.import_script_from_url("https://smartpy.io/templates/fa2_lib.py")
 #~/smartpy-cli/SmartPy.sh test tests/FA12tests.py output12
@@ -17,7 +18,9 @@ def test():
 
     scenario = sp.test_scenario()
     multisig_wallet = MULTI.MultiSigWallet(signer = alice.address)
+    multisig_wallet.set_initial_balance(sp.tez(100))
     scenario += multisig_wallet
+    
     
    
     
@@ -91,10 +94,13 @@ def test():
     multisig_wallet.signAndExecute(3).run(sender = admin.address)
     scenario.verify(c1.data.balances[multisig_wallet.address].approvals[alice.address] == 10)
     
-    # keyHash = sp.key_hash("tz1aqcYgG6NuViML5vdWhohHJBYxcDVLNUsE")
-    # multisig_wallet.addDelegate(keyHash).run(sender = alice.address)
-    # multisig_wallet.addDelegate(keyHash).run(sender = admin.address)
-    #multisig_wallet.recoverToken(sp.record(receiver = alice.address, amount = 10, tokenAddress = c1.address)).run(sender = admin.address)
-    #sp.verify(c1.data.delegate == sp.none(keyHash))
+    
+    
+    multisig_wallet.recoverToken(sp.record(receiver = alice.address, amount = 10, tokenAddress = c1.address)).run(sender = admin.address)
+    multisig_wallet.signAndExecute(4).run(sender = alice.address)
+   
+    # multisig_wallet.addDelegate(alice.public_key_hash).run(sender = alice.address)
+    # multisig_wallet.addDelegate(alice.public_key_hash).run(sender = admin.address)
+    # sp.verify(c1.data.delegate == sp.none(alice.public_key_hash))
     
     

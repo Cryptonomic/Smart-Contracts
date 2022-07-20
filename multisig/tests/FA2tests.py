@@ -34,6 +34,7 @@ def test():
     
     scenario = sp.test_scenario()
     multisig_wallet = MULTI.MultiSigWallet(signer = alice.address)
+    multisig_wallet.set_initial_balance(sp.tez(100))
     scenario += multisig_wallet
     c1 = FA2_FUNGIBLE.Fa2FungibleMinimal(multisig_wallet.address, FA2_FUNGIBLE.metadata_base, "https//example.com")
     scenario += c1
@@ -69,7 +70,7 @@ def test():
     scenario.verify(c1.data.ledger[(multisig_wallet.address, 0)] == 40)
     
     
-    # multisig_wallet.recoverToken(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
+   
     
     #MINT
     scenario.verify(c1.data.ledger[(alice.address, 0)] == 60)
@@ -78,6 +79,9 @@ def test():
     scenario.verify(c1.data.ledger[(alice.address, sp.nat(0))] == 70)
     
     #BURN - not available
+    
+    multisig_wallet.recoverToken(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
+    multisig_wallet.signAndExecute(2).run(sender = alice.address)
     
     
     
