@@ -1,5 +1,6 @@
 import smartpy as sp
 #SOURCE = sp.io.import_script_from_url("https://smartpy.io/templates/fa2_lib.py")
+#~/smartpy-cli/SmartPy.sh test tests/FA12tests.py output12
 
 MULTI = sp.io.import_script_from_url("file:multisigFA12.py")
 
@@ -47,16 +48,9 @@ def test():
     
     c1.mint(sp.record(address = alice.address, value = 50)).run(sender=multisig_wallet.address)
     c1.mint(sp.record(address = multisig_wallet.address, value = 50)).run(sender=multisig_wallet.address)
+    scenario.verify(c1.data.balances[alice.address].balance == 50)
+    scenario.verify(c1.data.balances[multisig_wallet.address].balance == 50)
     
-    
-
-    
-    
-    
-    
-    
-    
-   
     
     scenario.verify(multisig_wallet.data.threshold == 1)
     multisig_wallet.addSigner(bob.address).run(sender = alice.address)
@@ -69,37 +63,32 @@ def test():
     multisig_wallet.removeSigner(bob.address).run(sender = admin.address)
     multisig_wallet.removeSigner(bob.address).run(sender = alice.address)
     scenario.verify(multisig_wallet.data.threshold == 1)
+    multisig_wallet.addSigner(bob.address).run(sender = alice.address)
+    multisig_wallet.updateThreshold(2).run(sender = bob.address)
+    scenario.verify(multisig_wallet.data.threshold == 2)
     
-    # multisig_wallet.transfer(sp.record(receiver = alice.address, amount = 10, tokenAddress = c1.address)).run(sender = admin.address)
-    # multisig_wallet.signAndExecute(0).run(sender = alice.address)
-    # multisig_wallet.recoverToken(sp.record(receiver = alice.address, amount = 10, tokenAddress = c1.address)).run(sender = admin.address)
-    # multisig_wallet.mint(sp.record(receiver = alice.address, amount = 10, tokenAddress = c1.address)).run(sender = admin.address)
-    # multisig_wallet.signAndExecute(2).run(sender = alice.address)
+    
+    
+    multisig_wallet.transfer(sp.record(receiver = alice.address, amount = 10, tokenAddress = c1.address)).run(sender = admin.address)
+    multisig_wallet.signAndExecute(0).run(sender = alice.address)
+    scenario.verify(c1.data.balances[alice.address].balance == 60)
+    scenario.verify(c1.data.balances[multisig_wallet.address].balance == 40)
+    
+    
+    multisig_wallet.mint(sp.record(receiver = alice.address, amount = 10, tokenAddress = c1.address)).run(sender = admin.address)
+    multisig_wallet.signAndExecute(1).run(sender = alice.address)
+    scenario.verify(c1.data.balances[alice.address].balance == 70)
+    scenario.verify(c1.data.balances[multisig_wallet.address].balance == 40)
+    
+    
     multisig_wallet.addApprove(sp.record(spender = alice.address, amount = 10, tokenAddress = c1.address)).run(sender = alice.address)
+    multisig_wallet.signAndExecute(2).run(sender = admin.address)
+    scenario.verify(c1.data.balances[multisig_wallet.address].approvals[alice.address] == 10)
     
+    # keyHash = sp.key_hash("tz1aqcYgG6NuViML5vdWhohHJBYxcDVLNUsE")
+    # multisig_wallet.addDelegate(keyHash).run(sender = alice.address)
+    # multisig_wallet.addDelegate(keyHash).run(sender = admin.address)
+    #multisig_wallet.recoverToken(sp.record(receiver = alice.address, amount = 10, tokenAddress = c1.address)).run(sender = admin.address)
+    #sp.verify(c1.data.delegate == sp.none(keyHash))
     
-    
-    
-    
-
-    # scenario.h1("Offchain view - token_metadata")
-    # # Test token_metadata view
-    # offchainViewTester =FA12_TEMPLATE.TestOffchainView(c1.token_metadata)
-    # scenario.register(offchainViewTester)
-    # offchainViewTester.compute(data = c1.data, params = 0)
-    # scenario.verify_equal(
-    #     offchainViewTester.data.result,
-    #     sp.some(
-    #         sp.record(
-    #             token_id = 0,
-    #             token_info = sp.map({
-    #                 "decimals"    : sp.utils.bytes_of_string("18"),
-    #                 "name"        : sp.utils.bytes_of_string("My Great Token"),
-    #                 "symbol"      : sp.utils.bytes_of_string("MGT"),
-    #                 "icon"        : sp.utils.bytes_of_string('https://smartpy.io/static/img/logo-only.svg')
-    #             })
-    #         )
-    #     )
-    # )
-
     
