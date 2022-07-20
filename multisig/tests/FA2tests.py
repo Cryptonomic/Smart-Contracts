@@ -77,10 +77,7 @@ def test():
     multisig_wallet.signAndExecute(1).run(sender = alice.address)
     scenario.verify(c1.data.ledger[(alice.address, sp.nat(0))] == 70)
     
-    #BURN
-    multisig_wallet.burn(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
-    multisig_wallet.signAndExecute(2).run(sender = alice.address)
-    scenario.verify(c1.data.ledger[(alice.address, sp.nat(0))] == 60)
+    #BURN - not available
     
     
     
