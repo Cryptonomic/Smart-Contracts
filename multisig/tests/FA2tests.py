@@ -1,4 +1,4 @@
-#to execute test: ~/smartpy-cli/SmartPy.sh test tests/FA2tests.py output
+#to execute test: ~/smartpy-cli/SmartPy.sh test tests/FA2tests.py output2
 
 
 
@@ -41,16 +41,12 @@ def test():
     
     c1.mint(sp.record(to_ = alice.address, amount = 50, token = sp.variant("new", tok0_md))).run(sender=multisig_wallet.address)
     scenario.verify(c1.data.next_token_id == sp.nat(1))
-    
-
-    
-    
-    
-    
-    
+    scenario.verify(c1.data.ledger[(alice.address, 0)] == 50)
     
     c1.mint(sp.record(to_ = multisig_wallet.address, amount = 50, token = sp.variant("existing", 0))).run(sender=multisig_wallet.address)
     
+    #UPDATE THRESHOLD/SIGNERS
+    scenario.verify(c1.data.ledger[(multisig_wallet.address, 0)] == 50)
     scenario.verify(multisig_wallet.data.threshold == 1)
     multisig_wallet.addSigner(bob.address).run(sender = alice.address)
     multisig_wallet.addSigner(admin.address).run(sender = bob.address)
@@ -59,17 +55,32 @@ def test():
     scenario.verify(multisig_wallet.data.threshold == 2)
     multisig_wallet.updateThreshold(3).run(sender = bob.address)
     scenario.verify(multisig_wallet.data.threshold == 2)
-    # multisig_wallet.updateThreshold(3).run(sender = admin.address)
-    # scenario.verify(multisig_wallet.data.threshold == 3)
-    # multisig_wallet.removeSigner(bob.address).run(sender = admin.address)
-    # multisig_wallet.removeSigner(bob.address).run(sender = alice.address)
-    # scenario.verify(multisig_wallet.data.threshold == 1)
+    multisig_wallet.removeSigner(bob.address).run(sender = admin.address)
+    multisig_wallet.removeSigner(bob.address).run(sender = alice.address)
+    scenario.verify(multisig_wallet.data.threshold == 1)
+    multisig_wallet.addSigner(bob.address).run(sender = alice.address)
+    multisig_wallet.updateThreshold(2).run(sender = bob.address)
+    scenario.verify(multisig_wallet.data.threshold == 2)
     
-    # multisig_wallet.transfer(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
-    # multisig_wallet.signAndExecute(0).run(sender = alice.address)
-    # multisig_wallet.recoverToken(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
-    multisig_wallet.mint(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
+    #TRANSFER
+    multisig_wallet.transfer(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
     multisig_wallet.signAndExecute(0).run(sender = alice.address)
+    scenario.verify(c1.data.ledger[(alice.address, 0)] == 60)
+    scenario.verify(c1.data.ledger[(multisig_wallet.address, 0)] == 40)
+    
+    
+    # multisig_wallet.recoverToken(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
+    
+    #MINT
+    scenario.verify(c1.data.ledger[(alice.address, 0)] == 60)
+    multisig_wallet.mint(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
+    multisig_wallet.signAndExecute(1).run(sender = alice.address)
+    scenario.verify(c1.data.ledger[(alice.address, sp.nat(0))] == 70)
+    
+    #BURN
+    multisig_wallet.burn(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
+    multisig_wallet.signAndExecute(2).run(sender = alice.address)
+    scenario.verify(c1.data.ledger[(alice.address, sp.nat(0))] == 60)
     
     
     

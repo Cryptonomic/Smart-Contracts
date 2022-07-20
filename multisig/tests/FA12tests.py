@@ -81,8 +81,14 @@ def test():
     scenario.verify(c1.data.balances[multisig_wallet.address].balance == 40)
     
     
+    multisig_wallet.burn(sp.record(receiver = alice.address, amount = 10, tokenAddress = c1.address)).run(sender = admin.address)
+    multisig_wallet.signAndExecute(2).run(sender = alice.address)
+    scenario.verify(c1.data.balances[alice.address].balance == 60)
+    scenario.verify(c1.data.balances[multisig_wallet.address].balance == 40)
+    
+    
     multisig_wallet.addApprove(sp.record(spender = alice.address, amount = 10, tokenAddress = c1.address)).run(sender = alice.address)
-    multisig_wallet.signAndExecute(2).run(sender = admin.address)
+    multisig_wallet.signAndExecute(3).run(sender = admin.address)
     scenario.verify(c1.data.balances[multisig_wallet.address].approvals[alice.address] == 10)
     
     # keyHash = sp.key_hash("tz1aqcYgG6NuViML5vdWhohHJBYxcDVLNUsE")

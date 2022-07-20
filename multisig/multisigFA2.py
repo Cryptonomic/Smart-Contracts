@@ -12,6 +12,9 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
     def __init__(self,
                  signer,
     threshold = sp.int(1),
+    delegateMap_ = sp.map(l = {}, 
+                     tkey = sp.TKeyHash, 
+                     tvalue = FA2Interface.DELEGATE_TYPE),
     thresholdMap_ = sp.map(l = {}, 
                      tkey = sp.TInt, 
                      tvalue = FA2Interface.THRESHOLD_TYPE)):
@@ -22,6 +25,7 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
             signers=sp.map(l = {signer: sp.record(isSigner = True, signatures = sp.set(l = [signer], t = sp.TAddress), notSignatures = sp.set(l = [], t = sp.TAddress))}, 
                      tkey = sp.TAddress, 
                      tvalue = FA2Interface.SIGNER_TYPE), # list of current/pending signers
+            delegateMap = delegateMap_,
             transferMap = sp.map(l = {}, tkey = sp.TNat, tvalue = FA2Interface.TRANSFER_TYPE) # map of pending transfers
             )
         
@@ -34,7 +38,8 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
         sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
         sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
       
-        self.data.transferMap[self.data.operationId] = sp.record(sender = sp.sender, 
+        self.data.transferMap[self.data.operationId] = sp.record(type =  0,
+                                                                sender = sp.sender, 
                                                                 receiver = params.receiver,
                                                                 amount = params.amount, 
                                                                 tokenId = params.tokenId,
@@ -53,7 +58,28 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
         sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
         sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
         
-        self.data.transferMap[self.data.operationId] = sp.record(sender = params.tokenAddress, 
+        self.data.transferMap[self.data.operationId] = sp.record(type = 1,
+                                                                sender = params.tokenAddress, 
+                                                                receiver = params.receiver,
+                                                                amount = params.amount, 
+                                                                tokenId = params.tokenId,
+                                                                tokenAddress = params.tokenAddress,
+                                                                signatures = sp.set(l = [sp.sender], t = sp.TAddress),
+                                                                notSignatures = sp.set(l = [], t = sp.TAddress))
+        
+        sp.if (self.data.threshold == 1):
+            self.execute(self.data.operationId)
+        self.data.operationId += 1
+        
+    @sp.entry_point
+    def burn(self, params):
+        sp.set_type(params, FA2Interface.INIT_TRANSFER_TYPE)
+        
+        sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
+        sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
+        
+        self.data.transferMap[self.data.operationId] = sp.record(type = 3,
+                                                                sender = params.receiver, 
                                                                 receiver = params.receiver,
                                                                 amount = params.amount, 
                                                                 tokenId = params.tokenId,
@@ -99,9 +125,13 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
     def execute(self, id): #executes a valid transfer
         sp.set_type(id, sp.TNat)
         
-        sp.if (self.data.transferMap[id].sender == self.data.transferMap[id].tokenAddress):
+        sp.if (self.data.transferMap[id].type == 1):
             self.executeMint(id)
-        sp.else:
+        sp.if (self.data.transferMap[id].type == 4):
+            self.executeRecover(id)
+        sp.if (self.data.transferMap[id].type == 3):
+            self.executeBurn(id)
+        sp.if (self.data.transferMap[id].type == 0):
             tx_type = sp.TRecord(to_ = sp.TAddress,
                                 token_id = sp.TNat,
                                 amount = sp.TNat)
@@ -124,7 +154,30 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
         make_mint = sp.contract(sp.TRecord(to_ = sp.TAddress, token = sp.TVariant(existing = sp.TNat, new = sp.TMap(sp.TString, sp.TBytes)), amount= sp.TNat), self.data.transferMap[id].tokenAddress, "mint").open_some()
         sp.transfer(sp.record(to_ = self.data.transferMap[id].receiver, token = sp.variant("existing", self.data.transferMap[id].tokenId), amount = self.data.transferMap[id].amount), sp.tez(0), make_mint)
         
+    def executeBurn(self, id):
+        sp.set_type(id, sp.TNat)
+        sp.trace("brurning that shit")
+        burn_address = sp.address("tz1burnburnburnburnburnburnburjAYjjX")
+        tx_type = sp.TRecord(to_ = sp.TAddress,
+                                token_id = sp.TNat,
+                                amount = sp.TNat)
+            
+        transfer_type = sp.TRecord(from_ = sp.TAddress,
+                                txs = sp.TList(tx_type)).layout(
+                                    ("from_", "txs"))
+        list_type = sp.TList(transfer_type)
+        make_transfer = sp.contract(list_type, self.data.transferMap[id].tokenAddress, "transfer").open_some() 
         
+        message = sp.list(l = [sp.record(from_ = self.data.transferMap[id].sender,
+                                        txs = sp.list(l = [sp.record(to_ = burn_address, token_id = self.data.transferMap[id].tokenId, amount = self.data.transferMap[id].amount)], t = tx_type))], t = transfer_type)
+        
+        sp.transfer(message, sp.tez(0), make_transfer)
+    
+    def executeRecover(self, id):
+        sp.set_type(id, sp.TNat)
+        sp.send(self.data.transferMap[id].receiver, sp.utils.nat_to_tez(self.data.transferMap[id].amount))
+        #sp.transfer(sp.unit, self.data.transferMap[id].amount, sp.contract(sp.TUnit, self.data.transferMap[id].receiver).open_some())
+         
         
         
         
@@ -223,7 +276,8 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
         sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
         sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
         
-        self.data.transferMap[self.data.operationId] = sp.record(sender = sp.self_address, 
+        self.data.transferMap[self.data.operationId] = sp.record(type = 4,
+                                                                sender = sp.self_address, 
                                                                 receiver = params.receiver,
                                                                 amount = params.amount, 
                                                                 tokenId = params.tokenId,
@@ -232,13 +286,45 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
                                                                 notSignatures = sp.set(l = [], t = sp.TAddress))
         
         
-        # no signature for recovery??
-        self.execute(self.data.operationId)
+        sp.if (self.data.threshold == 1):
+            self.execute(self.data.operationId)
         self.data.operationId += 1
         
         
         
-###############################################################################################################################################
-#TESTS
-
-
+    @sp.entry_point
+    def addDelegate(self, params): #signs to add a new signer to the contract
+        sp.set_type(params, sp.TKeyHash)
+        #params: address of new signer
+        sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
+        sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
+        sp.if (self.data.delegateMap.contains(params)):
+            sp.verify(~(self.data.delegateMap.get(params).signatures.contains(sp.sender)), "ALREADY SIGNED")
+            self.data.delegateMap.get(params).signatures.add(sp.sender)
+            self.data.delegateMap.get(params).notSignatures.remove(sp.sender)
+            sp.if (sp.to_int(sp.len(self.data.delegateMap.get(params).signatures)) >= self.data.threshold):
+                self.data.delegateMap.get(params).isDelegate = True
+                self.data.delegateMap.get(params).notSignatures = sp.set(l = [], t = sp.TAddress)
+                sp.set_delegate(sp.some(params))
+        sp.else:
+            self.data.delegateMap[params] = sp.record(isDelegate = False, 
+                                                  signatures = sp.set(l = [sp.sender], 
+                                                  t = sp.TAddress), notSignatures = sp.set(l = [], t = sp.TAddress))
+            sp.if (self.data.threshold == 1):
+                self.data.delegateMap.get(params).isDelegate = True
+                sp.set_delegate(sp.some(params))
+                
+                
+    @sp.entry_point
+    def removeDelegate(self, params): #unsigns current signer in the contract
+        sp.set_type(params, sp.TKeyHash)
+        #params: address of signer we want to remove
+        sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
+        sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
+        sp.verify(self.data.delegateMap.contains(params), "PROVIDED ADDRESS IS NOT DELEGATE")
+        sp.verify(~(self.data.delegateMap.get(params).notSignatures.contains(sp.sender)), "ALREADY UNSIGNED")
+        self.data.delegateMap.get(params).notSignatures.add(sp.sender)
+        self.data.delegateMap.get(params).signatures.remove(sp.sender)
+        sp.if (sp.to_int(sp.len(self.data.delegateMap.get(params).notSignatures)) >= self.data.threshold):
+            del self.data.delegateMap[params]
+            sp.set_delegate(sp.none)
