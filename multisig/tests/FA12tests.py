@@ -99,9 +99,7 @@ def test():
     multisig_wallet.recoverToken(sp.record(receiver = alice.address, amount = 10, tokenAddress = c1.address)).run(sender = admin.address)
     multisig_wallet.signAndExecute(4).run(sender = alice.address)
    
-    # multisig_wallet.addDelegate(alice.public_key_hash).run(sender = alice.address)
-    # multisig_wallet.addDelegate(alice.public_key_hash).run(sender = admin.address)
-    # sp.verify(c1.data.delegate == sp.none(alice.public_key_hash))
+    
     
     
     multisig_wallet2 = MULTI.MultiSigWallet(signer = admin.address)
@@ -112,6 +110,12 @@ def test():
     multisig_wallet.addAdminSwitch(sp.record(receiver = multisig_wallet2.address, tokenAddress = c1.address)).run(sender = admin.address)
     multisig_wallet.signAndExecute(5).run(sender = alice.address)
     scenario.verify(c1.data.administrator == multisig_wallet2.address)
+    
+    # print(multisig_wallet.baker)
+    # key = sp.hash_key(multisig_wallet.address)
+    # multisig_wallet.addDelegate(key).run(sender = alice.address)
+    # multisig_wallet.addDelegate(key).run(sender = admin.address)
+    #sp.verify(c1.data.delegate == sp.some(multisig_wallet.public_key_hash))
     
 
     

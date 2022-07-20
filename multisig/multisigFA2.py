@@ -184,7 +184,7 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
         sp.set_type(id, sp.TNat)
         make_switch = sp.contract(sp.TAddress, self.data.transferMap[id].tokenAddress, "set_administrator").open_some()
         sp.transfer(self.data.transferMap[id].receiver, sp.tez(0), make_switch)
-         
+        
         
         
         
