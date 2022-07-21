@@ -111,10 +111,8 @@ def test():
     multisig_wallet.signAndExecute(5).run(sender = alice.address)
     scenario.verify(c1.data.administrator == multisig_wallet2.address)
     
-    # print(multisig_wallet.baker)
-    # key = sp.hash_key(multisig_wallet.address)
-    # multisig_wallet.addDelegate(key).run(sender = alice.address)
-    # multisig_wallet.addDelegate(key).run(sender = admin.address)
+    # multisig_wallet.addDelegate(alice.public_key_hash).run(sender = alice.address)
+    # multisig_wallet.addDelegate(alice.public_key_hash).run(sender = admin.address)
     #sp.verify(c1.data.delegate == sp.some(multisig_wallet.public_key_hash))
     
 
