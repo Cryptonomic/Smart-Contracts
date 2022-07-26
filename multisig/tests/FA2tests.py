@@ -65,25 +65,19 @@ def test():
     multisig_wallet.updateThreshold(2).run(sender = bob.address)
     scenario.verify(multisig_wallet.data.threshold == 2)
     
-    #TRANSFER
-    multisig_wallet.transfer(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
-    multisig_wallet.signAndExecute(0).run(sender = alice.address)
-    scenario.verify(c1.data.ledger[(alice.address, 0)] == 60)
-    scenario.verify(c1.data.ledger[(multisig_wallet.address, 0)] == 40)
-    
-    
+
    
     
-    #MINT
-    scenario.verify(c1.data.ledger[(alice.address, 0)] == 60)
-    multisig_wallet.mint(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
-    multisig_wallet.signAndExecute(1).run(sender = alice.address)
-    scenario.verify(c1.data.ledger[(alice.address, sp.nat(0))] == 70)
+    # #MINT
+    # scenario.verify(c1.data.ledger[(alice.address, 0)] == 60)
+    # multisig_wallet.mint(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
+    # multisig_wallet.signAndExecute(1).run(sender = alice.address)
+    # scenario.verify(c1.data.ledger[(alice.address, sp.nat(0))] == 70)
     
     #BURN - not available
     
     multisig_wallet.recoverToken(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
-    multisig_wallet.signAndExecute(2).run(sender = alice.address)
+    multisig_wallet.signAndExecute(0).run(sender = alice.address)
     
     
     c2 = FA2_NEW.FA2(config = FA2_NEW.environment_config(),
@@ -92,10 +86,33 @@ def test():
     
     scenario += c2
     c2.mint(sp.record(address = alice.address, amount = 50, metadata = tok0_md, token_id = 0)).run(sender=multisig_wallet.address)
+    c2.mint(sp.record(address = multisig_wallet.address, amount = 50, metadata = tok0_md, token_id = 0)).run(sender=multisig_wallet.address)
+    scenario.verify(c2.data.ledger[c2.ledger_key.make(alice.address, 0)].balance == 50)
+    scenario.verify(c2.data.ledger[c2.ledger_key.make(multisig_wallet.address, 0)].balance == 50)
     
+    # TRANSFER
+    multisig_wallet.transfer(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c2.address)).run(sender = admin.address)
+    multisig_wallet.signAndExecute(1).run(sender = alice.address)
+    scenario.verify(c2.data.ledger[c2.ledger_key.make(alice.address, 0)].balance == 60)
+    scenario.verify(c2.data.ledger[c2.ledger_key.make(multisig_wallet.address, 0)].balance == 40)
+    
+    
+
+    
+    # MINT
+    multisig_wallet.mint(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c2.address, metadata = sp.map())).run(sender = admin.address)
+    multisig_wallet.signAndExecute(2).run(sender = alice.address)
+    scenario.verify(c2.data.ledger[c2.ledger_key.make(alice.address, 0)].balance == 70)
+    scenario.verify(c2.data.ledger[c2.ledger_key.make(multisig_wallet.address, 0)].balance == 40)
+    
+    
+    
+    
+    # ADMIN SWITC3
     multisig_wallet.addAdminSwitch(sp.record(receiver = alice.address, tokenAddress = c2.address, tokenId = 0)).run(sender = admin.address)
     multisig_wallet.signAndExecute(3).run(sender = alice.address)
     scenario.verify(c2.data.administrator == alice.address)
+    
     
     
     

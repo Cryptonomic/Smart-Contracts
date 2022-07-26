@@ -1,4 +1,3 @@
-from cv2 import threshold
 import smartpy as sp
 
 FA2Interface = sp.io.import_script_from_url(
@@ -43,6 +42,7 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
                                                                 receiver = params.receiver,
                                                                 amount = params.amount, 
                                                                 tokenId = params.tokenId,
+                                                                metadata = sp.map(l = {}, tkey = sp.TString, tvalue = sp.TBytes),
                                                                 tokenAddress = params.tokenAddress,
                                                                 signatures = sp.set(l = [sp.sender], t = sp.TAddress),
                                                                 notSignatures = sp.set(l = [], t = sp.TAddress))
@@ -53,7 +53,7 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
         
     @sp.entry_point
     def mint(self, params):
-        sp.set_type(params, FA2Interface.INIT_TRANSFER_TYPE)
+        sp.set_type(params, FA2Interface.MINTING_TYPE)
         
         sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
         sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
@@ -63,6 +63,7 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
                                                                 receiver = params.receiver,
                                                                 amount = params.amount, 
                                                                 tokenId = params.tokenId,
+                                                                metadata = params.metadata,
                                                                 tokenAddress = params.tokenAddress,
                                                                 signatures = sp.set(l = [sp.sender], t = sp.TAddress),
                                                                 notSignatures = sp.set(l = [], t = sp.TAddress))
@@ -71,25 +72,27 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
             self.execute(self.data.operationId)
         self.data.operationId += 1
         
-    @sp.entry_point
-    def burn(self, params):
-        sp.set_type(params, FA2Interface.INIT_TRANSFER_TYPE)
+    # @sp.entry_point
+    # def burn(self, params):
+    #     
+        # sp.set_type(params, FA2Interface.INIT_TRANSFER_TYPE)
         
-        sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
-        sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
+        # sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
+        # sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
         
-        self.data.transferMap[self.data.operationId] = sp.record(type = 3,
-                                                                sender = params.receiver, 
-                                                                receiver = params.receiver,
-                                                                amount = params.amount, 
-                                                                tokenId = params.tokenId,
-                                                                tokenAddress = params.tokenAddress,
-                                                                signatures = sp.set(l = [sp.sender], t = sp.TAddress),
-                                                                notSignatures = sp.set(l = [], t = sp.TAddress))
+        # self.data.transferMap[self.data.operationId] = sp.record(type = 3,
+        #                                                         sender = params.receiver, 
+        #                                                         receiver = params.receiver,
+        #                                                         amount = params.amount, 
+        #                                                         tokenId = params.tokenId,
+        #                                                         metadata = sp.map(),
+        #                                                         tokenAddress = params.tokenAddress,
+        #                                                         signatures = sp.set(l = [sp.sender], t = sp.TAddress),
+        #                                                         notSignatures = sp.set(l = [], t = sp.TAddress))
         
-        sp.if (self.data.threshold == 1):
-            self.execute(self.data.operationId)
-        self.data.operationId += 1
+        # sp.if (self.data.threshold == 1):
+        #     self.execute(self.data.operationId)
+        # self.data.operationId += 1
     
     @sp.entry_point
     def signTransfer(self,params): # sign current transfer proposition
@@ -129,14 +132,14 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
             self.executeMint(id)
         sp.if (self.data.transferMap[id].type == 4):
             self.executeRecover(id)
-        sp.if (self.data.transferMap[id].type == 3):
-            self.executeBurn(id)
+        # sp.if (self.data.transferMap[id].type == 3):
+        #     self.executeBurn(id)
         sp.if (self.data.transferMap[id].type == 5):
             self.executeAdminSwitch(id)   
         sp.if (self.data.transferMap[id].type == 0):
             tx_type = sp.TRecord(to_ = sp.TAddress,
                                 token_id = sp.TNat,
-                                amount = sp.TNat)
+                                amount = sp.TNat).layout(("to_", ("token_id", "amount")));
             
             transfer_type = sp.TRecord(from_ = sp.TAddress,
                                     txs = sp.TList(tx_type)).layout(
@@ -153,27 +156,26 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
         
     def executeMint(self, id):
         sp.set_type(id, sp.TNat)
-        make_mint = sp.contract(sp.TRecord(to_ = sp.TAddress, token = sp.TVariant(existing = sp.TNat, new = sp.TMap(sp.TString, sp.TBytes)), amount= sp.TNat), self.data.transferMap[id].tokenAddress, "mint").open_some()
-        sp.transfer(sp.record(to_ = self.data.transferMap[id].receiver, token = sp.variant("existing", self.data.transferMap[id].tokenId), amount = self.data.transferMap[id].amount), sp.tez(0), make_mint)
+        make_mint = sp.contract(sp.TRecord(address = sp.TAddress, amount= sp.TNat, token_id = sp.TNat, metadata = sp.TMap(sp.TString, sp.TBytes)).layout((("address", "amount"), ("metadata", "token_id"))), self.data.transferMap[id].tokenAddress, "mint").open_some()
+        sp.transfer(sp.record(address = self.data.transferMap[id].receiver, token_id = self.data.transferMap[id].tokenId, amount = self.data.transferMap[id].amount, metadata = self.data.transferMap[id].metadata), sp.tez(0), make_mint)
         
-    def executeBurn(self, id):
-        sp.set_type(id, sp.TNat)
-        sp.trace("brurning that shit")
-        burn_address = sp.address("tz1burnburnburnburnburnburnburjAYjjX")
-        tx_type = sp.TRecord(to_ = sp.TAddress,
-                                token_id = sp.TNat,
-                                amount = sp.TNat)
+    # def executeBurn(self, id):
+    #     sp.set_type(id, sp.TNat)
+    #     burn_address = sp.address("tz1burnburnburnburnburnburnburjAYjjX")
+    #     tx_type = sp.TRecord(to_ = sp.TAddress,
+    #                             token_id = sp.TNat,
+    #                             amount = sp.TNat)
             
-        transfer_type = sp.TRecord(from_ = sp.TAddress,
-                                txs = sp.TList(tx_type)).layout(
-                                    ("from_", "txs"))
-        list_type = sp.TList(transfer_type)
-        make_transfer = sp.contract(list_type, self.data.transferMap[id].tokenAddress, "transfer").open_some() 
+    #     transfer_type = sp.TRecord(from_ = sp.TAddress,
+    #                             txs = sp.TList(tx_type)).layout(
+    #                                 ("from_", "txs"))
+    #     list_type = sp.TList(transfer_type)
+    #     make_transfer = sp.contract(list_type, self.data.transferMap[id].tokenAddress, "transfer").open_some() 
         
-        message = sp.list(l = [sp.record(from_ = self.data.transferMap[id].sender,
-                                        txs = sp.list(l = [sp.record(to_ = burn_address, token_id = self.data.transferMap[id].tokenId, amount = self.data.transferMap[id].amount)], t = tx_type))], t = transfer_type)
+    #     message = sp.list(l = [sp.record(from_ = self.data.transferMap[id].sender,
+    #                                     txs = sp.list(l = [sp.record(to_ = burn_address, token_id = self.data.transferMap[id].tokenId, amount = self.data.transferMap[id].amount)], t = tx_type))], t = transfer_type)
         
-        sp.transfer(message, sp.tez(0), make_transfer)
+    #     sp.transfer(message, sp.tez(0), make_transfer)
     
     def executeRecover(self, id):
         sp.set_type(id, sp.TNat)
@@ -288,6 +290,7 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
                                                                 receiver = params.receiver,
                                                                 amount = params.amount, 
                                                                 tokenId = params.tokenId,
+                                                                metadata = sp.map(l = {}, tkey = sp.TString, tvalue = sp.TBytes),
                                                                 tokenAddress = params.tokenAddress,
                                                                 signatures = sp.set(l = [sp.sender], t = sp.TAddress),
                                                                 notSignatures = sp.set(l = [], t = sp.TAddress))
@@ -348,6 +351,7 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
                                                                 receiver = params.receiver,
                                                                 amount = 0, 
                                                                 tokenId = params.tokenId,
+                                                                metadata = sp.map(l = {}, tkey = sp.TString, tvalue = sp.TBytes),
                                                                 tokenAddress = params.tokenAddress,
                                                                 signatures = sp.set(l = [sp.sender], t = sp.TAddress),
                                                                 notSignatures = sp.set(l = [], t = sp.TAddress))

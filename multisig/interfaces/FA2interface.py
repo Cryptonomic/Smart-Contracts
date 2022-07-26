@@ -2,7 +2,9 @@ import smartpy as sp
 
 SIGNATURES_TYPE = sp.TMap(sp.TKeyHash, sp.TSignature)
 
-TRANSFER_TYPE = sp.TRecord(type = sp.TNat, sender = sp.TAddress, receiver = sp.TAddress, amount = sp.TNat, tokenId = sp.TNat, tokenAddress = sp.TAddress, signatures = sp.TSet(sp.TAddress), notSignatures = sp.TSet(sp.TAddress))
+MINTING_TYPE = sp.TRecord(receiver = sp.TAddress, amount = sp.TNat, tokenId = sp.TNat, tokenAddress = sp.TAddress, metadata = sp.TMap(sp.TString, sp.TBytes))
+
+TRANSFER_TYPE = sp.TRecord(type = sp.TNat, sender = sp.TAddress, receiver = sp.TAddress, amount = sp.TNat, tokenId = sp.TNat, tokenAddress = sp.TAddress,metadata = sp.TMap(sp.TString, sp.TBytes), signatures = sp.TSet(sp.TAddress), notSignatures = sp.TSet(sp.TAddress)) # metadata used for mint
 #Types: 0 transfer, 1 mint, 2 approve, 3 burn, 4 recover, 5 switch admin
 
 INIT_TRANSFER_TYPE = sp.TRecord(receiver = sp.TAddress, amount = sp.TNat, tokenId = sp.TNat, tokenAddress = sp.TAddress)
