@@ -98,6 +98,8 @@ def test():
     
     multisig_wallet.recoverToken(sp.record(receiver = alice.address, amount = 10, tokenAddress = c1.address)).run(sender = admin.address)
     multisig_wallet.signAndExecute(4).run(sender = alice.address)
+    scenario.verify(multisig_wallet.balance == sp.tez(90))
+    scenario.verify(alice.balance == sp.tez(10))
    
     
     
@@ -111,9 +113,6 @@ def test():
     multisig_wallet.signAndExecute(5).run(sender = alice.address)
     scenario.verify(c1.data.administrator == multisig_wallet2.address)
     
-    # multisig_wallet.addDelegate(alice.public_key_hash).run(sender = alice.address)
-    # multisig_wallet.addDelegate(alice.public_key_hash).run(sender = admin.address)
-    #sp.verify(c1.data.delegate == sp.some(multisig_wallet.public_key_hash))
     
 
     

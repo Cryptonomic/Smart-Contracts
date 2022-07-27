@@ -66,18 +66,11 @@ def test():
     scenario.verify(multisig_wallet.data.threshold == 2)
     
 
-   
-    
-    # #MINT
-    # scenario.verify(c1.data.ledger[(alice.address, 0)] == 60)
-    # multisig_wallet.mint(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
-    # multisig_wallet.signAndExecute(1).run(sender = alice.address)
-    # scenario.verify(c1.data.ledger[(alice.address, sp.nat(0))] == 70)
-    
     #BURN - not available
     
     multisig_wallet.recoverToken(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
     multisig_wallet.signAndExecute(0).run(sender = alice.address)
+    scenario.verify(multisig_wallet.balance == sp.tez(90))
     
     
     c2 = FA2_NEW.FA2(config = FA2_NEW.environment_config(),
