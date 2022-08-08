@@ -68,24 +68,6 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
             self.execute(self.data.operationId)
         self.data.operationId += 1
         
-    @sp.entry_point
-    def burn(self, params):
-        sp.set_type(params, FA12Interface.INIT_TRANSFER_TYPE)
-        
-        sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
-        sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
-        
-        self.data.transferMap[self.data.operationId] = sp.record(type = 3,
-                                                                sender = params.receiver, 
-                                                                receiver = params.tokenAddress,
-                                                                amount = params.amount, 
-                                                                tokenAddress = params.tokenAddress,
-                                                                signatures = sp.set(l = [sp.sender], t = sp.TAddress),
-                                                                notSignatures = sp.set(l = [], t = sp.TAddress))
-        
-        sp.if (self.data.threshold == 1):
-            self.execute(self.data.operationId)
-        self.data.operationId += 1
     
     @sp.entry_point
     def signTransfer(self,params): # sign current transfer proposition
@@ -125,8 +107,8 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
             self.executeMint(id)
         sp.if (self.data.transferMap[id].type == 2):
             self.executeApprove(id)
-        sp.if (self.data.transferMap[id].type == 3):
-            self.executeBurn(id)
+        # sp.if (self.data.transferMap[id].type == 3):
+        #     self.executeBurn(id)
         sp.if (self.data.transferMap[id].type == 4):
             self.executeRecover(id) 
         sp.if (self.data.transferMap[id].type == 5):
@@ -154,10 +136,6 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
         make_mint = sp.contract(sp.TRecord(spender = sp.TAddress, value= sp.TNat), self.data.transferMap[id].tokenAddress, "approve").open_some()
         sp.transfer(sp.record(spender = self.data.transferMap[id].receiver, value = self.data.transferMap[id].amount), sp.tez(0), make_mint)
         
-    def executeBurn(self, id): # type 3
-        sp.set_type(id, sp.TNat)
-        make_burn = sp.contract(sp.TRecord(address = sp.TAddress, value= sp.TNat), self.data.transferMap[id].tokenAddress, "burn").open_some()
-        sp.transfer(sp.record(address = self.data.transferMap[id].sender, value = self.data.transferMap[id].amount), sp.tez(0), make_burn)
     
     def executeRecover(self, id):
         sp.set_type(id, sp.TNat)

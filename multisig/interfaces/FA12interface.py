@@ -57,11 +57,6 @@ class MultiSigWalletInterface(sp.Contract):
         sp.set_type(params, INIT_TRANSFER_TYPE)
         pass
     
-    @sp.entry_point #initiate mint proposition
-    def burn(self, params):
-        sp.set_type(params, INIT_TRANSFER_TYPE)
-        pass
-    
     @sp.entry_point # to add/sign threshold proposition
     def updateThreshold(self, params):
         sp.set_type(params, sp.TInt)
