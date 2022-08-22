@@ -54,6 +54,8 @@ def test():
     multisig_wallet.addSigner(bob.address).run(sender = alice.address)
     multisig_wallet.addSigner(admin.address).run(sender = bob.address)
     scenario.verify(multisig_wallet.data.signers.contains(bob.address)) ## add bob as signer
+    multisig_wallet.updateThreshold(4).run(sender = bob.address).run(valid=False)
+    multisig_wallet.updateThreshold(0).run(sender = bob.address).run(valid=False)
     multisig_wallet.updateThreshold(2).run(sender = bob.address)
     scenario.verify(multisig_wallet.data.threshold == 2)
     multisig_wallet.updateThreshold(3).run(sender = bob.address)

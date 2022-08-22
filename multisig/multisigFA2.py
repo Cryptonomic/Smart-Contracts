@@ -25,7 +25,8 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
                      tkey = sp.TAddress, 
                      tvalue = FA2Interface.SIGNER_TYPE), # list of current/pending signers
             delegateMap = delegateMap_,
-            transferMap = sp.map(l = {}, tkey = sp.TNat, tvalue = FA2Interface.TRANSFER_TYPE) # map of pending transfers
+            transferMap = sp.map(l = {}, tkey = sp.TNat, tvalue = FA2Interface.TRANSFER_TYPE), # map of pending transfers
+            numberSigner = sp.int(1)
             )
         
     
@@ -183,6 +184,7 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
             self.data.signers.get(params).notSignatures.remove(sp.sender)
             sp.if (sp.to_int(sp.len(self.data.signers.get(params).signatures)) >= self.data.threshold):
                 self.data.signers.get(params).isSigner = True
+                self.data.numberSigner = self.data.numberSigner + 1
                 self.data.signers.get(params).notSignatures = sp.set(l = [], t = sp.TAddress)
         sp.else:
             self.data.signers[params] = sp.record(isSigner = False, 
@@ -190,6 +192,7 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
                                                   t = sp.TAddress), notSignatures = sp.set(l = [], t = sp.TAddress))
             sp.if (self.data.threshold == 1):
                 self.data.signers.get(params).isSigner = True
+                self.data.numberSigner = self.data.numberSigner + 1
                 
                 
     @sp.entry_point
@@ -205,11 +208,14 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
         sp.if (sp.to_int(sp.len(self.data.signers.get(params).notSignatures)) >= self.data.threshold):
             del self.data.signers[params]
             self.data.threshold = self.data.threshold - 1
+            self.data.numberSigner = self.data.numberSigner - 1
             
     @sp.entry_point
     def updateThreshold(self, params):
         sp.set_type(params, sp.TInt)
         #params: new suggested threshold
+        sp.verify(params <= self.data.numberSigner, "THRESHOLD TOO HIGH")
+        sp.verify(params >= 1, "THRESHOLD TOO LOW")
         sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
         sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
         sp.if (self.data.thresholdMap.contains(params)):
