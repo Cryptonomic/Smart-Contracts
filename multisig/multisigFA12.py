@@ -46,7 +46,7 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
                                                                 signatures = sp.set(l = [sp.sender], t = sp.TAddress),
                                                                 notSignatures = sp.set(l = [], t = sp.TAddress))
         
-        sp.if (self.data.threshold == 1):
+        sp.if (self.data.threshold <= 1):
             self.execute(self.data.operationId)
         self.data.operationId += 1
         
@@ -65,7 +65,7 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
                                                                 signatures = sp.set(l = [sp.sender], t = sp.TAddress),
                                                                 notSignatures = sp.set(l = [], t = sp.TAddress))
         
-        sp.if (self.data.threshold == 1):
+        sp.if (self.data.threshold <= 1):
             self.execute(self.data.operationId)
         self.data.operationId += 1
         
@@ -185,7 +185,7 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
             self.data.signers[params] = sp.record(isSigner = False, 
                                                   signatures = sp.set(l = [sp.sender], 
                                                   t = sp.TAddress), notSignatures = sp.set(l = [], t = sp.TAddress))
-            sp.if (self.data.threshold == 1):
+            sp.if (self.data.threshold <= 1):
                 self.data.signers.get(params).isSigner = True
                 self.data.numberSigner = self.data.numberSigner + 1
                 
@@ -224,7 +224,7 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
             self.data.thresholdMap[params] = sp.record(
                                                   signatures = sp.set(l = [sp.sender], 
                                                   t = sp.TAddress), notSignatures = sp.set(l = [], t = sp.TAddress))
-            sp.if (self.data.threshold == 1):
+            sp.if (self.data.threshold <= 1):
                 self.data.threshold = params
                 del self.data.thresholdMap[params]
                 
@@ -257,7 +257,7 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
                                                                 notSignatures = sp.set(l = [], t = sp.TAddress))
         
         
-        sp.if (self.data.threshold == 1):
+        sp.if (self.data.threshold <= 1):
             self.execute(self.data.operationId)
         self.data.operationId += 1
         
@@ -276,7 +276,7 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
                                                                 signatures = sp.set(l = [sp.sender], t = sp.TAddress),
                                                                 notSignatures = sp.set(l = [], t = sp.TAddress))
         
-        sp.if (self.data.threshold == 1):
+        sp.if (self.data.threshold <= 1):
             self.execute(self.data.operationId)
         self.data.operationId += 1
         
@@ -299,7 +299,7 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
             self.data.delegateMap[params] = sp.record(isDelegate = False, 
                                                   signatures = sp.set(l = [sp.sender], 
                                                   t = sp.TAddress), notSignatures = sp.set(l = [], t = sp.TAddress))
-            sp.if (self.data.threshold == 1):
+            sp.if (self.data.threshold <= 1):
                 self.data.delegateMap.get(params).isDelegate = True
                 sp.set_delegate(sp.some(params))
                 
@@ -333,7 +333,7 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
                                                                 signatures = sp.set(l = [sp.sender], t = sp.TAddress),
                                                                 notSignatures = sp.set(l = [], t = sp.TAddress))
         
-        sp.if (self.data.threshold == 1):
+        sp.if (self.data.threshold <= 1):
             self.execute(self.data.operationId)
         self.data.operationId += 1
         
