@@ -30,6 +30,9 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
             )
         
     
+    @sp.entry_point
+    def default(self):
+        pass
     
     @sp.entry_point
     def transfer(self, params): # new transfer proposition
