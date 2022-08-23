@@ -248,7 +248,7 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
         
     @sp.entry_point
     def recoverToken(self, params):
-        sp.set_type(params, FA2Interface.INIT_TRANSFER_TYPE)
+        sp.set_type(params, FA2Interface.INIT_RECOVER_TYPE)
         
         sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
         sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
@@ -257,9 +257,9 @@ class MultiSigWallet(FA2Interface.MultiSigWalletInterface):
                                                                 sender = sp.self_address, 
                                                                 receiver = params.receiver,
                                                                 amount = params.amount, 
-                                                                tokenId = params.tokenId,
+                                                                tokenId = 0,
                                                                 metadata = sp.map(l = {}, tkey = sp.TString, tvalue = sp.TBytes),
-                                                                tokenAddress = params.tokenAddress,
+                                                                tokenAddress = sp.self_address,
                                                                 signatures = sp.set(l = [sp.sender], t = sp.TAddress),
                                                                 notSignatures = sp.set(l = [], t = sp.TAddress))
         

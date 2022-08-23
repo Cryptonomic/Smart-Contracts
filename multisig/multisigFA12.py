@@ -243,7 +243,7 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
         
     @sp.entry_point
     def recoverToken(self, params):
-        sp.set_type(params, FA12Interface.INIT_TRANSFER_TYPE)
+        sp.set_type(params, FA12Interface.INIT_RECOVER_TYPE)
         
         sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
         sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")

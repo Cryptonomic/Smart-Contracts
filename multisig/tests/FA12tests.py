@@ -91,7 +91,7 @@ def test():
     
     
     
-    multisig_wallet.recoverToken(sp.record(receiver = alice.address, amount = 10, tokenAddress = c1.address)).run(sender = admin.address)
+    multisig_wallet.recoverToken(sp.record(receiver = alice.address, amount = 10)).run(sender = admin.address)
     multisig_wallet.signAndExecute(3).run(sender = alice.address)
     scenario.verify(multisig_wallet.balance == sp.tez(90))
    

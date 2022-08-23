@@ -8,6 +8,7 @@ TRANSFER_TYPE = sp.TRecord(type = sp.TNat, sender = sp.TAddress, receiver = sp.T
 #Types: 0 transfer, 1 mint, 2 approve, 3 burn, 4 recover, 5 switch admin
 
 INIT_TRANSFER_TYPE = sp.TRecord(receiver = sp.TAddress, amount = sp.TNat, tokenId = sp.TNat, tokenAddress = sp.TAddress)
+INIT_RECOVER_TYPE = sp.TRecord(receiver = sp.TAddress, amount = sp.TNat)
 
 SIGNER_TYPE = sp.TRecord(isSigner = sp.TBool, signatures = sp.TSet(sp.TAddress), notSignatures = sp.TSet(sp.TAddress))
 THRESHOLD_TYPE = sp.TRecord(signatures = sp.TSet(sp.TAddress), notSignatures = sp.TSet(sp.TAddress))

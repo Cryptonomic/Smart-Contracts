@@ -70,7 +70,7 @@ def test():
 
     #BURN - not available
     
-    multisig_wallet.recoverToken(sp.record(receiver = alice.address, amount = 10, tokenId = sp.nat(0), tokenAddress = c1.address)).run(sender = admin.address)
+    multisig_wallet.recoverToken(sp.record(receiver = alice.address, amount = 10)).run(sender = admin.address)
     multisig_wallet.signAndExecute(0).run(sender = alice.address)
     scenario.verify(multisig_wallet.balance == sp.tez(90))
     
