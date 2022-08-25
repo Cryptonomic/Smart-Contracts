@@ -28,11 +28,6 @@ class MultiSigWalletInterface(sp.Contract):
         sp.set_type(params, INIT_TRANSFER_TYPE)
         pass
     
-    @sp.entry_point # sign a tranfer/mint proposition
-    def signTransfer(self, params):
-        sp.set_type(params, sp.TNat)
-        pass
-    
     @sp.entry_point # sign and try to execute a proposition
     def signAndExecute(self, params):
         sp.set_type(params, sp.TNat)

@@ -73,18 +73,7 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
         self.data.operationId += 1
         
     
-    @sp.entry_point
-    def signTransfer(self,params): # sign current transfer proposition
-        #params: id of transfer
-        sp.set_type(params, sp.TNat)
-        
-    
-        sp.verify(self.data.signers.contains(sp.sender), "NOT AUTHORIZED SIGNER")
-        sp.verify(self.data.signers.get(sp.sender).isSigner, "NOT AUTHORIZED SIGNER")
-        self.data.transferMap[params].notSignatures.remove(sp.sender)
-        sp.verify(~(self.data.transferMap[params].signatures.contains(sp.sender)), "ALREADY SIGNED THIS TRANSACTION")
-        self.data.transferMap[params].signatures.add(sp.sender)
-        
+
     @sp.entry_point
     def signAndExecute(self, params): # sign and execute current transfer proposition if enough signatures
         #params: id of transfer
@@ -98,8 +87,8 @@ class MultiSigWallet(FA12Interface.MultiSigWalletInterface):
         
         
         nbSig = sp.to_int(sp.len(self.data.transferMap.get(params).signatures))
-        sp.verify(nbSig >= self.data.threshold, "NOT ENOUGH SIGNATURES")
-        self.execute(params)
+        sp.if (nbSig >= self.data.threshold):
+            self.execute(params)
         
         
         
