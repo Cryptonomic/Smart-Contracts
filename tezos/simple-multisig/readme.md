@@ -1,5 +1,7 @@
 ## Multisig smart contract for FA1.2 and FA2 templates
 
+### How the mulitisigs work:
+
 Both multisigs have the same functionalities:
 - create a transaction request (transactions include token transfer, minting, recovery, approve the reception of tokens, change admin for FA1.2/FA2 token contract)
 - add/remove signer
@@ -19,4 +21,23 @@ How the signing process works:
 - the same principle applies to delegates, signers and threshold modifications.
 - for signers only: when signer is approved, all unsignatures are removed from transaction map
 
+### Tests: 
 
+- the tests for both multisigs are located in the *test* folder
+- to run the tests, run command *~/smartpy-cli/SmartPy.sh test tests/FA2tests.py output2* in terminal for FA2 mulitisig, and *~/smartpy-cli/SmartPy.sh test tests/FA12tests.py output12* for FA1.2 multisig
+
+### Deploying the contracts:
+
+- compilation targets are in the *deploy* folder
+- before deploying a multisig, put your address in the *signer* field so that you can access it after
+- I also included FA1.2 and FA2 token templates contracts from SmartPy in you need to deploy tokens for testing
+- to generate contract code, run *~/smartpy-cli/SmartPy.sh compile deploy/fa2target.py compiled* or *~/smartpy-cli/SmartPy.sh compile deploy/fa12target.py compiled*
+- once the contract source code has been generated, go into the newly created *compiled* folder and deploy the contract using your method of choice. Here is an example that SmartPy provides: https://smartpy.io/docs/cli/
+
+## User Interface
+
+- Very simple react application to interact with multisig contracts on Jakartanet.
+- To start the app, simply run *npm run start* in *UI* folder terminal
+- Right now, contract origination is not working (*storage_exhausted.operation* error), so deployment has to be done manually. Once you have the address of your multisig, simple add it in the *UI/src/utils/operations.js* file as such: *const contractAddressTest = "your new multisig address";*
+- You can then make call to the multisig in the *operations*, *parameters* and *storage* pages once you are connected to your wallet.
+- All the functionnalities are available, expect for minting with FA2 and approve for FA1.2
