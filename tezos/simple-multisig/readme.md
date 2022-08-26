@@ -1,5 +1,7 @@
 ## Multisig smart contract for FA1.2 and FA2 templates
 
+**Link to the demo video:** https://drive.google.com/file/d/1nZL9Q9EJ1Y1RPJR24S0uGYNZ0zi2TCW1/view?usp=sharing
+
 ### How the mulitisigs work:
 
 Both multisigs have the same functionalities:
