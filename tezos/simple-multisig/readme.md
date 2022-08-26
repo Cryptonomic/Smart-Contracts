@@ -39,5 +39,5 @@ How the signing process works:
 - Very simple react application to interact with multisig contracts on Jakartanet.
 - To start the app, simply run *npm run start* in *UI* folder terminal
 - Right now, contract origination is not working (*storage_exhausted.operation* error), so deployment has to be done manually. Once you have the address of your multisig, simple add it in the *UI/src/utils/operations.js* file as such: *const contractAddressTest = "your new multisig address";*
-- You can then make call to the multisig in the *operations*, *parameters* and *storage* pages once you are connected to your wallet.
+- You can then make calls to the multisig in the *operations*, *parameters* and *storage* pages once you are connected to your wallet.
 - All the functionnalities are available, expect for minting with FA2 and approve for FA1.2
