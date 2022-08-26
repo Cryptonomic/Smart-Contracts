@@ -14,7 +14,7 @@ contract_metadata = {
 }
 
 sp.add_compilation_target("FA12_comp", FA12_NEW.FA12(
-        sp.address("KT1J3REbhAcu8tmBfVLUHYXV7ke3PLdsdx8r"),
+        sp.address("KT1TCUbHBjHbgqcMsBGwjD85XZSzcwfKHpP6"),
         config              = FA12_NEW.FA12_config(support_upgradable_metadata = True),
         token_metadata      = token_metadata,
         contract_metadata   = contract_metadata
