@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { addTransfer } from "../../utils/operation";
+import { addApprove } from "../../utils/operation";
 
 
-const Transfer = ({contractAddress}) => {
+const Approve = ({contractAddress}) => {
 
     const [to, setTo] = useState("");
     const [amount, setAmount] = useState(0);
@@ -20,14 +20,16 @@ const Transfer = ({contractAddress}) => {
         try{
 
             setLoading(true);
-            let transfer = {
-                receiver: to,
+
+            let approve = {
+
+                sender: to,
                 amount: amount,
                 tokenAddress: address,
-                tokenId: id
-            };
 
-            await addTransfer(transfer, contractAddress);
+            }
+
+            await addApprove(approve, contractAddress);
 
             alert("transaction confirmed!");
             
@@ -43,11 +45,9 @@ const Transfer = ({contractAddress}) => {
 
 
     return (
-        <div className="d-flex flex-column justify-content-center align-items-left t-100">
-          <h1>A</h1>
-          <h1>A</h1>
-           <h5>transfer</h5>
-          <label>To:
+        <div className="d-flex flex-column justify-content-center align-items-left h-100">
+           <h5>Approve</h5>
+          <label>From:
             <input 
               style={{width: "370px"}}
               type="text"
@@ -58,7 +58,7 @@ const Transfer = ({contractAddress}) => {
           <label>Amount:
             <input 
               style={{width: "370px"}}
-              type="number"
+              type="text"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
             />
@@ -82,7 +82,7 @@ const Transfer = ({contractAddress}) => {
           <button onClick={handleSubmitAdd}>
             Submit
           </button>
-       <span>{loading?"Loading...":""}</span>
+       <span>{loading?"Loading...": ""}</span>
         </div>
       )
     
@@ -90,4 +90,4 @@ const Transfer = ({contractAddress}) => {
 
 };
 
-export default Transfer;
+export default Approve;

@@ -9,7 +9,7 @@ export const wallet = new BeaconWallet({
 
 export const connectWallet = async () => {
 
-    //await wallet.clearActiveAccount();
+    await wallet.clearActiveAccount();
 
     await wallet.requestPermissions({
         network: {

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { addMint } from "../../utils/operation";
 
 
-const Mint = () => {
+const Mint = ({contractAddress}) => {
 
     const [to, setTo] = useState("");
     const [amount, setAmount] = useState(0);
@@ -31,7 +31,7 @@ const Mint = () => {
 
             }
 
-            await addMint(mint);
+            await addMint(mint, contractAddress);
 
             alert("transaction confirmed!");
             
@@ -48,7 +48,7 @@ const Mint = () => {
 
     return (
         <div className="d-flex flex-column justify-content-center align-items-left h-100">
-           <h3>Mint</h3>
+           <h5>Mint</h5>
           <label>To:
             <input 
               style={{width: "370px"}}

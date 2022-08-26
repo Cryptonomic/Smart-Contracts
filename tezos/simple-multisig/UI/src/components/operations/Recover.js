@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { addRecover } from "../../utils/operation";
 
-const Send = () => {
+const Send = ({contractAddress}) => {
 
     const [to, setTo] = useState("");
     const [amount, setAmount] = useState(0);
@@ -22,7 +22,7 @@ const Send = () => {
                 receiver: to
             };
 
-            await addRecover(recover);
+            await addRecover(recover, contractAddress);
 
             alert("transaction confirmed!");
             
@@ -39,7 +39,7 @@ const Send = () => {
 
     return (
         <div className="d-flex flex-column justify-content-center align-items-left h-100">
-           <h3>Send</h3>
+           <h5>Send</h5>
           <label>To:
             <input 
               style={{width: "370px"}}

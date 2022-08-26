@@ -2,12 +2,13 @@ import { useEffect, useState } from "react";
 import { originateMultisig12, originateMultisig2 } from "../utils/operation";
 
 
-const Homepage = () => {
+const Homepage = ({updateAddress}) => {
 
     const [address12, setAddress12] = useState("");
     const [address2, setAddress2] = useState("");
     const [loading, setLoading] = useState(false);
     const [mySigs, setMySigs] = useState([]);
+    const [current, setCurrent] = useState("");
 
     const parseMySigs = async () => {
 
@@ -17,6 +18,7 @@ const Homepage = () => {
 
 
     }
+
    
 
     const handleSubmitAdd12 = async (event) => {
@@ -32,6 +34,7 @@ const Homepage = () => {
 
             const a = await originateMultisig12();
             setAddress12(a);
+            setCurrent(a);
 
             alert("transaction confirmed!");
             
@@ -75,7 +78,17 @@ const Homepage = () => {
     return (
         <div className="d-flex flex-column justify-content-center align-items-left h-100">
             <h3>My multisigs</h3>
-            <ul>{mySigs}</ul>
+            <label>Current:
+            <input 
+              style={{width: "370px"}}
+              type="text"
+              value={current}
+              onChange={(e) => setCurrent(e.target.value)}
+            />
+            <button onClick={() => {updateAddress(current)}}>
+            Use this multisig
+          </button>
+          </label>
            <h3>New Multisig</h3>
           <button onClick={handleSubmitAdd12}>
             Create new FA1.2 multisig

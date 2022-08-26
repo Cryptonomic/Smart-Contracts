@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { adminSwitch } from "../../utils/operation";
 
 
-const Admin = () => {
+const Admin = ({contractAddress}) => {
 
     const [to, setTo] = useState("");
     const [address, setAddress] = useState("");
@@ -24,7 +24,7 @@ const Admin = () => {
                 tokenAddress: address
             }
 
-            await adminSwitch(admin);
+            await adminSwitch(admin, contractAddress);
 
             alert("transaction confirmed!");
             
@@ -41,7 +41,7 @@ const Admin = () => {
 
     return (
         <div className="d-flex flex-column justify-content-center align-items-left h-100">
-           <h3>Admin Switch</h3>
+           <h5>Admin Switch</h5>
           <label>New Admin:
             <input 
               style={{width: "370px"}}

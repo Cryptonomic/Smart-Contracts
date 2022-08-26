@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { connectWallet, getAccount} from "../../utils/wallet";
 import {addSignerOperation, removeSignerOperation} from "../../utils/operation";
 
-const Signer = () => {
+const Signer = ({contractAddress}) => {
 
     const [signer, setSigner] = useState("");
     const [unsigner, unsetSigner] = useState("");
@@ -19,7 +19,7 @@ const Signer = () => {
 
             setLoading(true);
 
-            await addSignerOperation(signer);
+            await addSignerOperation(signer, contractAddress);
 
             alert("transaction confirmed!");
             
@@ -40,7 +40,7 @@ const Signer = () => {
 
           setUnloading(true);
 
-          await removeSignerOperation(unsigner);
+          await removeSignerOperation(unsigner, contractAddress);
           alert("transaction confirmed!");
           
         }catch(error){

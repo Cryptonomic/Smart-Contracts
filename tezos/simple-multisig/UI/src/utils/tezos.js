@@ -2,7 +2,7 @@
 import { TezosToolkit } from "@taquito/taquito";
 import {wallet} from "./wallet";
 
-const RPC_URL = "https://jakartanet.ecadinfra.com";
+const RPC_URL = "https://jakartanet.smartpy.io";
 
 export const tezos = new TezosToolkit(RPC_URL);
 

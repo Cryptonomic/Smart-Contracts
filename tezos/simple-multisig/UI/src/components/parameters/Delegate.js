@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { connectWallet, getAccount} from "../../utils/wallet";
 import {addDelegate, removeDelegate} from "../../utils/operation";
 
-const Delegate = () => {
+const Delegate = ({contractAddress}) => {
 
     const [delegate, setDelegate] = useState("");
     const [unDelegate, unsetDelegate] = useState("");
@@ -19,7 +19,7 @@ const Delegate = () => {
 
             setLoading(true);
 
-            await addDelegate(delegate);
+            await addDelegate(delegate, contractAddress);
 
             alert("transaction confirmed!");
             
@@ -40,7 +40,7 @@ const Delegate = () => {
 
           setUnloading(true);
 
-          await removeDelegate(unDelegate);
+          await removeDelegate(unDelegate, contractAddress);
           alert("transaction confirmed!");
           
         }catch(error){

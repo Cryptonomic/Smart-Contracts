@@ -3,7 +3,7 @@ import { getStorage, sign, unsign } from "../utils/operation";
 import { getTransfers } from "../utils/specific";
 import Transaction from "./Transaction";
 
-function Storage(){
+function Storage({contractAddress}){
 
 
 
@@ -19,11 +19,11 @@ function Storage(){
 
     const signAction = async (id) => {
         console.log(id);
-        await sign(id);
+        await sign(id, contractAddress);
     };
 
     const unsignAction = async (id) => {
-        await unsign(id);
+        await unsign(id, contractAddress);
     };
 
     const parseMap = async () => {
@@ -33,22 +33,22 @@ function Storage(){
         console.log("waiting");
 
 
-        const storage = await getTransfers();
+        const storage = await getTransfers(contractAddress);
         setStorage(storage);
         let display = [];
         storage.forEach((value, key) => {
             switch(value.type.toNumber()) {
                 case 0:
-                  //display.push(parseTransfer(value));
+                  display.push(parseTransfer(value, key.toNumber()));
                   break;
                 case 1:
                   display.push(parseMint(value, key.toNumber()));
                   break;
                 case 2:
-                    //display.push(parseApprove(value));
+                    display.push(parseApprove(value));
                     break;
                 case 5:
-                    //display.push(parseAdmin(value));
+                    display.push(parseAdmin(value, key.toNumber()));
                     break;
                 case 4: 
                     display.push(parseRecover(value, key.toNumber()));
@@ -99,6 +99,60 @@ function Storage(){
         )
 
     }
+
+    const parseTransfer = (value, key) => {
+
+        return (
+                <Transaction 
+                    key={key}
+                    id={key}
+                    type={"Transfer"}
+                    amount={value.amount.toNumber()}
+                    receiver={value.receiver}
+                    tokenAddress={value.tokenAddress}
+                    tokenID={value.tokenID}
+                    sign={signAction}
+                    unsign={unsignAction}
+                />
+        )
+
+    }
+
+    const parseAdmin = (value, key) => {
+
+        return (
+                <Transaction 
+                    key={key}
+                    id={key}
+                    type={"Admin Switch"}
+                    receiver={value.receiver}
+                    tokenAddress={value.tokenAddress}
+                    sign={signAction}
+                    unsign={unsignAction}
+                />
+        )
+
+    }
+
+    const parseApprove = (value, key) => {
+
+        return (
+                <Transaction 
+                key={key}
+                id={key}
+                type={"Arrpove"}
+                amount={value.amount.toNumber()}
+                receiver={value.receiver}
+                tokenAddress={value.tokenAddress}
+                tokenID={value.tokenID}
+                sign={signAction}
+                unsign={unsignAction}
+                />
+        )
+
+    }
+
+
 
 
     

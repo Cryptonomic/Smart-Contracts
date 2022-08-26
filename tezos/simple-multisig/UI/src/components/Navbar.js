@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { connectWallet, getAccount} from "../utils/wallet";
 import { useNavigate } from "react-router-dom";
 
-const Navbar = () => {
+const Navbar = ({contractAddress}) => {
   const [account, setAccount] = useState("");
 
   useEffect(() => {
@@ -23,12 +23,15 @@ const Navbar = () => {
 
   const navigate = useNavigate(); 
 
+  console.log(contractAddress);
+
   return (
     <div className="navbar navbar-dark bg-dark fixed-top">
       <div className="container py-2">
         <a href="/" className="navbar-brand">
           Cryptonomic Multisig
         </a>
+        <span style={{ color: 'white' }}>{contractAddress}</span>
         <div className="d-flex">
         <button onClick={() => (navigate('home'))}>
             Home

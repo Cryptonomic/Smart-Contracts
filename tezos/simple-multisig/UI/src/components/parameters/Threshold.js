@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {addThreshold, removeThreshold} from "../../utils/operation";
 import { getThreshold } from "../../utils/specific";
 
-const Threshold = () => {
+const Threshold = ({contractAddress}) => {
 
     const [threshold, setThreshold] = useState(3);
     const [newThreshold, setNew] = useState();
@@ -15,7 +15,7 @@ const Threshold = () => {
 
       try{
 
-        const t = await getThreshold();
+        const t = await getThreshold(contractAddress);
         setThreshold(t);
 
       }catch(e){
@@ -41,7 +41,7 @@ const Threshold = () => {
 
           setNewLoad(true);
 
-          await addThreshold(newThreshold);
+          await addThreshold(newThreshold, contractAddress);
           await gettingThreshold();
           alert("transaction confirmed!");
           
@@ -61,7 +61,7 @@ const Threshold = () => {
 
           setOldLoad(true);
 
-          await removeThreshold(oldThreshold);
+          await removeThreshold(oldThreshold, contractAddress);
           await gettingThreshold();
 
           alert("transaction confirmed!");

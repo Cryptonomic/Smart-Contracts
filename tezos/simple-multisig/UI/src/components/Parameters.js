@@ -4,12 +4,12 @@ import Delegate from "./parameters/Delegate";
 import Navbar from "./Navbar";
 
 
-function Parameters() {
+function Parameters({contractAddress}) {
     return (
         <div className="d-flex flex-column justify-content-center align-items-left h-100">
-            <Threshold/>
-            <Signer/>
-            <Delegate/>
+            <Threshold contractAddress={contractAddress}/>
+            <Signer contractAddress={contractAddress}/>
+            <Delegate contractAddress={contractAddress}/>
         </div>
     )
 }

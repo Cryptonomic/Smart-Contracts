@@ -6,29 +6,38 @@ import Operations from "./Operations";
 import Homepage from "./Homepage";
 import Navbar from "./Navbar";
 import Storage from "./Storage";
+import { useState } from "react";
 
 
 function AppRouter() {
+
+    const [contractAddress, setAddress] = useState("KT1BCLaBA6M3UAUBUpj9FjYknRiiZRMA5LVn");
+    const updateAddress = (a) => {
+        setAddress(a);
+    }
     return (
 
         <BrowserRouter>
             <div className="h-100">
-                <Navbar/>
+                <Navbar contractAddress={contractAddress}/>
                 <Routes>
                     <Route path = "/home" element={
-                        <Homepage/>
+                        <Homepage
+                        updateAddress={updateAddress}
+                        />
                     }>
                     </Route>
                     <Route path = "/parameters" element={
-                        <Parameters/>
+                        <Parameters
+                        contractAddress={contractAddress}/>
                     }>
                     </Route>
                     <Route path = "/operations" element={
-                        <Operations/>
+                        <Operations contractAddress={contractAddress}/>
                     }>
                     </Route>
                     <Route path = "/storage" element={
-                        <Storage/>
+                        <Storage contractAddress={contractAddress}/>
                     }>
                     </Route>
                 </Routes>
