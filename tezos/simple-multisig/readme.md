@@ -2,6 +2,10 @@
 
 **Link to the demo video:** https://www.youtube.com/watch?v=onVIkjDoQsQ&ab_channel=Cryptonomic
 
+### Purpose of the multisig
+
+Make a very basic multi - signature wallet contract which do basic operations with FA2 and FA1.2 token contract. 
+
 ### How the mulitisigs work:
 
 Both multisigs have the same functionalities:
