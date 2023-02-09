@@ -4,7 +4,7 @@
 
 ### Purpose of the multisig
 
-Make a very basic multi - signature wallet contract which do basic operations with FA2 and FA1.2 token contract. 
+Make a very basic multi - signature wallet contract which can do basic operations with FA2 and FA1.2 token contract. 
 
 ### How the mulitisigs work:
 
