@@ -40,7 +40,8 @@ contract Ballot{
     }
 
     //allows chairperson to give the right to vote
-    function giveRightToVote(address voter) public {
+    function giveRightToVote(address voter, address msgSender) public {
+        msg.sender == msgSender;
         require(
             msg.sender == chairperson,
             "Only chairperson can give right to vote."
@@ -55,7 +56,8 @@ contract Ballot{
     }
 
     //allows voters to spend credits on proposal of their choice
-    function useVoterCredit (uint proposal) public{
+    function useVoterCredit (uint proposal, address msgSender) public{
+        msg.sender == msgSender;
         Voter storage sender = voters[msg.sender];
         require(sender.voterCreditBank != 0, "Has no right to vote.");
         require(sender.voterCreditSpent !=100, "Already spent all voter credits.");
@@ -66,7 +68,7 @@ contract Ballot{
     }
     
     //implements quadratic voting structure by taking square root of voting credits in each proposal
-    function getVoteCount() public {
+    function calcVoteCount() public {
         for (uint q; q < proposals.length; q++)
             proposals[q].voteCount = Math.sqrt(proposals[q].voteCreditCount);
     }
@@ -93,4 +95,11 @@ contract Ballot{
         return voters[voter].voterCreditBank;
     }
 
+    function getVoterCreditSpent(address voter) public view returns (uint256) {
+        return voters[voter].voterCreditSpent;
+    }
+
+    function getVoteCount(bytes32 proposal) public view returns (uint256) {
+        //return proposals[proposalNames[j]].voteCount;
+    }
 }
