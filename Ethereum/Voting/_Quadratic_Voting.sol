@@ -40,8 +40,7 @@ contract Ballot{
     }
 
     //allows chairperson to give the right to vote
-    function giveRightToVote(address voter, address msgSender) public {
-        msg.sender == msgSender;
+    function giveRightToVote(address voter) public {
         require(
             msg.sender == chairperson,
             "Only chairperson can give right to vote."
@@ -56,8 +55,7 @@ contract Ballot{
     }
 
     //allows voters to spend credits on proposal of their choice
-    function useVoterCredit (uint proposal, address msgSender) public{
-        msg.sender == msgSender;
+    function useVoterCredit (uint proposal) public{
         Voter storage sender = voters[msg.sender];
         require(sender.voterCreditBank != 0, "Has no right to vote.");
         require(sender.voterCreditSpent !=100, "Already spent all voter credits.");
