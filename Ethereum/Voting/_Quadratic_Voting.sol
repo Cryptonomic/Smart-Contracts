@@ -1,17 +1,12 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 
-
 pragma solidity ^0.8.18;
-
 
 import "@openzeppelin/contracts/utils/math/Math.sol";
 
-
 //https://www.devoven.com/string-to-bytes32 --> converts from string to bytes32 format
 
-
 contract Ballot{
-
 
 struct Voter{
     uint voterCreditBank;
@@ -19,20 +14,16 @@ struct Voter{
     uint vote;
 }
 
-
 struct Proposal{
     bytes32 name;
     uint voteCount;
     uint voteCreditCount;
 }
 
-
 address public chairperson;
 mapping(address => Voter) public voters;
 
-
 Proposal[] public proposals;
-
 
 //assigns chairperson and allows for creation of proposals
 constructor (bytes32[] memory proposalNames) {
@@ -46,7 +37,6 @@ constructor (bytes32[] memory proposalNames) {
         }));
     }
 }
-
 
 //allows chairperson to give the right to vote
 function giveRightToVote(address voter) public {
@@ -63,7 +53,6 @@ require(voters[voter].voterCreditBank == 0);
     voters[voter].voterCreditSpent = 0;
 }
 
-
 //allows voters to spend credits on proposal of their choice
 function useVoterCredit (uint proposal) public{
     Voter storage sender = voters[msg.sender];
@@ -74,11 +63,13 @@ function useVoterCredit (uint proposal) public{
     sender.voterCreditBank = 100 - sender.voterCreditSpent;
     proposals[proposal].voteCreditCount++;
 }
+
 //implements quadratic voting structure by taking square root of voting credits in each proposal
 function calcVoteCount() public {
     for (uint q; q < proposals.length; q++)
         proposals[q].voteCount = Math.sqrt(proposals[q].voteCreditCount);
 }
+
 //chooses proposal as the one with highest vote count
 function chooseWinningProposal() public view returns (uint winningProposal){
     uint winningVoteCount = 0;
@@ -90,24 +81,16 @@ function chooseWinningProposal() public view returns (uint winningProposal){
 }
 }
 
-
 //displays name of winning proposal
 function winnerName() public view returns (bytes32 winnerName_) {
     winnerName_ = proposals[chooseWinningProposal()].name;
 }
 
-
 function getVoterCreditBank(address voter) public view returns (uint256) {
     return voters[voter].voterCreditBank;
 }
 
-
 function getVoterCreditSpent(address voter) public view returns (uint256) {
     return voters[voter].voterCreditSpent;
-}
-
-
-function getVoteCount(bytes32 proposal) public view returns (uint256) {
-    //return proposals[proposalNames[j]].voteCount;
 }
 }
